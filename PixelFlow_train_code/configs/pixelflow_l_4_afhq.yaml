@@ -1,0 +1,53 @@
+model:
+  target: pixelflow.model.PixelFlowModel
+  params:
+    num_attention_heads: 16
+    attention_head_dim: 64
+    in_channels: 3
+    out_channels: 3
+    depth: 24
+    num_classes: 3
+    patch_size: 4
+    attention_bias: true
+
+scheduler:
+  num_train_timesteps: 1000
+  num_stages: 4
+  pyramid_shift: false
+
+train:
+  lr: 1e-4
+  weight_decay: 0.0
+  epochs: 100
+  warmup_steps: 3657
+  checkpoint_every_n_epochs: 10
+  validate: true
+  val_every_n_epochs: 5
+  val_root: /mnt/data3/ruy45/dataset/afhq/val
+  val_num_samples: 500
+  val_batch_size: 8
+  val_guidance_scale: 4.0
+  val_num_inference_steps: 10
+
+data:
+  dataset: imagefolder   # imagefolder | mri
+  root: /mnt/data3/ruy45/dataset/afhq/train
+  center_crop: false
+  resolution: 512
+  expand_ratio: 1.125
+  # MRI-specific options (used when data.dataset == mri)
+  pt_key: slices
+  target_mode: class_index
+  recursive: true
+  return_metadata: false
+  max_samples: null
+  skip_broken_files: false
+  verbose: false
+  random_horizontal_flip: true
+  normalize: true
+  normalize_mean: 0.5
+  normalize_std: 0.5
+  num_workers: 4
+  batch_size: 4
+
+seed: 42

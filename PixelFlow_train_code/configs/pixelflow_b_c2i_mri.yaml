@@ -1,0 +1,43 @@
+model:
+  target: pixelflow.model.PixelFlowModel
+  params:
+    num_attention_heads: 12
+    attention_head_dim: 64
+    in_channels: 2
+    out_channels: 2
+    depth: 12
+    num_classes: 5
+    patch_size: 4
+    attention_bias: true
+
+scheduler:
+  num_train_timesteps: 1000
+  num_stages: 4
+  pyramid_shift: false
+
+train:
+  lr: 1e-4
+  weight_decay: 0.03
+  epochs: 100
+  warmup_steps: 14516
+
+data:
+  dataset: mri   # imagefolder | mri
+  root: /mnt/data3/ruy45/dataset/processed_data/train
+  center_crop: false
+  resolution: 384
+  expand_ratio: 1.125
+  # MRI-specific options (used when data.dataset == mri)
+  pt_key: slices
+  target_mode: class_index
+  recursive: true
+  return_metadata: false
+  max_samples: null
+  skip_broken_files: false
+  verbose: false
+  normalize: false
+  random_horizontal_flip: true
+  num_workers: 4
+  batch_size: 4
+
+seed: 42

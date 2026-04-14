@@ -1,0 +1,45 @@
+{
+  "experiment_name": "inpainting_grid",
+  "data_dir": "/home/../mnt/data3/ruy45/dataset/imageNet256/ILSVRC/Data/CLS-LOC/train/",
+  "model_dir": "./pretrained_models/c2img",
+  "output_root_dir": "./vis/IP",
+  "device": "cuda:1",
+  "resolution": 256,
+  "num_stages": 4,
+  "class_label": 10,
+  "num_examples": 4,
+  "sigma_n": 0.05,
+  "shift": 1.0,
+  "fix_stage_noise": false,
+  "guidance": 0.0,
+  "seed": 20000120,
+  "fps": 6,
+  "plot_ids": [0, 1, 2, 3],
+  "operator_name": "inpainting",
+  "operator_mask_type": "box",
+  "operator_mask_len_range": [80, 160],
+  "operator_mask_prob_range": null,
+  "scheduler_gamma": -0.3333333333333333,
+  "max_token_length": 512,
+  "num_inference_steps": [
+    [10, 10, 10, 10]
+  ],
+  "num_ode_steps": [
+    10
+  ],
+  "renoise": [
+    false
+  ],
+  "langevin_proj": [
+    false
+  ],
+  "num_langevin_steps": [
+    50
+  ],
+  "lr_base": [
+    5e-5
+  ],
+  "lr_min_ratio": [
+    0.01
+  ]
+}

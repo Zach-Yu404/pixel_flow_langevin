@@ -1,0 +1,82 @@
+# === Large data / models / experiment outputs (excluded from repo) ===
+PixelFlow/pretrained_models/
+PixelFlow/trajectory_videos/
+PixelFlow/outputs/
+PixelFlow/latents_stages4_Time_steps10/
+PixelFlow_train_code/afhqL4/
+PixelFlow_train_code/exp*/
+**/pretrained_models/
+**/trajectory_videos/
+**/outputs/
+**/checkpoints/
+**/wandb/
+**/runs/
+**/logs/
+
+# === Model / dataset binary formats ===
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.bin
+*.onnx
+*.h5
+*.pkl
+*.npz
+*.npy
+*.tfrecord
+*.lmdb
+*.arrow
+*.parquet
+
+# === Media ===
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.gif
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+*.bmp
+*.wav
+*.flac
+*.mp3
+
+# === Logs / temp ===
+*.log
+*.out
+*.err
+*.tmp
+*.swp
+*.swo
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.Python
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# === IDE / OS ===
+.DS_Store
+.idea/
+.vscode/
+*.sublime-*
+
+# === Secrets ===
+.env
+.env.*
+*.pem
+*.key
+credentials.json
