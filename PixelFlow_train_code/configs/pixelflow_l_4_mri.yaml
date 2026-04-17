@@ -1,0 +1,47 @@
+model:
+  target: pixelflow.model.PixelFlowModel
+  params:
+    num_attention_heads: 16
+    attention_head_dim: 64
+    in_channels: 2
+    out_channels: 2
+    depth: 24
+    num_classes: 4
+    patch_size: 4
+    attention_bias: true
+scheduler:
+  num_train_timesteps: 1000
+  num_stages: 4
+  pyramid_shift: false
+train:
+  lr: 0.0001
+  weight_decay: 0.03
+  epochs: 150
+  warmup_steps: 14516
+  # --- validation (FID on magnitude images vs MRI_processed/val) ---
+  validate: true
+  val_root: /data/Zach_dataset/MRI_processed/val
+  val_every_n_epochs: 10        # run validation every 5 training epochs
+  checkpoint_every_n_epochs: 10   # snapshot ckpt at each validation point
+  val_num_samples: 100
+  val_batch_size: 8
+  val_num_inference_steps: 10
+  val_guidance_scale: 4.0
+data:
+  dataset: mri
+  root: /data/Zach_dataset/MRI_processed/train
+  center_crop: false
+  resolution: 384
+  expand_ratio: 1.125
+  pt_key: slices
+  target_mode: class_index
+  recursive: true
+  return_metadata: false
+  max_samples: null
+  skip_broken_files: false
+  verbose: false
+  normalize: false
+  random_horizontal_flip: true
+  num_workers: 8
+  batch_size: 4
+seed: 42

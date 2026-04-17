@@ -5,7 +5,7 @@ import os
 import argparse
 import copy
 from collections import OrderedDict
-from datetime import datetime
+from datetime import datetime, timedelta
 from omegaconf import OmegaConf
 import torch
 import torch.distributed as dist
@@ -58,7 +58,7 @@ def main(args):
     local_rank = int(os.environ["LOCAL_RANK"])
     world_size = int(os.environ["WORLD_SIZE"])
 
-    dist.init_process_group("nccl", rank=rank, world_size=world_size)
+    dist.init_process_group("nccl", rank=rank, world_size=world_size, timeout=timedelta(hours=2))
     device = torch.device(f"cuda:{local_rank}")
     torch.cuda.set_device(device)
 
@@ -240,7 +240,7 @@ def main(args):
                 evaluator.compute_metrics(
                     ema, epoch + 1, logger=logger, save_dir=val_save_dir,
                 )
-            dist.barrier()
+            dist.barrier(device_ids=[local_rank])
             model.train()
 
     # save final checkpoint
