@@ -1,0 +1,27 @@
+{
+  "tag": "pareto_dual_king_srs1e-3",
+  "srs": "1e-3",
+  "level": "pareto_dual_king",
+  "source_run": "folder_woNoiseLast/runs/he1e-2_hx01_L15_srs1e-3.json",
+  "kw": {
+    "lambda_reg": 150.0,
+    "lambda_prox": 150.0,
+    "noise_scale": 1.0,
+    "guidance_scale": 2.0,
+    "terminal_replace_weight": 0.0,
+    "h_epsilon": 0.01,
+    "h_x": 0.1,
+    "num_langevin": 15,
+    "sigma_ref_sq": 0.001
+  },
+  "metrics": {
+    "psnr": 19.893712043762207,
+    "ssim": 0.6824151277542114,
+    "lpips": 0.2621581703424454,
+    "psnr_unobs": 13.989604735099128,
+    "hf": 0.6063373989612878,
+    "dhf": 0.04765811623511618,
+    "gt_hf": 0.653995515196404
+  },
+  "time_s": 336.14353919029236
+}

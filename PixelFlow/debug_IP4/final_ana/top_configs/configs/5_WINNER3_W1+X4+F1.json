@@ -1,0 +1,14 @@
+{
+  "name": "5_WINNER3_W1+X4+F1",
+  "rationale": "W1 + h_x stage-3 boost. Sharpest bird texture. PSNR -4 dB. Most detail, sometimes over-sharp.",
+  "kw": {
+    "h_epsilon": 0.001,
+    "h_x": [
+      0.1,
+      0.1,
+      0.1,
+      0.7
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

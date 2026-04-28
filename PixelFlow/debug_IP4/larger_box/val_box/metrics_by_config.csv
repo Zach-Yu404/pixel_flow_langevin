@@ -1,0 +1,4 @@
+config_name,psnr_mean,psnr_std,ssim_mean,ssim_std,lpips_mean,lpips_std,fid_mean_pergroup,fid_std_pergroup,fid_pooled_n500
+pareto_dual_king_srs1e-4__fd1_tr1,19.9984,0.3293,0.7929,0.0010,0.1603,0.0019,100.6728,6.7133,66.1502
+LPIPS_king_srs1e-4__fd1_tr1,17.6839,0.2303,0.7748,0.0016,0.1556,0.0017,81.1638,2.8610,52.3734
+balanced_perceptual_srs1e-4__fd1_tr1,19.9448,0.3243,0.7946,0.0017,0.1627,0.0026,103.2415,3.2447,68.0314

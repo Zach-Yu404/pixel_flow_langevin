@@ -1,0 +1,49 @@
+{
+  "name": "F_cfg20_lr150_hxu02",
+  "source": "exploration_v3_final (same-batch F sweep)",
+  "kw": {
+    "h_x": 0.2,
+    "h_epsilon": 0.001,
+    "num_langevin": 5,
+    "lambda_reg": 150.0,
+    "noise_scale": 0.0,
+    "terminal_replace_weight": 1.0,
+    "guidance_scale": 2.0
+  },
+  "metrics": {
+    "psnr": 17.18,
+    "psnr_unobs": 11.16,
+    "ssim": 0.844,
+    "lpips": 0.1200,
+    "hf": 0.6417,
+    "gt_hf": 0.6520,
+    "dhf": 0.0103,
+    "balanced_score": 0.1200,
+    "time_sec": 257
+  },
+  "per_image": [
+    {"idx": 0, "psnr": 18.39, "lpips": 0.1066, "psnr_unobs": 12.37},
+    {"idx": 1, "psnr": 15.97, "lpips": 0.1334, "psnr_unobs":  9.95}
+  ],
+  "task": {
+    "active_operator": "box",
+    "mask_type": "box",
+    "resolution": 256,
+    "mask_len_range": [128, 129],
+    "random_box_seed": 7919,
+    "sigma_n": 0.05,
+    "class_label": 10
+  },
+  "validation": {
+    "method": "Same-batch F sweep (12 configs run simultaneously on identical GPU contention)",
+    "anchors_same_batch": {
+      "F_anchor_C_L5":    {"psnr": 18.94, "lpips": 0.1365, "dhf": 0.025},
+      "F_anchor_N_cfg2":  {"psnr": 18.91, "lpips": 0.1360, "dhf": 0.017},
+      "F_anchor_P_cfg25": {"psnr": 17.50, "lpips": 0.1388, "dhf": 0.026},
+      "F_anchor_lreg300": {"psnr": 17.95, "lpips": 0.1435, "dhf": 0.065}
+    },
+    "delta_vs_anchor_N_cfg2": {"d_psnr": -1.73, "d_lpips": -0.0160, "d_dhf": -0.007},
+    "delta_vs_anchor_C_L5":   {"d_psnr": -1.76, "d_lpips": -0.0165, "d_dhf": -0.014}
+  },
+  "comment": "Winner from a 167-config corpus across 4 sweep stages (E:45 + P:78 + F:12 + 32 from larger_box). The F batch eliminated co-tenancy noise by running same-batch with 4 anchor reruns. F_cfg20_lr150_hxu02 has the lowest LPIPS (0.1200) and lowest |dHF| (0.010) in the entire corpus while staying above the 17 dB PSNR floor. Wing-pattern detail in the recon box is genuinely present and not fake grain (verified visually). The CFG=2.0 + lambda_reg=150 combination strengthens both the prior push and the data fidelity, while h_x=0.2 uniform applies the prior step across all 4 stages instead of only stage-3 amplification."
+}

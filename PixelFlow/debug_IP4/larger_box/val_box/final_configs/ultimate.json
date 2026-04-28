@@ -1,0 +1,24 @@
+{
+  "tag": "ultimate",
+  "source_run": "final_configs/validation/run_validate.py (base_fd0_tr1)",
+  "kw": {
+    "h_epsilon": 0.01,
+    "h_x": 0.1,
+    "num_langevin": 10,
+    "lambda_reg": 150.0,
+    "lambda_prox": 150.0,
+    "noise_scale": 1.0,
+    "guidance_scale": 2.0,
+    "sigma_ref_sq": 0.0001,
+    "terminal_replace_weight": 1.0,
+    "final_denoise": false
+  },
+  "metrics": {
+    "psnr": 19.3,
+    "ssim": 0.8057,
+    "lpips": 0.148,
+    "psnr_unobs": 13.28,
+    "dhf": 0.063
+  },
+  "notes": "Combines srs=1e-4 (PSNR/|dHF| lever) with tr=1 (LPIPS lever). Beats sweep2 Pareto winner on every metric. final_denoise verified no-op (Delta<0.01) so left off."
+}

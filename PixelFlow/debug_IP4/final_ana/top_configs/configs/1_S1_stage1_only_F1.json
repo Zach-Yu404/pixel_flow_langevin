@@ -1,0 +1,13 @@
+{
+  "name": "1_S1_stage1_only_F1",
+  "rationale": "Minimal perturbation: low h_eps only at stage 1 (most critical per-stage). Nearly baseline PSNR, mild perceptual shift.",
+  "kw": {
+    "h_epsilon": [
+      0.01,
+      0.001,
+      0.01,
+      0.01
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "A0_reference_WINNER3_cfg4",
+  "desc": "WINNER3 reference: W1 (h_eps=0.001) + X4 stage3 h_x=0.7 + terminal_replace=1.0  +  guidance_scale=4.0",
+  "source": "debug_IP4/final_ana/visual_best_box  (single-image PSNR=20.56, HF=0.684)  (CFG sweep variant)",
+  "overrides": {
+    "h_epsilon": 0.001,
+    "h_x": [
+      0.1,
+      0.1,
+      0.1,
+      0.7
+    ],
+    "terminal_replace_weight": 1.0,
+    "guidance_scale": 4.0
+  },
+  "kw": {
+    "num_langevin": 10,
+    "h_x": [
+      0.1,
+      0.1,
+      0.1,
+      0.7
+    ],
+    "h_epsilon": 0.001,
+    "lambda_reg": 50.0,
+    "noise_scale": 0.0,
+    "ode_steps_per_stage": 10,
+    "shift": 1.0,
+    "guidance_scale": 4.0,
+    "warm_restart": true,
+    "g_bypass_stage3": true,
+    "x1_init_mode": "model",
+    "lambda_x": 0.01,
+    "rho_s": 1.0,
+    "rho_e": 1.0,
+    "cg_tol": 1e-05,
+    "cg_max_iter": 50,
+    "dps_kick_zeta": null,
+    "terminal_replace_weight": 1.0,
+    "soft_replace_weight": 0.0,
+    "h_x_obs_ratio": 1.0,
+    "lambda_prox": 0.0,
+    "skip_eps_update": false,
+    "reset_eps_per_ode_step": false,
+    "lambda_eps_norm": 0.0,
+    "mask_aware_eps": false,
+    "lambda_eps_prox": 0.0,
+    "lambda_eps_inject": 0.0
+  }
+}

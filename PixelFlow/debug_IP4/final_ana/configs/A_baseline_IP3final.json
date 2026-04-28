@@ -1,0 +1,59 @@
+{
+  "_comment": "Candidate: A_baseline_IP3final",
+  "exp_name": "A_baseline_IP3final",
+  "seed": 42,
+  "num_stages": 4,
+  "resolution": 256,
+  "num_examples": 4,
+  "sigma_n": 0.05,
+  "class_label": 10,
+  "shift": 1.0,
+  "inference_each_step": 10,
+  "guidance_scale": 0.0,
+  "num_langevin": 10,
+  "h_x": 0.1,
+  "h_epsilon": 0.01,
+  "lambda_x": 0.01,
+  "lambda_reg": 50.0,
+  "lambda_prox": 0.0,
+  "rho_s": 1.0,
+  "rho_e": 1.0,
+  "terminal_replace_weight": 0.0,
+  "soft_replace_weight": 0.0,
+  "dps_kick_zeta": 0.0,
+  "h_x_obs_ratio": 1.0,
+  "mask_aware_eps": false,
+  "lambda_eps_norm": 0.0,
+  "lambda_eps_prox": 0.0,
+  "lambda_eps_inject": 0.0,
+  "skip_eps_update": false,
+  "reset_eps_per_ode_step": false,
+  "warm_restart": true,
+  "g_bypass_stage3": true,
+  "x1_init_mode": "model",
+  "cg_tol": 1e-05,
+  "cg_max_iter": 50,
+  "device": "cuda:0",
+  "data_dir": "/data/Zach_dataset/imageNet256/ILSVRC/Data/CLS-LOC/train/",
+  "model_dir": "./pretrained_models/c2img",
+  "dict_path": "./trajectory_videos/posterior_sampling",
+  "active_operator": "box",
+  "measurement_mode": "call",
+  "latent_update_mode": "f_x1",
+  "box_operator": {
+    "mask_type": "box",
+    "mask_len_range": [
+      80,
+      160
+    ],
+    "mask_prob_range": null
+  },
+  "random_operator": {
+    "mask_type": "random",
+    "mask_len_range": null,
+    "mask_prob_range": [
+      0.8,
+      0.8
+    ]
+  }
+}

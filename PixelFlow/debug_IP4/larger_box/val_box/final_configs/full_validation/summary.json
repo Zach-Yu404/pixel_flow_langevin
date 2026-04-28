@@ -1,0 +1,3641 @@
+{
+  "rows": [
+    {
+      "name": "LPIPS_king_srs1e-2__fd0_tr0",
+      "kw": {
+        "num_langevin": 5,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.01,
+        "final_denoise": false
+      },
+      "psnr": 18.102413654327393,
+      "ssim": 0.6707402765750885,
+      "lpips": 0.2438814342021942,
+      "psnr_unobs": 12.198409596621179,
+      "hf": 0.6676637868066413,
+      "dhf": 0.003912021449620884,
+      "gt_hf": 0.6637517653570204,
+      "res": 2621.41455078125,
+      "time": 430.000275850296,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 18.47101593017578,
+          "ssim": 0.648099422454834,
+          "lpips": 0.27926188707351685,
+          "psnr_unobs": 12.538525503102878
+        },
+        {
+          "idx": 1,
+          "psnr": 17.182435989379883,
+          "ssim": 0.701910674571991,
+          "lpips": 0.25043153762817383,
+          "psnr_unobs": 11.233333948199862
+        },
+        {
+          "idx": 2,
+          "psnr": 17.154375076293945,
+          "ssim": 0.6793026328086853,
+          "lpips": 0.1865491271018982,
+          "psnr_unobs": 11.313029973786588
+        },
+        {
+          "idx": 3,
+          "psnr": 17.485017776489258,
+          "ssim": 0.7002832293510437,
+          "lpips": 0.19820499420166016,
+          "psnr_unobs": 11.593789594306942
+        },
+        {
+          "idx": 4,
+          "psnr": 20.704803466796875,
+          "ssim": 0.6376819014549255,
+          "lpips": 0.274471253156662,
+          "psnr_unobs": 14.852679088682725
+        },
+        {
+          "idx": 5,
+          "psnr": 16.30123519897461,
+          "ssim": 0.6391997337341309,
+          "lpips": 0.2593381404876709,
+          "psnr_unobs": 10.367082862544033
+        },
+        {
+          "idx": 6,
+          "psnr": 17.282207489013672,
+          "ssim": 0.6859427690505981,
+          "lpips": 0.21744447946548462,
+          "psnr_unobs": 11.352836400576274
+        },
+        {
+          "idx": 7,
+          "psnr": 20.238218307495117,
+          "ssim": 0.6735018491744995,
+          "lpips": 0.2853500545024872,
+          "psnr_unobs": 14.335999401770131
+        }
+      ]
+    },
+    {
+      "name": "LPIPS_king_srs1e-2__fd0_tr1",
+      "kw": {
+        "num_langevin": 5,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.01,
+        "final_denoise": false
+      },
+      "psnr": 18.219006538391113,
+      "ssim": 0.7666688933968544,
+      "lpips": 0.16377214342355728,
+      "psnr_unobs": 12.198409596621179,
+      "hf": 0.6676637868066413,
+      "dhf": 0.003912021449620884,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 427.8355438709259,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 18.559123992919922,
+          "ssim": 0.759089469909668,
+          "lpips": 0.15971685945987701,
+          "psnr_unobs": 12.538525503102878
+        },
+        {
+          "idx": 1,
+          "psnr": 17.253931045532227,
+          "ssim": 0.7810029983520508,
+          "lpips": 0.16041851043701172,
+          "psnr_unobs": 11.233333948199862
+        },
+        {
+          "idx": 2,
+          "psnr": 17.333627700805664,
+          "ssim": 0.745608925819397,
+          "lpips": 0.14785361289978027,
+          "psnr_unobs": 11.313029973786588
+        },
+        {
+          "idx": 3,
+          "psnr": 17.61438751220703,
+          "ssim": 0.7498344779014587,
+          "lpips": 0.16513851284980774,
+          "psnr_unobs": 11.593789594306942
+        },
+        {
+          "idx": 4,
+          "psnr": 20.873271942138672,
+          "ssim": 0.7819826006889343,
+          "lpips": 0.15806680917739868,
+          "psnr_unobs": 14.852679088682725
+        },
+        {
+          "idx": 5,
+          "psnr": 16.387680053710938,
+          "ssim": 0.7494484782218933,
+          "lpips": 0.16427932679653168,
+          "psnr_unobs": 10.367082862544033
+        },
+        {
+          "idx": 6,
+          "psnr": 17.37343406677246,
+          "ssim": 0.7801474332809448,
+          "lpips": 0.16076070070266724,
+          "psnr_unobs": 11.352836400576274
+        },
+        {
+          "idx": 7,
+          "psnr": 20.356595993041992,
+          "ssim": 0.7862367630004883,
+          "lpips": 0.1939428150653839,
+          "psnr_unobs": 14.335999401770131
+        }
+      ]
+    },
+    {
+      "name": "LPIPS_king_srs1e-2__fd1_tr0",
+      "kw": {
+        "num_langevin": 5,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.01,
+        "final_denoise": true
+      },
+      "psnr": 18.11242961883545,
+      "ssim": 0.671737477183342,
+      "lpips": 0.24370761588215828,
+      "psnr_unobs": 12.207961264894767,
+      "hf": 0.6669934570874448,
+      "dhf": 0.003241691730424434,
+      "gt_hf": 0.6637517653570204,
+      "res": 2605.361328125,
+      "time": 433.17440724372864,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 18.482105255126953,
+          "ssim": 0.6499312520027161,
+          "lpips": 0.27794551849365234,
+          "psnr_unobs": 12.548864322236037
+        },
+        {
+          "idx": 1,
+          "psnr": 17.19181251525879,
+          "ssim": 0.7033240795135498,
+          "lpips": 0.24996352195739746,
+          "psnr_unobs": 11.242124777128751
+        },
+        {
+          "idx": 2,
+          "psnr": 17.168428421020508,
+          "ssim": 0.6793498992919922,
+          "lpips": 0.18672066926956177,
+          "psnr_unobs": 11.327000782629035
+        },
+        {
+          "idx": 3,
+          "psnr": 17.49751853942871,
+          "ssim": 0.7007699012756348,
+          "lpips": 0.19824400544166565,
+          "psnr_unobs": 11.606018939049838
+        },
+        {
+          "idx": 4,
+          "psnr": 20.71328353881836,
+          "ssim": 0.6387693285942078,
+          "lpips": 0.27527159452438354,
+          "psnr_unobs": 14.860517891062957
+        },
+        {
+          "idx": 5,
+          "psnr": 16.314533233642578,
+          "ssim": 0.6399373412132263,
+          "lpips": 0.25951898097991943,
+          "psnr_unobs": 10.380403772756692
+        },
+        {
+          "idx": 6,
+          "psnr": 17.286479949951172,
+          "ssim": 0.6869108080863953,
+          "lpips": 0.21721792221069336,
+          "psnr_unobs": 11.356575916559951
+        },
+        {
+          "idx": 7,
+          "psnr": 20.245275497436523,
+          "ssim": 0.6749072074890137,
+          "lpips": 0.2847787141799927,
+          "psnr_unobs": 14.342183717734882
+        }
+      ]
+    },
+    {
+      "name": "LPIPS_king_srs1e-2__fd1_tr1",
+      "kw": {
+        "num_langevin": 5,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.01,
+        "final_denoise": true
+      },
+      "psnr": 18.228559255599976,
+      "ssim": 0.7671483680605888,
+      "lpips": 0.16360740549862385,
+      "psnr_unobs": 12.207961264894767,
+      "hf": 0.6669934570874448,
+      "dhf": 0.003241691730424434,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 433.33145785331726,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 18.569461822509766,
+          "ssim": 0.7595402598381042,
+          "lpips": 0.1596202850341797,
+          "psnr_unobs": 12.548864322236037
+        },
+        {
+          "idx": 1,
+          "psnr": 17.262723922729492,
+          "ssim": 0.7817301154136658,
+          "lpips": 0.1601835936307907,
+          "psnr_unobs": 11.242124777128751
+        },
+        {
+          "idx": 2,
+          "psnr": 17.347599029541016,
+          "ssim": 0.7458237409591675,
+          "lpips": 0.14768661558628082,
+          "psnr_unobs": 11.327000782629035
+        },
+        {
+          "idx": 3,
+          "psnr": 17.626617431640625,
+          "ssim": 0.7500414252281189,
+          "lpips": 0.16501332819461823,
+          "psnr_unobs": 11.606018939049838
+        },
+        {
+          "idx": 4,
+          "psnr": 20.881114959716797,
+          "ssim": 0.7826234102249146,
+          "lpips": 0.15808093547821045,
+          "psnr_unobs": 14.860517891062957
+        },
+        {
+          "idx": 5,
+          "psnr": 16.401002883911133,
+          "ssim": 0.7497944831848145,
+          "lpips": 0.1641077697277069,
+          "psnr_unobs": 10.380403772756692
+        },
+        {
+          "idx": 6,
+          "psnr": 17.377174377441406,
+          "ssim": 0.7807022929191589,
+          "lpips": 0.160422682762146,
+          "psnr_unobs": 11.356575916559951
+        },
+        {
+          "idx": 7,
+          "psnr": 20.36277961730957,
+          "ssim": 0.7869312167167664,
+          "lpips": 0.19374403357505798,
+          "psnr_unobs": 14.342183717734882
+        }
+      ]
+    },
+    {
+      "name": "LPIPS_king_srs1e-3__fd0_tr0",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.001,
+        "final_denoise": false
+      },
+      "psnr": 18.3239643573761,
+      "ssim": 0.6844005510210991,
+      "lpips": 0.2173430398106575,
+      "psnr_unobs": 12.3918214735026,
+      "hf": 0.6794539762182455,
+      "dhf": 0.01570221086122514,
+      "gt_hf": 0.6637517653570204,
+      "res": 1779.003662109375,
+      "time": 774.6008191108704,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 19.216142654418945,
+          "ssim": 0.650688648223877,
+          "lpips": 0.27075570821762085,
+          "psnr_unobs": 13.28303827583261
+        },
+        {
+          "idx": 1,
+          "psnr": 17.51266860961914,
+          "ssim": 0.7080930471420288,
+          "lpips": 0.23488721251487732,
+          "psnr_unobs": 11.550727928975084
+        },
+        {
+          "idx": 2,
+          "psnr": 16.89972686767578,
+          "ssim": 0.708338737487793,
+          "lpips": 0.15545307099819183,
+          "psnr_unobs": 10.961447154196453
+        },
+        {
+          "idx": 3,
+          "psnr": 16.1494083404541,
+          "ssim": 0.7055082321166992,
+          "lpips": 0.18218305706977844,
+          "psnr_unobs": 10.183801982223574
+        },
+        {
+          "idx": 4,
+          "psnr": 20.381786346435547,
+          "ssim": 0.6501510143280029,
+          "lpips": 0.24226346611976624,
+          "psnr_unobs": 14.491562290244637
+        },
+        {
+          "idx": 5,
+          "psnr": 16.194332122802734,
+          "ssim": 0.6541343927383423,
+          "lpips": 0.23869383335113525,
+          "psnr_unobs": 10.227385061002835
+        },
+        {
+          "idx": 6,
+          "psnr": 19.01150894165039,
+          "ssim": 0.7087289690971375,
+          "lpips": 0.18050658702850342,
+          "psnr_unobs": 13.092124239118487
+        },
+        {
+          "idx": 7,
+          "psnr": 21.22614097595215,
+          "ssim": 0.6895613670349121,
+          "lpips": 0.23400138318538666,
+          "psnr_unobs": 15.344484856427123
+        }
+      ]
+    },
+    {
+      "name": "LPIPS_king_srs1e-3__fd0_tr1",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.001,
+        "final_denoise": false
+      },
+      "psnr": 18.412418365478516,
+      "ssim": 0.7719871699810028,
+      "lpips": 0.15126272104680538,
+      "psnr_unobs": 12.3918214735026,
+      "hf": 0.6794539762182455,
+      "dhf": 0.01570221086122514,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 777.9016654491425,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 19.303634643554688,
+          "ssim": 0.7660785913467407,
+          "lpips": 0.158135786652565,
+          "psnr_unobs": 13.28303827583261
+        },
+        {
+          "idx": 1,
+          "psnr": 17.571325302124023,
+          "ssim": 0.7948169708251953,
+          "lpips": 0.14438383281230927,
+          "psnr_unobs": 11.550727928975084
+        },
+        {
+          "idx": 2,
+          "psnr": 16.982044219970703,
+          "ssim": 0.7437011003494263,
+          "lpips": 0.13771286606788635,
+          "psnr_unobs": 10.961447154196453
+        },
+        {
+          "idx": 3,
+          "psnr": 16.20439910888672,
+          "ssim": 0.746802806854248,
+          "lpips": 0.1637655794620514,
+          "psnr_unobs": 10.183801982223574
+        },
+        {
+          "idx": 4,
+          "psnr": 20.51215934753418,
+          "ssim": 0.7783093452453613,
+          "lpips": 0.14469031989574432,
+          "psnr_unobs": 14.491562290244637
+        },
+        {
+          "idx": 5,
+          "psnr": 16.247983932495117,
+          "ssim": 0.7541624903678894,
+          "lpips": 0.1627458930015564,
+          "psnr_unobs": 10.227385061002835
+        },
+        {
+          "idx": 6,
+          "psnr": 19.112720489501953,
+          "ssim": 0.7860285639762878,
+          "lpips": 0.14481301605701447,
+          "psnr_unobs": 13.092124239118487
+        },
+        {
+          "idx": 7,
+          "psnr": 21.365079879760742,
+          "ssim": 0.8059974908828735,
+          "lpips": 0.15385447442531586,
+          "psnr_unobs": 15.344484856427123
+        }
+      ]
+    },
+    {
+      "name": "LPIPS_king_srs1e-3__fd1_tr0",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.001,
+        "final_denoise": true
+      },
+      "psnr": 18.33807635307312,
+      "ssim": 0.6859001964330673,
+      "lpips": 0.21691876463592052,
+      "psnr_unobs": 12.404651730093503,
+      "hf": 0.6784587999738538,
+      "dhf": 0.014707034616833425,
+      "gt_hf": 0.6637517653570204,
+      "res": 1745.5272216796875,
+      "time": 778.9651570320129,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 19.22779083251953,
+          "ssim": 0.6531126499176025,
+          "lpips": 0.2693520486354828,
+          "psnr_unobs": 13.293068352269577
+        },
+        {
+          "idx": 1,
+          "psnr": 17.522075653076172,
+          "ssim": 0.7100808024406433,
+          "lpips": 0.23420585691928864,
+          "psnr_unobs": 11.5590779032346
+        },
+        {
+          "idx": 2,
+          "psnr": 16.919998168945312,
+          "ssim": 0.7088284492492676,
+          "lpips": 0.155369371175766,
+          "psnr_unobs": 10.980467165667317
+        },
+        {
+          "idx": 3,
+          "psnr": 16.166418075561523,
+          "ssim": 0.7063167095184326,
+          "lpips": 0.1819618195295334,
+          "psnr_unobs": 10.199668026609675
+        },
+        {
+          "idx": 4,
+          "psnr": 20.392236709594727,
+          "ssim": 0.6516836881637573,
+          "lpips": 0.2426510453224182,
+          "psnr_unobs": 14.50066489503105
+        },
+        {
+          "idx": 5,
+          "psnr": 16.221237182617188,
+          "ssim": 0.6554555296897888,
+          "lpips": 0.2384810894727707,
+          "psnr_unobs": 10.253507926865657
+        },
+        {
+          "idx": 6,
+          "psnr": 19.018577575683594,
+          "ssim": 0.7101282477378845,
+          "lpips": 0.18016724288463593,
+          "psnr_unobs": 13.097872796628378
+        },
+        {
+          "idx": 7,
+          "psnr": 21.236276626586914,
+          "ssim": 0.6915954947471619,
+          "lpips": 0.23316164314746857,
+          "psnr_unobs": 15.352886774441764
+        }
+      ]
+    },
+    {
+      "name": "LPIPS_king_srs1e-3__fd1_tr1",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.001,
+        "final_denoise": true
+      },
+      "psnr": 18.425248384475708,
+      "ssim": 0.772530660033226,
+      "lpips": 0.15106535702943802,
+      "psnr_unobs": 12.404651730093503,
+      "hf": 0.6784587999738538,
+      "dhf": 0.014707034616833425,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 779.3722546100616,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 19.313663482666016,
+          "ssim": 0.7666500806808472,
+          "lpips": 0.1579078733921051,
+          "psnr_unobs": 13.293068352269577
+        },
+        {
+          "idx": 1,
+          "psnr": 17.579673767089844,
+          "ssim": 0.7956938743591309,
+          "lpips": 0.14418110251426697,
+          "psnr_unobs": 11.5590779032346
+        },
+        {
+          "idx": 2,
+          "psnr": 17.001066207885742,
+          "ssim": 0.7439210414886475,
+          "lpips": 0.13755670189857483,
+          "psnr_unobs": 10.980467165667317
+        },
+        {
+          "idx": 3,
+          "psnr": 16.220266342163086,
+          "ssim": 0.7470138072967529,
+          "lpips": 0.1636020988225937,
+          "psnr_unobs": 10.199668026609675
+        },
+        {
+          "idx": 4,
+          "psnr": 20.521259307861328,
+          "ssim": 0.7789267301559448,
+          "lpips": 0.14459949731826782,
+          "psnr_unobs": 14.50066489503105
+        },
+        {
+          "idx": 5,
+          "psnr": 16.274106979370117,
+          "ssim": 0.7545778155326843,
+          "lpips": 0.16255001723766327,
+          "psnr_unobs": 10.253507926865657
+        },
+        {
+          "idx": 6,
+          "psnr": 19.11846923828125,
+          "ssim": 0.7866582274436951,
+          "lpips": 0.1444910615682602,
+          "psnr_unobs": 13.097872796628378
+        },
+        {
+          "idx": 7,
+          "psnr": 21.37348175048828,
+          "ssim": 0.8068037033081055,
+          "lpips": 0.15363450348377228,
+          "psnr_unobs": 15.352886774441764
+        }
+      ]
+    },
+    {
+      "name": "LPIPS_king_srs1e-4__fd0_tr0",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.0001,
+        "final_denoise": false
+      },
+      "psnr": 18.339502573013306,
+      "ssim": 0.691239483654499,
+      "lpips": 0.21468078717589378,
+      "psnr_unobs": 12.40543785662916,
+      "hf": 0.6789298479908873,
+      "dhf": 0.015178082633866885,
+      "gt_hf": 0.6637517653570204,
+      "res": 1736.195068359375,
+      "time": 774.3762657642365,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 19.245187759399414,
+          "ssim": 0.6585408449172974,
+          "lpips": 0.26821038126945496,
+          "psnr_unobs": 13.310202596261341
+        },
+        {
+          "idx": 1,
+          "psnr": 17.521833419799805,
+          "ssim": 0.7205314040184021,
+          "lpips": 0.22986623644828796,
+          "psnr_unobs": 11.558089597030378
+        },
+        {
+          "idx": 2,
+          "psnr": 16.896425247192383,
+          "ssim": 0.7092573642730713,
+          "lpips": 0.15470485389232635,
+          "psnr_unobs": 10.957156539032598
+        },
+        {
+          "idx": 3,
+          "psnr": 16.135543823242188,
+          "ssim": 0.7074312567710876,
+          "lpips": 0.1814933568239212,
+          "psnr_unobs": 10.168940468089593
+        },
+        {
+          "idx": 4,
+          "psnr": 20.42717170715332,
+          "ssim": 0.6576331257820129,
+          "lpips": 0.23998954892158508,
+          "psnr_unobs": 14.5341563774864
+        },
+        {
+          "idx": 5,
+          "psnr": 16.17076873779297,
+          "ssim": 0.6586072444915771,
+          "lpips": 0.2365434169769287,
+          "psnr_unobs": 10.20227755740404
+        },
+        {
+          "idx": 6,
+          "psnr": 19.042280197143555,
+          "ssim": 0.715800404548645,
+          "lpips": 0.17629295587539673,
+          "psnr_unobs": 13.12104565502433
+        },
+        {
+          "idx": 7,
+          "psnr": 21.276809692382812,
+          "ssim": 0.7021142244338989,
+          "lpips": 0.23034554719924927,
+          "psnr_unobs": 15.3916340627046
+        }
+      ]
+    },
+    {
+      "name": "LPIPS_king_srs1e-4__fd0_tr1",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.0001,
+        "final_denoise": false
+      },
+      "psnr": 18.426035165786743,
+      "ssim": 0.7769769504666328,
+      "lpips": 0.14930603094398975,
+      "psnr_unobs": 12.40543785662916,
+      "hf": 0.6789298479908873,
+      "dhf": 0.015178082633866885,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 774.085648059845,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 19.330799102783203,
+          "ssim": 0.7713141441345215,
+          "lpips": 0.1565728783607483,
+          "psnr_unobs": 13.310202596261341
+        },
+        {
+          "idx": 1,
+          "psnr": 17.57868766784668,
+          "ssim": 0.8042038679122925,
+          "lpips": 0.14043846726417542,
+          "psnr_unobs": 11.558089597030378
+        },
+        {
+          "idx": 2,
+          "psnr": 16.977754592895508,
+          "ssim": 0.7442750334739685,
+          "lpips": 0.13690906763076782,
+          "psnr_unobs": 10.957156539032598
+        },
+        {
+          "idx": 3,
+          "psnr": 16.189538955688477,
+          "ssim": 0.7480392456054688,
+          "lpips": 0.16332276165485382,
+          "psnr_unobs": 10.168940468089593
+        },
+        {
+          "idx": 4,
+          "psnr": 20.554752349853516,
+          "ssim": 0.7836641669273376,
+          "lpips": 0.14284856617450714,
+          "psnr_unobs": 14.5341563774864
+        },
+        {
+          "idx": 5,
+          "psnr": 16.222875595092773,
+          "ssim": 0.756959080696106,
+          "lpips": 0.16200676560401917,
+          "psnr_unobs": 10.20227755740404
+        },
+        {
+          "idx": 6,
+          "psnr": 19.141643524169922,
+          "ssim": 0.7917656898498535,
+          "lpips": 0.14120769500732422,
+          "psnr_unobs": 13.12104565502433
+        },
+        {
+          "idx": 7,
+          "psnr": 21.412229537963867,
+          "ssim": 0.8155943751335144,
+          "lpips": 0.15114204585552216,
+          "psnr_unobs": 15.3916340627046
+        }
+      ]
+    },
+    {
+      "name": "LPIPS_king_srs1e-4__fd1_tr0",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.0001,
+        "final_denoise": true
+      },
+      "psnr": 18.353346347808838,
+      "ssim": 0.6926021948456764,
+      "lpips": 0.21431784331798553,
+      "psnr_unobs": 12.418014229357746,
+      "hf": 0.6779360079963286,
+      "dhf": 0.014184242639308176,
+      "gt_hf": 0.6637517653570204,
+      "res": 1702.669921875,
+      "time": 779.8369600772858,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 19.25634002685547,
+          "ssim": 0.6608168482780457,
+          "lpips": 0.2668238878250122,
+          "psnr_unobs": 13.319745712629793
+        },
+        {
+          "idx": 1,
+          "psnr": 17.530895233154297,
+          "ssim": 0.7223398089408875,
+          "lpips": 0.2292322814464569,
+          "psnr_unobs": 11.566021841760541
+        },
+        {
+          "idx": 2,
+          "psnr": 16.91725730895996,
+          "ssim": 0.7097463011741638,
+          "lpips": 0.15460260212421417,
+          "psnr_unobs": 10.976679831659908
+        },
+        {
+          "idx": 3,
+          "psnr": 16.15288543701172,
+          "ssim": 0.7081990242004395,
+          "lpips": 0.18133634328842163,
+          "psnr_unobs": 10.18505699712332
+        },
+        {
+          "idx": 4,
+          "psnr": 20.436519622802734,
+          "ssim": 0.6589484214782715,
+          "lpips": 0.24051973223686218,
+          "psnr_unobs": 14.542315127458135
+        },
+        {
+          "idx": 5,
+          "psnr": 16.198505401611328,
+          "ssim": 0.6597827672958374,
+          "lpips": 0.23636651039123535,
+          "psnr_unobs": 10.229211666792645
+        },
+        {
+          "idx": 6,
+          "psnr": 19.04854393005371,
+          "ssim": 0.7170456647872925,
+          "lpips": 0.17602939903736115,
+          "psnr_unobs": 13.126067367590045
+        },
+        {
+          "idx": 7,
+          "psnr": 21.285823822021484,
+          "ssim": 0.7039387226104736,
+          "lpips": 0.22963199019432068,
+          "psnr_unobs": 15.399015289847588
+        }
+      ]
+    },
+    {
+      "name": "LPIPS_king_srs1e-4__fd1_tr1",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.0001,
+        "final_denoise": true
+      },
+      "psnr": 18.43861150741577,
+      "ssim": 0.7774623706936836,
+      "lpips": 0.1491495668888092,
+      "psnr_unobs": 12.418014229357746,
+      "hf": 0.6779360079963286,
+      "dhf": 0.014184242639308176,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 778.0782868862152,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 19.340341567993164,
+          "ssim": 0.7718305587768555,
+          "lpips": 0.15639039874076843,
+          "psnr_unobs": 13.319745712629793
+        },
+        {
+          "idx": 1,
+          "psnr": 17.586618423461914,
+          "ssim": 0.8049742579460144,
+          "lpips": 0.14028656482696533,
+          "psnr_unobs": 11.566021841760541
+        },
+        {
+          "idx": 2,
+          "psnr": 16.997278213500977,
+          "ssim": 0.744493842124939,
+          "lpips": 0.13673244416713715,
+          "psnr_unobs": 10.976679831659908
+        },
+        {
+          "idx": 3,
+          "psnr": 16.205656051635742,
+          "ssim": 0.7482265830039978,
+          "lpips": 0.1632012128829956,
+          "psnr_unobs": 10.18505699712332
+        },
+        {
+          "idx": 4,
+          "psnr": 20.562911987304688,
+          "ssim": 0.7842252254486084,
+          "lpips": 0.1428183615207672,
+          "psnr_unobs": 14.542315127458135
+        },
+        {
+          "idx": 5,
+          "psnr": 16.24981117248535,
+          "ssim": 0.757344126701355,
+          "lpips": 0.1618293970823288,
+          "psnr_unobs": 10.229211666792645
+        },
+        {
+          "idx": 6,
+          "psnr": 19.146663665771484,
+          "ssim": 0.7923076152801514,
+          "lpips": 0.1409670114517212,
+          "psnr_unobs": 13.126067367590045
+        },
+        {
+          "idx": 7,
+          "psnr": 21.41961097717285,
+          "ssim": 0.8162967562675476,
+          "lpips": 0.15097114443778992,
+          "psnr_unobs": 15.399015289847588
+        }
+      ]
+    },
+    {
+      "name": "balanced_perceptual_srs1e-2__fd0_tr0",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.01,
+        "final_denoise": false
+      },
+      "psnr": 18.201269388198853,
+      "ssim": 0.6581659987568855,
+      "lpips": 0.23020525835454464,
+      "psnr_unobs": 12.281121587458918,
+      "hf": 0.6849885458376836,
+      "dhf": 0.021236780480663242,
+      "gt_hf": 0.6637517653570204,
+      "res": 2066.970703125,
+      "time": 772.6618053913116,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 19.038780212402344,
+          "ssim": 0.6161761283874512,
+          "lpips": 0.2875216007232666,
+          "psnr_unobs": 13.120602659169675
+        },
+        {
+          "idx": 1,
+          "psnr": 17.434568405151367,
+          "ssim": 0.6693276166915894,
+          "lpips": 0.2526460587978363,
+          "psnr_unobs": 11.483012672600053
+        },
+        {
+          "idx": 2,
+          "psnr": 16.83254051208496,
+          "ssim": 0.7028427124023438,
+          "lpips": 0.1590031385421753,
+          "psnr_unobs": 10.900583834151895
+        },
+        {
+          "idx": 3,
+          "psnr": 16.136871337890625,
+          "ssim": 0.6956652402877808,
+          "lpips": 0.18749520182609558,
+          "psnr_unobs": 10.178557173589851
+        },
+        {
+          "idx": 4,
+          "psnr": 20.164493560791016,
+          "ssim": 0.619968056678772,
+          "lpips": 0.2570039927959442,
+          "psnr_unobs": 14.290248115977688
+        },
+        {
+          "idx": 5,
+          "psnr": 16.172035217285156,
+          "ssim": 0.6342481374740601,
+          "lpips": 0.2493918240070343,
+          "psnr_unobs": 10.21298150263792
+        },
+        {
+          "idx": 6,
+          "psnr": 18.859107971191406,
+          "ssim": 0.6819885969161987,
+          "lpips": 0.19509948790073395,
+          "psnr_unobs": 12.951319688832896
+        },
+        {
+          "idx": 7,
+          "psnr": 20.971757888793945,
+          "ssim": 0.6451115012168884,
+          "lpips": 0.2534807622432709,
+          "psnr_unobs": 15.111667052711372
+        }
+      ]
+    },
+    {
+      "name": "balanced_perceptual_srs1e-2__fd0_tr1",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.01,
+        "final_denoise": false
+      },
+      "psnr": 18.30171823501587,
+      "ssim": 0.7584109827876091,
+      "lpips": 0.15737035311758518,
+      "psnr_unobs": 12.281121587458918,
+      "hf": 0.6849885458376836,
+      "dhf": 0.021236780480663242,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 773.4354312419891,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 19.141199111938477,
+          "ssim": 0.7520736455917358,
+          "lpips": 0.16429784893989563,
+          "psnr_unobs": 13.120602659169675
+        },
+        {
+          "idx": 1,
+          "psnr": 17.50360870361328,
+          "ssim": 0.7718634605407715,
+          "lpips": 0.15321692824363708,
+          "psnr_unobs": 11.483012672600053
+        },
+        {
+          "idx": 2,
+          "psnr": 16.92118263244629,
+          "ssim": 0.7414204478263855,
+          "lpips": 0.1406337320804596,
+          "psnr_unobs": 10.900583834151895
+        },
+        {
+          "idx": 3,
+          "psnr": 16.199155807495117,
+          "ssim": 0.7428891062736511,
+          "lpips": 0.16644185781478882,
+          "psnr_unobs": 10.178557173589851
+        },
+        {
+          "idx": 4,
+          "psnr": 20.310842514038086,
+          "ssim": 0.7633451223373413,
+          "lpips": 0.1507471799850464,
+          "psnr_unobs": 14.290248115977688
+        },
+        {
+          "idx": 5,
+          "psnr": 16.233579635620117,
+          "ssim": 0.7462886571884155,
+          "lpips": 0.16593173146247864,
+          "psnr_unobs": 10.21298150263792
+        },
+        {
+          "idx": 6,
+          "psnr": 18.97191619873047,
+          "ssim": 0.7689001560211182,
+          "lpips": 0.15523302555084229,
+          "psnr_unobs": 12.951319688832896
+        },
+        {
+          "idx": 7,
+          "psnr": 21.132261276245117,
+          "ssim": 0.7805072665214539,
+          "lpips": 0.16246052086353302,
+          "psnr_unobs": 15.111667052711372
+        }
+      ]
+    },
+    {
+      "name": "balanced_perceptual_srs1e-2__fd1_tr0",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.01,
+        "final_denoise": true
+      },
+      "psnr": 18.217866897583008,
+      "ssim": 0.6601117849349976,
+      "lpips": 0.22950853407382965,
+      "psnr_unobs": 12.296193191471751,
+      "hf": 0.6838731529910627,
+      "dhf": 0.020121387634042254,
+      "gt_hf": 0.6637517653570204,
+      "res": 2026.9818115234375,
+      "time": 778.7970168590546,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 19.054834365844727,
+          "ssim": 0.619186520576477,
+          "lpips": 0.2858354151248932,
+          "psnr_unobs": 13.134726843470737
+        },
+        {
+          "idx": 1,
+          "psnr": 17.44580078125,
+          "ssim": 0.6717607378959656,
+          "lpips": 0.251670777797699,
+          "psnr_unobs": 11.49317023776561
+        },
+        {
+          "idx": 2,
+          "psnr": 16.852394104003906,
+          "ssim": 0.7034389972686768,
+          "lpips": 0.15885089337825775,
+          "psnr_unobs": 10.919100536601352
+        },
+        {
+          "idx": 3,
+          "psnr": 16.153093338012695,
+          "ssim": 0.6966906785964966,
+          "lpips": 0.1870320439338684,
+          "psnr_unobs": 10.193641148824446
+        },
+        {
+          "idx": 4,
+          "psnr": 20.180736541748047,
+          "ssim": 0.6221141219139099,
+          "lpips": 0.2569486200809479,
+          "psnr_unobs": 14.304635812866186
+        },
+        {
+          "idx": 5,
+          "psnr": 16.19750213623047,
+          "ssim": 0.6360148787498474,
+          "lpips": 0.2489248365163803,
+          "psnr_unobs": 10.237574200964355
+        },
+        {
+          "idx": 6,
+          "psnr": 18.870655059814453,
+          "ssim": 0.6839022636413574,
+          "lpips": 0.19459575414657593,
+          "psnr_unobs": 12.961110457961302
+        },
+        {
+          "idx": 7,
+          "psnr": 20.987918853759766,
+          "ssim": 0.6477860808372498,
+          "lpips": 0.25220993161201477,
+          "psnr_unobs": 15.12558629332003
+        }
+      ]
+    },
+    {
+      "name": "balanced_perceptual_srs1e-2__fd1_tr1",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.01,
+        "final_denoise": true
+      },
+      "psnr": 18.316790103912354,
+      "ssim": 0.7590337172150612,
+      "lpips": 0.15707139484584332,
+      "psnr_unobs": 12.296193191471751,
+      "hf": 0.6838731529910627,
+      "dhf": 0.020121387634042254,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 784.5139224529266,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 19.155323028564453,
+          "ssim": 0.7527260780334473,
+          "lpips": 0.16401271522045135,
+          "psnr_unobs": 13.134726843470737
+        },
+        {
+          "idx": 1,
+          "psnr": 17.51376724243164,
+          "ssim": 0.7728168368339539,
+          "lpips": 0.15288539230823517,
+          "psnr_unobs": 11.49317023776561
+        },
+        {
+          "idx": 2,
+          "psnr": 16.939699172973633,
+          "ssim": 0.7416488528251648,
+          "lpips": 0.14042365550994873,
+          "psnr_unobs": 10.919100536601352
+        },
+        {
+          "idx": 3,
+          "psnr": 16.2142391204834,
+          "ssim": 0.7431420087814331,
+          "lpips": 0.16615307331085205,
+          "psnr_unobs": 10.193641148824446
+        },
+        {
+          "idx": 4,
+          "psnr": 20.325231552124023,
+          "ssim": 0.7640541791915894,
+          "lpips": 0.15055562555789948,
+          "psnr_unobs": 14.304635812866186
+        },
+        {
+          "idx": 5,
+          "psnr": 16.2581729888916,
+          "ssim": 0.7467321157455444,
+          "lpips": 0.16564995050430298,
+          "psnr_unobs": 10.237574200964355
+        },
+        {
+          "idx": 6,
+          "psnr": 18.981706619262695,
+          "ssim": 0.7696915864944458,
+          "lpips": 0.15478180348873138,
+          "psnr_unobs": 12.961110457961302
+        },
+        {
+          "idx": 7,
+          "psnr": 21.146181106567383,
+          "ssim": 0.7814580798149109,
+          "lpips": 0.16210894286632538,
+          "psnr_unobs": 15.12558629332003
+        }
+      ]
+    },
+    {
+      "name": "balanced_perceptual_srs1e-3__fd0_tr0",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.001,
+        "final_denoise": false
+      },
+      "psnr": 20.363513946533203,
+      "ssim": 0.7008693665266037,
+      "lpips": 0.23695977218449116,
+      "psnr_unobs": 14.49311482943261,
+      "hf": 0.6078196733720644,
+      "dhf": 0.05593209198495597,
+      "gt_hf": 0.6637517653570204,
+      "res": 1909.248779296875,
+      "time": 774.283191204071,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.85254669189453,
+          "ssim": 0.66473388671875,
+          "lpips": 0.2937167286872864,
+          "psnr_unobs": 14.96709152586398
+        },
+        {
+          "idx": 1,
+          "psnr": 20.880395889282227,
+          "ssim": 0.7382732629776001,
+          "lpips": 0.22314472496509552,
+          "psnr_unobs": 14.99782163558762
+        },
+        {
+          "idx": 2,
+          "psnr": 20.514528274536133,
+          "ssim": 0.7308562994003296,
+          "lpips": 0.17671629786491394,
+          "psnr_unobs": 14.703543569986357
+        },
+        {
+          "idx": 3,
+          "psnr": 19.24400520324707,
+          "ssim": 0.7247672080993652,
+          "lpips": 0.21553708612918854,
+          "psnr_unobs": 13.347545570630778
+        },
+        {
+          "idx": 4,
+          "psnr": 20.488525390625,
+          "ssim": 0.6513998508453369,
+          "lpips": 0.2652813792228699,
+          "psnr_unobs": 14.608782093405214
+        },
+        {
+          "idx": 5,
+          "psnr": 17.53297996520996,
+          "ssim": 0.663972020149231,
+          "lpips": 0.269681841135025,
+          "psnr_unobs": 11.59231835851369
+        },
+        {
+          "idx": 6,
+          "psnr": 20.191341400146484,
+          "ssim": 0.7287248373031616,
+          "lpips": 0.2114836722612381,
+          "psnr_unobs": 14.312697370869824
+        },
+        {
+          "idx": 7,
+          "psnr": 23.20378875732422,
+          "ssim": 0.7042275667190552,
+          "lpips": 0.2401164472103119,
+          "psnr_unobs": 17.415118510603417
+        }
+      ]
+    },
+    {
+      "name": "balanced_perceptual_srs1e-3__fd0_tr1",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.001,
+        "final_denoise": false
+      },
+      "psnr": 20.513710021972656,
+      "ssim": 0.7943000122904778,
+      "lpips": 0.16253808699548244,
+      "psnr_unobs": 14.49311482943261,
+      "hf": 0.6078196733720644,
+      "dhf": 0.05593209198495597,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 774.503740310669,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.98768424987793,
+          "ssim": 0.7849708795547485,
+          "lpips": 0.17151090502738953,
+          "psnr_unobs": 14.96709152586398
+        },
+        {
+          "idx": 1,
+          "psnr": 21.018417358398438,
+          "ssim": 0.8277606964111328,
+          "lpips": 0.12989361584186554,
+          "psnr_unobs": 14.99782163558762
+        },
+        {
+          "idx": 2,
+          "psnr": 20.724140167236328,
+          "ssim": 0.7701818346977234,
+          "lpips": 0.1549900323152542,
+          "psnr_unobs": 14.703543569986357
+        },
+        {
+          "idx": 3,
+          "psnr": 19.36814308166504,
+          "ssim": 0.7691048383712769,
+          "lpips": 0.19350023567676544,
+          "psnr_unobs": 13.347545570630778
+        },
+        {
+          "idx": 4,
+          "psnr": 20.629377365112305,
+          "ssim": 0.7909197807312012,
+          "lpips": 0.15576587617397308,
+          "psnr_unobs": 14.608782093405214
+        },
+        {
+          "idx": 5,
+          "psnr": 17.612916946411133,
+          "ssim": 0.7719211578369141,
+          "lpips": 0.1847837120294571,
+          "psnr_unobs": 11.59231835851369
+        },
+        {
+          "idx": 6,
+          "psnr": 20.33329200744629,
+          "ssim": 0.8125725984573364,
+          "lpips": 0.16633567214012146,
+          "psnr_unobs": 14.312697370869824
+        },
+        {
+          "idx": 7,
+          "psnr": 23.43570899963379,
+          "ssim": 0.8269683122634888,
+          "lpips": 0.1435246467590332,
+          "psnr_unobs": 17.415118510603417
+        }
+      ]
+    },
+    {
+      "name": "balanced_perceptual_srs1e-3__fd1_tr0",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.001,
+        "final_denoise": true
+      },
+      "psnr": 20.373276710510254,
+      "ssim": 0.7025021612644196,
+      "lpips": 0.2364938072860241,
+      "psnr_unobs": 14.500176528213313,
+      "hf": 0.6070648405264462,
+      "dhf": 0.05668692483057425,
+      "gt_hf": 0.6637517653570204,
+      "res": 1868.486572265625,
+      "time": 781.1939780712128,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.860349655151367,
+          "ssim": 0.6673190593719482,
+          "lpips": 0.29226046800613403,
+          "psnr_unobs": 14.972003948402861
+        },
+        {
+          "idx": 1,
+          "psnr": 20.898876190185547,
+          "ssim": 0.7408194541931152,
+          "lpips": 0.2221202552318573,
+          "psnr_unobs": 15.012565957640263
+        },
+        {
+          "idx": 2,
+          "psnr": 20.52741050720215,
+          "ssim": 0.7313525080680847,
+          "lpips": 0.17666611075401306,
+          "psnr_unobs": 14.712877876267289
+        },
+        {
+          "idx": 3,
+          "psnr": 19.253963470458984,
+          "ssim": 0.7257367968559265,
+          "lpips": 0.21537554264068604,
+          "psnr_unobs": 13.353705170499182
+        },
+        {
+          "idx": 4,
+          "psnr": 20.494335174560547,
+          "ssim": 0.6528165936470032,
+          "lpips": 0.2658754289150238,
+          "psnr_unobs": 14.61327096627311
+        },
+        {
+          "idx": 5,
+          "psnr": 17.540287017822266,
+          "ssim": 0.6653806567192078,
+          "lpips": 0.2695830762386322,
+          "psnr_unobs": 11.597642196976349
+        },
+        {
+          "idx": 6,
+          "psnr": 20.197303771972656,
+          "ssim": 0.7302297353744507,
+          "lpips": 0.21111084520816803,
+          "psnr_unobs": 14.317090778490975
+        },
+        {
+          "idx": 7,
+          "psnr": 23.213687896728516,
+          "ssim": 0.7063624858856201,
+          "lpips": 0.23895873129367828,
+          "psnr_unobs": 17.422255331156478
+        }
+      ]
+    },
+    {
+      "name": "balanced_perceptual_srs1e-3__fd1_tr1",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.001,
+        "final_denoise": true
+      },
+      "psnr": 20.520771980285645,
+      "ssim": 0.7949860468506813,
+      "lpips": 0.16234008967876434,
+      "psnr_unobs": 14.500176528213313,
+      "hf": 0.6070648405264462,
+      "dhf": 0.05668692483057425,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 780.4467084407806,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.992599487304688,
+          "ssim": 0.7856907844543457,
+          "lpips": 0.1713288277387619,
+          "psnr_unobs": 14.972003948402861
+        },
+        {
+          "idx": 1,
+          "psnr": 21.033161163330078,
+          "ssim": 0.8290829658508301,
+          "lpips": 0.1294345259666443,
+          "psnr_unobs": 15.012565957640263
+        },
+        {
+          "idx": 2,
+          "psnr": 20.73347282409668,
+          "ssim": 0.7704551219940186,
+          "lpips": 0.15499939024448395,
+          "psnr_unobs": 14.712877876267289
+        },
+        {
+          "idx": 3,
+          "psnr": 19.37430191040039,
+          "ssim": 0.7694243788719177,
+          "lpips": 0.19345028698444366,
+          "psnr_unobs": 13.353705170499182
+        },
+        {
+          "idx": 4,
+          "psnr": 20.633865356445312,
+          "ssim": 0.791542649269104,
+          "lpips": 0.15581147372722626,
+          "psnr_unobs": 14.61327096627311
+        },
+        {
+          "idx": 5,
+          "psnr": 17.618240356445312,
+          "ssim": 0.7724248170852661,
+          "lpips": 0.18473321199417114,
+          "psnr_unobs": 11.597642196976349
+        },
+        {
+          "idx": 6,
+          "psnr": 20.33768653869629,
+          "ssim": 0.8133695125579834,
+          "lpips": 0.16593877971172333,
+          "psnr_unobs": 14.317090778490975
+        },
+        {
+          "idx": 7,
+          "psnr": 23.442848205566406,
+          "ssim": 0.8278981447219849,
+          "lpips": 0.14302422106266022,
+          "psnr_unobs": 17.422255331156478
+        }
+      ]
+    },
+    {
+      "name": "balanced_perceptual_srs1e-4__fd0_tr0",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.0001,
+        "final_denoise": false
+      },
+      "psnr": 20.39571714401245,
+      "ssim": 0.7066838890314102,
+      "lpips": 0.23735456727445126,
+      "psnr_unobs": 14.527916213388412,
+      "hf": 0.6045520204176236,
+      "dhf": 0.05919974493939684,
+      "gt_hf": 0.6637517653570204,
+      "res": 1928.491455078125,
+      "time": 775.9732780456543,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.894372940063477,
+          "ssim": 0.6715161204338074,
+          "lpips": 0.29400989413261414,
+          "psnr_unobs": 15.010620380652922
+        },
+        {
+          "idx": 1,
+          "psnr": 20.903348922729492,
+          "ssim": 0.751097559928894,
+          "lpips": 0.21974489092826843,
+          "psnr_unobs": 15.022338478791891
+        },
+        {
+          "idx": 2,
+          "psnr": 20.544506072998047,
+          "ssim": 0.7324730753898621,
+          "lpips": 0.180313840508461,
+          "psnr_unobs": 14.737297439381827
+        },
+        {
+          "idx": 3,
+          "psnr": 19.268413543701172,
+          "ssim": 0.7273518443107605,
+          "lpips": 0.21705162525177002,
+          "psnr_unobs": 13.374611396452945
+        },
+        {
+          "idx": 4,
+          "psnr": 20.521724700927734,
+          "ssim": 0.6557761430740356,
+          "lpips": 0.2685413956642151,
+          "psnr_unobs": 14.644546150990667
+        },
+        {
+          "idx": 5,
+          "psnr": 17.540939331054688,
+          "ssim": 0.6656357049942017,
+          "lpips": 0.2718650698661804,
+          "psnr_unobs": 11.60188344951341
+        },
+        {
+          "idx": 6,
+          "psnr": 20.223329544067383,
+          "ssim": 0.7356982231140137,
+          "lpips": 0.20982876420021057,
+          "psnr_unobs": 14.347174320525442
+        },
+        {
+          "idx": 7,
+          "psnr": 23.269102096557617,
+          "ssim": 0.7139224410057068,
+          "lpips": 0.23748105764389038,
+          "psnr_unobs": 17.484858090798184
+        }
+      ]
+    },
+    {
+      "name": "balanced_perceptual_srs1e-4__fd0_tr1",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.0001,
+        "final_denoise": false
+      },
+      "psnr": 20.548511743545532,
+      "ssim": 0.8010939955711365,
+      "lpips": 0.1614701710641384,
+      "psnr_unobs": 14.527916213388412,
+      "hf": 0.6045520204176236,
+      "dhf": 0.05919974493939684,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 773.7262301445007,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 21.03121566772461,
+          "ssim": 0.7919541597366333,
+          "lpips": 0.17096354067325592,
+          "psnr_unobs": 15.010620380652922
+        },
+        {
+          "idx": 1,
+          "psnr": 21.04293441772461,
+          "ssim": 0.8404029607772827,
+          "lpips": 0.12582959234714508,
+          "psnr_unobs": 15.022338478791891
+        },
+        {
+          "idx": 2,
+          "psnr": 20.757892608642578,
+          "ssim": 0.772258996963501,
+          "lpips": 0.15777349472045898,
+          "psnr_unobs": 14.737297439381827
+        },
+        {
+          "idx": 3,
+          "psnr": 19.395206451416016,
+          "ssim": 0.7722095251083374,
+          "lpips": 0.19449977576732635,
+          "psnr_unobs": 13.374611396452945
+        },
+        {
+          "idx": 4,
+          "psnr": 20.665142059326172,
+          "ssim": 0.7979375123977661,
+          "lpips": 0.1557369977235794,
+          "psnr_unobs": 14.644546150990667
+        },
+        {
+          "idx": 5,
+          "psnr": 17.622482299804688,
+          "ssim": 0.7756244540214539,
+          "lpips": 0.18558570742607117,
+          "psnr_unobs": 11.60188344951341
+        },
+        {
+          "idx": 6,
+          "psnr": 20.36777114868164,
+          "ssim": 0.8207380175590515,
+          "lpips": 0.16317488253116608,
+          "psnr_unobs": 14.347174320525442
+        },
+        {
+          "idx": 7,
+          "psnr": 23.505449295043945,
+          "ssim": 0.8376263380050659,
+          "lpips": 0.1381973773241043,
+          "psnr_unobs": 17.484858090798184
+        }
+      ]
+    },
+    {
+      "name": "balanced_perceptual_srs1e-4__fd1_tr0",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.0001,
+        "final_denoise": true
+      },
+      "psnr": 20.404616594314575,
+      "ssim": 0.7082138955593109,
+      "lpips": 0.2369228322058916,
+      "psnr_unobs": 14.533933270341375,
+      "hf": 0.6039014976182933,
+      "dhf": 0.05985026773872715,
+      "gt_hf": 0.6637517653570204,
+      "res": 1885.6954345703125,
+      "time": 779.3925266265869,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.901020050048828,
+          "ssim": 0.6740138530731201,
+          "lpips": 0.2926449775695801,
+          "psnr_unobs": 15.014216054863951
+        },
+        {
+          "idx": 1,
+          "psnr": 20.92108154296875,
+          "ssim": 0.7535027265548706,
+          "lpips": 0.2187323123216629,
+          "psnr_unobs": 15.03599797229734
+        },
+        {
+          "idx": 2,
+          "psnr": 20.556795120239258,
+          "ssim": 0.7329397201538086,
+          "lpips": 0.18024903535842896,
+          "psnr_unobs": 14.745714087690384
+        },
+        {
+          "idx": 3,
+          "psnr": 19.277904510498047,
+          "ssim": 0.7282700538635254,
+          "lpips": 0.2169336974620819,
+          "psnr_unobs": 13.379955887983904
+        },
+        {
+          "idx": 4,
+          "psnr": 20.526573181152344,
+          "ssim": 0.6570476293563843,
+          "lpips": 0.2691931128501892,
+          "psnr_unobs": 14.648079393660801
+        },
+        {
+          "idx": 5,
+          "psnr": 17.548124313354492,
+          "ssim": 0.6669801473617554,
+          "lpips": 0.27176615595817566,
+          "psnr_unobs": 11.60692233609543
+        },
+        {
+          "idx": 6,
+          "psnr": 20.22831916809082,
+          "ssim": 0.7370355129241943,
+          "lpips": 0.20948076248168945,
+          "psnr_unobs": 14.350601695743261
+        },
+        {
+          "idx": 7,
+          "psnr": 23.277114868164062,
+          "ssim": 0.7159215211868286,
+          "lpips": 0.2363826036453247,
+          "psnr_unobs": 17.48997873439594
+        }
+      ]
+    },
+    {
+      "name": "balanced_perceptual_srs1e-4__fd1_tr1",
+      "kw": {
+        "num_langevin": 10,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.0001,
+        "final_denoise": true
+      },
+      "psnr": 20.55452823638916,
+      "ssim": 0.8016847223043442,
+      "lpips": 0.16130975261330605,
+      "psnr_unobs": 14.533933270341375,
+      "hf": 0.6039014976182933,
+      "dhf": 0.05985026773872715,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 779.6687858104706,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 21.03481101989746,
+          "ssim": 0.7925853133201599,
+          "lpips": 0.17085766792297363,
+          "psnr_unobs": 15.014216054863951
+        },
+        {
+          "idx": 1,
+          "psnr": 21.05659294128418,
+          "ssim": 0.8415751457214355,
+          "lpips": 0.12540408968925476,
+          "psnr_unobs": 15.03599797229734
+        },
+        {
+          "idx": 2,
+          "psnr": 20.766307830810547,
+          "ssim": 0.7724902629852295,
+          "lpips": 0.15779182314872742,
+          "psnr_unobs": 14.745714087690384
+        },
+        {
+          "idx": 3,
+          "psnr": 19.40055274963379,
+          "ssim": 0.7724705934524536,
+          "lpips": 0.19447052478790283,
+          "psnr_unobs": 13.379955887983904
+        },
+        {
+          "idx": 4,
+          "psnr": 20.66867446899414,
+          "ssim": 0.7984555959701538,
+          "lpips": 0.1558084487915039,
+          "psnr_unobs": 14.648079393660801
+        },
+        {
+          "idx": 5,
+          "psnr": 17.627521514892578,
+          "ssim": 0.776076078414917,
+          "lpips": 0.18556243181228638,
+          "psnr_unobs": 11.60692233609543
+        },
+        {
+          "idx": 6,
+          "psnr": 20.371196746826172,
+          "ssim": 0.8213934898376465,
+          "lpips": 0.16282919049263,
+          "psnr_unobs": 14.350601695743261
+        },
+        {
+          "idx": 7,
+          "psnr": 23.510568618774414,
+          "ssim": 0.8384312987327576,
+          "lpips": 0.13775384426116943,
+          "psnr_unobs": 17.48997873439594
+        }
+      ]
+    },
+    {
+      "name": "pareto_dual_king_srs1e-2__fd0_tr0",
+      "kw": {
+        "num_langevin": 5,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.01,
+        "final_denoise": false
+      },
+      "psnr": 20.24225354194641,
+      "ssim": 0.6981372535228729,
+      "lpips": 0.25587616488337517,
+      "psnr_unobs": 14.411339463713466,
+      "hf": 0.6154112120307591,
+      "dhf": 0.048340553326261304,
+      "gt_hf": 0.6637517653570204,
+      "res": 2514.442138671875,
+      "time": 428.2113537788391,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.638656616210938,
+          "ssim": 0.6801528930664062,
+          "lpips": 0.2958819568157196,
+          "psnr_unobs": 14.757241993355372
+        },
+        {
+          "idx": 1,
+          "psnr": 19.15570068359375,
+          "ssim": 0.7422053217887878,
+          "lpips": 0.25077104568481445,
+          "psnr_unobs": 13.243192632529404
+        },
+        {
+          "idx": 2,
+          "psnr": 19.882917404174805,
+          "ssim": 0.6989387273788452,
+          "lpips": 0.2169109284877777,
+          "psnr_unobs": 14.190589820692372
+        },
+        {
+          "idx": 3,
+          "psnr": 20.38252067565918,
+          "ssim": 0.7213473320007324,
+          "lpips": 0.22830837965011597,
+          "psnr_unobs": 14.614140336674616
+        },
+        {
+          "idx": 4,
+          "psnr": 21.88044548034668,
+          "ssim": 0.6491530537605286,
+          "lpips": 0.2927854061126709,
+          "psnr_unobs": 16.073763984676933
+        },
+        {
+          "idx": 5,
+          "psnr": 17.233137130737305,
+          "ssim": 0.6640822887420654,
+          "lpips": 0.2762814164161682,
+          "psnr_unobs": 11.314420070641514
+        },
+        {
+          "idx": 6,
+          "psnr": 19.34996223449707,
+          "ssim": 0.71586012840271,
+          "lpips": 0.23464497923851013,
+          "psnr_unobs": 13.470176274309484
+        },
+        {
+          "idx": 7,
+          "psnr": 23.414688110351562,
+          "ssim": 0.7133582830429077,
+          "lpips": 0.25142520666122437,
+          "psnr_unobs": 17.62719059682803
+        }
+      ]
+    },
+    {
+      "name": "pareto_dual_king_srs1e-2__fd0_tr1",
+      "kw": {
+        "num_langevin": 5,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.01,
+        "final_denoise": false
+      },
+      "psnr": 20.431934118270874,
+      "ssim": 0.7923056930303574,
+      "lpips": 0.16806636191904545,
+      "psnr_unobs": 14.411339463713466,
+      "hf": 0.6154112120307591,
+      "dhf": 0.048340553326261304,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 429.61942744255066,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.777835845947266,
+          "ssim": 0.7854524850845337,
+          "lpips": 0.17746701836585999,
+          "psnr_unobs": 14.757241993355372
+        },
+        {
+          "idx": 1,
+          "psnr": 19.263790130615234,
+          "ssim": 0.8157961368560791,
+          "lpips": 0.1606127768754959,
+          "psnr_unobs": 13.243192632529404
+        },
+        {
+          "idx": 2,
+          "psnr": 20.211183547973633,
+          "ssim": 0.7664110660552979,
+          "lpips": 0.1709951013326645,
+          "psnr_unobs": 14.190589820692372
+        },
+        {
+          "idx": 3,
+          "psnr": 20.634735107421875,
+          "ssim": 0.7703455686569214,
+          "lpips": 0.19073274731636047,
+          "psnr_unobs": 14.614140336674616
+        },
+        {
+          "idx": 4,
+          "psnr": 22.094356536865234,
+          "ssim": 0.7956662178039551,
+          "lpips": 0.15636464953422546,
+          "psnr_unobs": 16.073763984676933
+        },
+        {
+          "idx": 5,
+          "psnr": 17.335018157958984,
+          "ssim": 0.7735595107078552,
+          "lpips": 0.17427870631217957,
+          "psnr_unobs": 11.314420070641514
+        },
+        {
+          "idx": 6,
+          "psnr": 19.490772247314453,
+          "ssim": 0.8100406527519226,
+          "lpips": 0.16479039192199707,
+          "psnr_unobs": 13.470176274309484
+        },
+        {
+          "idx": 7,
+          "psnr": 23.647781372070312,
+          "ssim": 0.821173906326294,
+          "lpips": 0.14928950369358063,
+          "psnr_unobs": 17.62719059682803
+        }
+      ]
+    },
+    {
+      "name": "pareto_dual_king_srs1e-2__fd1_tr0",
+      "kw": {
+        "num_langevin": 5,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.01,
+        "final_denoise": true
+      },
+      "psnr": 20.247508764266968,
+      "ssim": 0.6989727392792702,
+      "lpips": 0.25580779276788235,
+      "psnr_unobs": 14.415922384374658,
+      "hf": 0.6148966897137828,
+      "dhf": 0.048855075643237655,
+      "gt_hf": 0.6637517653570204,
+      "res": 2502.1962890625,
+      "time": 432.83673787117004,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.644018173217773,
+          "ssim": 0.6817409992218018,
+          "lpips": 0.29475897550582886,
+          "psnr_unobs": 14.761446018521953
+        },
+        {
+          "idx": 1,
+          "psnr": 19.162824630737305,
+          "ssim": 0.7437564730644226,
+          "lpips": 0.250358521938324,
+          "psnr_unobs": 13.24872592786787
+        },
+        {
+          "idx": 2,
+          "psnr": 19.887022018432617,
+          "ssim": 0.6986674070358276,
+          "lpips": 0.2172757387161255,
+          "psnr_unobs": 14.195282456522264
+        },
+        {
+          "idx": 3,
+          "psnr": 20.389081954956055,
+          "ssim": 0.7218172550201416,
+          "lpips": 0.22833265364170074,
+          "psnr_unobs": 14.619068392578951
+        },
+        {
+          "idx": 4,
+          "psnr": 21.88577651977539,
+          "ssim": 0.6498326659202576,
+          "lpips": 0.2936781644821167,
+          "psnr_unobs": 16.078967442907008
+        },
+        {
+          "idx": 5,
+          "psnr": 17.236587524414062,
+          "ssim": 0.6646669507026672,
+          "lpips": 0.27669185400009155,
+          "psnr_unobs": 11.31761763897063
+        },
+        {
+          "idx": 6,
+          "psnr": 19.352815628051758,
+          "ssim": 0.7166839838027954,
+          "lpips": 0.23454883694648743,
+          "psnr_unobs": 13.472782372990553
+        },
+        {
+          "idx": 7,
+          "psnr": 23.42194366455078,
+          "ssim": 0.7146161794662476,
+          "lpips": 0.25081759691238403,
+          "psnr_unobs": 17.633488824638036
+        }
+      ]
+    },
+    {
+      "name": "pareto_dual_king_srs1e-2__fd1_tr1",
+      "kw": {
+        "num_langevin": 5,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.01,
+        "final_denoise": true
+      },
+      "psnr": 20.4365177154541,
+      "ssim": 0.7928905412554741,
+      "lpips": 0.16795668378472328,
+      "psnr_unobs": 14.415922384374658,
+      "hf": 0.6148966897137828,
+      "dhf": 0.048855075643237655,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 431.83208870887756,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.782041549682617,
+          "ssim": 0.7860459685325623,
+          "lpips": 0.17744819819927216,
+          "psnr_unobs": 14.761446018521953
+        },
+        {
+          "idx": 1,
+          "psnr": 19.26932144165039,
+          "ssim": 0.8168191313743591,
+          "lpips": 0.1603829562664032,
+          "psnr_unobs": 13.24872592786787
+        },
+        {
+          "idx": 2,
+          "psnr": 20.215877532958984,
+          "ssim": 0.7666218280792236,
+          "lpips": 0.17106959223747253,
+          "psnr_unobs": 14.195282456522264
+        },
+        {
+          "idx": 3,
+          "psnr": 20.639663696289062,
+          "ssim": 0.770610511302948,
+          "lpips": 0.1906520277261734,
+          "psnr_unobs": 14.619068392578951
+        },
+        {
+          "idx": 4,
+          "psnr": 22.09956169128418,
+          "ssim": 0.7962608337402344,
+          "lpips": 0.1564445197582245,
+          "psnr_unobs": 16.078967442907008
+        },
+        {
+          "idx": 5,
+          "psnr": 17.33821678161621,
+          "ssim": 0.7740103602409363,
+          "lpips": 0.17428800463676453,
+          "psnr_unobs": 11.31761763897063
+        },
+        {
+          "idx": 6,
+          "psnr": 19.493379592895508,
+          "ssim": 0.8107352256774902,
+          "lpips": 0.16442477703094482,
+          "psnr_unobs": 13.472782372990553
+        },
+        {
+          "idx": 7,
+          "psnr": 23.65407943725586,
+          "ssim": 0.8220204710960388,
+          "lpips": 0.14894339442253113,
+          "psnr_unobs": 17.633488824638036
+        }
+      ]
+    },
+    {
+      "name": "pareto_dual_king_srs1e-3__fd0_tr0",
+      "kw": {
+        "num_langevin": 15,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.001,
+        "final_denoise": false
+      },
+      "psnr": 20.346046209335327,
+      "ssim": 0.6899376064538956,
+      "lpips": 0.2349124439060688,
+      "psnr_unobs": 14.482069644836205,
+      "hf": 0.6276135032558545,
+      "dhf": 0.036138262101165886,
+      "gt_hf": 0.6637517653570204,
+      "res": 1914.403076171875,
+      "time": 1120.1333436965942,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.655832290649414,
+          "ssim": 0.651030421257019,
+          "lpips": 0.28820091485977173,
+          "psnr_unobs": 14.773081527918974
+        },
+        {
+          "idx": 1,
+          "psnr": 19.9840145111084,
+          "ssim": 0.7152253985404968,
+          "lpips": 0.22653916478157043,
+          "psnr_unobs": 14.080851741011251
+        },
+        {
+          "idx": 2,
+          "psnr": 20.288677215576172,
+          "ssim": 0.7256057262420654,
+          "lpips": 0.2026589959859848,
+          "psnr_unobs": 14.446402023483785
+        },
+        {
+          "idx": 3,
+          "psnr": 19.385662078857422,
+          "ssim": 0.7195259928703308,
+          "lpips": 0.21681830286979675,
+          "psnr_unobs": 13.490274342576225
+        },
+        {
+          "idx": 4,
+          "psnr": 20.604421615600586,
+          "ssim": 0.6415984034538269,
+          "lpips": 0.2591148614883423,
+          "psnr_unobs": 14.732707137536858
+        },
+        {
+          "idx": 5,
+          "psnr": 16.942007064819336,
+          "ssim": 0.6582376956939697,
+          "lpips": 0.2665894031524658,
+          "psnr_unobs": 10.990429978013758
+        },
+        {
+          "idx": 6,
+          "psnr": 20.797758102416992,
+          "ssim": 0.7168721556663513,
+          "lpips": 0.18752224743366241,
+          "psnr_unobs": 14.940677061036576
+        },
+        {
+          "idx": 7,
+          "psnr": 24.109996795654297,
+          "ssim": 0.6914050579071045,
+          "lpips": 0.23185566067695618,
+          "psnr_unobs": 18.402133347112223
+        }
+      ]
+    },
+    {
+      "name": "pareto_dual_king_srs1e-3__fd0_tr1",
+      "kw": {
+        "num_langevin": 15,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.001,
+        "final_denoise": false
+      },
+      "psnr": 20.50266432762146,
+      "ssim": 0.7871465757489204,
+      "lpips": 0.16207616589963436,
+      "psnr_unobs": 14.482069644836205,
+      "hf": 0.6276135032558545,
+      "dhf": 0.036138262101165886,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 1119.6767885684967,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.793676376342773,
+          "ssim": 0.7811152338981628,
+          "lpips": 0.1625937521457672,
+          "psnr_unobs": 14.773081527918974
+        },
+        {
+          "idx": 1,
+          "psnr": 20.10144805908203,
+          "ssim": 0.8135625720024109,
+          "lpips": 0.1289861500263214,
+          "psnr_unobs": 14.080851741011251
+        },
+        {
+          "idx": 2,
+          "psnr": 20.466997146606445,
+          "ssim": 0.7613976001739502,
+          "lpips": 0.18668757379055023,
+          "psnr_unobs": 14.446402023483785
+        },
+        {
+          "idx": 3,
+          "psnr": 19.5108699798584,
+          "ssim": 0.7656481266021729,
+          "lpips": 0.19502553343772888,
+          "psnr_unobs": 13.490274342576225
+        },
+        {
+          "idx": 4,
+          "psnr": 20.75330352783203,
+          "ssim": 0.7819725871086121,
+          "lpips": 0.15480932593345642,
+          "psnr_unobs": 14.732707137536858
+        },
+        {
+          "idx": 5,
+          "psnr": 17.011028289794922,
+          "ssim": 0.7684182524681091,
+          "lpips": 0.1810673177242279,
+          "psnr_unobs": 10.990429978013758
+        },
+        {
+          "idx": 6,
+          "psnr": 20.96126937866211,
+          "ssim": 0.8015733957290649,
+          "lpips": 0.14685359597206116,
+          "psnr_unobs": 14.940677061036576
+        },
+        {
+          "idx": 7,
+          "psnr": 24.42272186279297,
+          "ssim": 0.8234848380088806,
+          "lpips": 0.14058607816696167,
+          "psnr_unobs": 18.402133347112223
+        }
+      ]
+    },
+    {
+      "name": "pareto_dual_king_srs1e-3__fd1_tr0",
+      "kw": {
+        "num_langevin": 15,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.001,
+        "final_denoise": true
+      },
+      "psnr": 20.358593225479126,
+      "ssim": 0.6918785274028778,
+      "lpips": 0.23428430408239365,
+      "psnr_unobs": 14.491502785028608,
+      "hf": 0.6266031240612353,
+      "dhf": 0.0371486412957851,
+      "gt_hf": 0.6637517653570204,
+      "res": 1866.615966796875,
+      "time": 1129.3791835308075,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.667837142944336,
+          "ssim": 0.6540078520774841,
+          "lpips": 0.2864845097064972,
+          "psnr_unobs": 14.782001878586604
+        },
+        {
+          "idx": 1,
+          "psnr": 20.000219345092773,
+          "ssim": 0.7178020477294922,
+          "lpips": 0.2255064845085144,
+          "psnr_unobs": 14.094106763976477
+        },
+        {
+          "idx": 2,
+          "psnr": 20.30606460571289,
+          "ssim": 0.7264052629470825,
+          "lpips": 0.20257246494293213,
+          "psnr_unobs": 14.459387723513569
+        },
+        {
+          "idx": 3,
+          "psnr": 19.399250030517578,
+          "ssim": 0.720666766166687,
+          "lpips": 0.21640431880950928,
+          "psnr_unobs": 13.499699402155493
+        },
+        {
+          "idx": 4,
+          "psnr": 20.613574981689453,
+          "ssim": 0.6435043811798096,
+          "lpips": 0.2593938112258911,
+          "psnr_unobs": 14.739917095927343
+        },
+        {
+          "idx": 5,
+          "psnr": 16.947696685791016,
+          "ssim": 0.6599581241607666,
+          "lpips": 0.26626211404800415,
+          "psnr_unobs": 10.994108911629537
+        },
+        {
+          "idx": 6,
+          "psnr": 20.807525634765625,
+          "ssim": 0.7186939120292664,
+          "lpips": 0.18697574734687805,
+          "psnr_unobs": 14.948148305926834
+        },
+        {
+          "idx": 7,
+          "psnr": 24.126577377319336,
+          "ssim": 0.6939898729324341,
+          "lpips": 0.23067498207092285,
+          "psnr_unobs": 18.414652198513014
+        }
+      ]
+    },
+    {
+      "name": "pareto_dual_king_srs1e-3__fd1_tr1",
+      "kw": {
+        "num_langevin": 15,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.001,
+        "final_denoise": true
+      },
+      "psnr": 20.51209783554077,
+      "ssim": 0.7878981456160545,
+      "lpips": 0.161832882091403,
+      "psnr_unobs": 14.491502785028608,
+      "hf": 0.6266031240612353,
+      "dhf": 0.0371486412957851,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 1119.092921257019,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.802595138549805,
+          "ssim": 0.7819410562515259,
+          "lpips": 0.16234377026557922,
+          "psnr_unobs": 14.782001878586604
+        },
+        {
+          "idx": 1,
+          "psnr": 20.114704132080078,
+          "ssim": 0.8148261904716492,
+          "lpips": 0.12849575281143188,
+          "psnr_unobs": 14.094106763976477
+        },
+        {
+          "idx": 2,
+          "psnr": 20.479982376098633,
+          "ssim": 0.7617650032043457,
+          "lpips": 0.1866532862186432,
+          "psnr_unobs": 14.459387723513569
+        },
+        {
+          "idx": 3,
+          "psnr": 19.52029800415039,
+          "ssim": 0.7660205364227295,
+          "lpips": 0.19491088390350342,
+          "psnr_unobs": 13.499699402155493
+        },
+        {
+          "idx": 4,
+          "psnr": 20.760513305664062,
+          "ssim": 0.7826771140098572,
+          "lpips": 0.15479283034801483,
+          "psnr_unobs": 14.739917095927343
+        },
+        {
+          "idx": 5,
+          "psnr": 17.014705657958984,
+          "ssim": 0.7689521312713623,
+          "lpips": 0.18102526664733887,
+          "psnr_unobs": 10.994108911629537
+        },
+        {
+          "idx": 6,
+          "psnr": 20.96874237060547,
+          "ssim": 0.802440881729126,
+          "lpips": 0.1463225781917572,
+          "psnr_unobs": 14.948148305926834
+        },
+        {
+          "idx": 7,
+          "psnr": 24.43524169921875,
+          "ssim": 0.8245622515678406,
+          "lpips": 0.14011868834495544,
+          "psnr_unobs": 18.414652198513014
+        }
+      ]
+    },
+    {
+      "name": "pareto_dual_king_srs1e-4__fd0_tr0",
+      "kw": {
+        "num_langevin": 15,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.0001,
+        "final_denoise": false
+      },
+      "psnr": 20.40250253677368,
+      "ssim": 0.6994079723954201,
+      "lpips": 0.23385468497872353,
+      "psnr_unobs": 14.54133408476173,
+      "hf": 0.6239245818276513,
+      "dhf": 0.03982718352936909,
+      "gt_hf": 0.6637517653570204,
+      "res": 1921.26171875,
+      "time": 1114.4661405086517,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.722087860107422,
+          "ssim": 0.6618249416351318,
+          "lpips": 0.2870281934738159,
+          "psnr_unobs": 14.840563643289247
+        },
+        {
+          "idx": 1,
+          "psnr": 20.004804611206055,
+          "ssim": 0.7338522672653198,
+          "lpips": 0.22211980819702148,
+          "psnr_unobs": 14.101960693159599
+        },
+        {
+          "idx": 2,
+          "psnr": 20.32895278930664,
+          "ssim": 0.7280861139297485,
+          "lpips": 0.2060711830854416,
+          "psnr_unobs": 14.489603402742988
+        },
+        {
+          "idx": 3,
+          "psnr": 19.412708282470703,
+          "ssim": 0.7230216860771179,
+          "lpips": 0.21863330900669098,
+          "psnr_unobs": 13.519808258945375
+        },
+        {
+          "idx": 4,
+          "psnr": 20.665748596191406,
+          "ssim": 0.650259256362915,
+          "lpips": 0.25883644819259644,
+          "psnr_unobs": 14.796027965502203
+        },
+        {
+          "idx": 5,
+          "psnr": 16.96782875061035,
+          "ssim": 0.6633073091506958,
+          "lpips": 0.2667791545391083,
+          "psnr_unobs": 11.017745788312372
+        },
+        {
+          "idx": 6,
+          "psnr": 20.86421775817871,
+          "ssim": 0.7273174524307251,
+          "lpips": 0.1845642328262329,
+          "psnr_unobs": 15.009964299772031
+        },
+        {
+          "idx": 7,
+          "psnr": 24.253671646118164,
+          "ssim": 0.7075947523117065,
+          "lpips": 0.22680515050888062,
+          "psnr_unobs": 18.554998626370022
+        }
+      ]
+    },
+    {
+      "name": "pareto_dual_king_srs1e-4__fd0_tr1",
+      "kw": {
+        "num_langevin": 15,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.0001,
+        "final_denoise": false
+      },
+      "psnr": 20.561928510665894,
+      "ssim": 0.7971770763397217,
+      "lpips": 0.160207349807024,
+      "psnr_unobs": 14.54133408476173,
+      "hf": 0.6239245818276513,
+      "dhf": 0.03982718352936909,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 1114.2038640975952,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.86115837097168,
+          "ssim": 0.7914818525314331,
+          "lpips": 0.16117358207702637,
+          "psnr_unobs": 14.840563643289247
+        },
+        {
+          "idx": 1,
+          "psnr": 20.122554779052734,
+          "ssim": 0.8314473032951355,
+          "lpips": 0.12387247383594513,
+          "psnr_unobs": 14.101960693159599
+        },
+        {
+          "idx": 2,
+          "psnr": 20.51019859313965,
+          "ssim": 0.7640976905822754,
+          "lpips": 0.1896667778491974,
+          "psnr_unobs": 14.489603402742988
+        },
+        {
+          "idx": 3,
+          "psnr": 19.5404052734375,
+          "ssim": 0.7695590853691101,
+          "lpips": 0.19672688841819763,
+          "psnr_unobs": 13.519808258945375
+        },
+        {
+          "idx": 4,
+          "psnr": 20.816621780395508,
+          "ssim": 0.7923463582992554,
+          "lpips": 0.15394237637519836,
+          "psnr_unobs": 14.796027965502203
+        },
+        {
+          "idx": 5,
+          "psnr": 17.03834342956543,
+          "ssim": 0.7756590843200684,
+          "lpips": 0.1802344024181366,
+          "psnr_unobs": 11.017745788312372
+        },
+        {
+          "idx": 6,
+          "psnr": 21.030559539794922,
+          "ssim": 0.8127321004867554,
+          "lpips": 0.14273883402347565,
+          "psnr_unobs": 15.009964299772031
+        },
+        {
+          "idx": 7,
+          "psnr": 24.575586318969727,
+          "ssim": 0.8400931358337402,
+          "lpips": 0.1333034634590149,
+          "psnr_unobs": 18.554998626370022
+        }
+      ]
+    },
+    {
+      "name": "pareto_dual_king_srs1e-4__fd1_tr0",
+      "kw": {
+        "num_langevin": 15,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 0.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.0001,
+        "final_denoise": true
+      },
+      "psnr": 20.413243293762207,
+      "ssim": 0.7012072801589966,
+      "lpips": 0.23328266479074955,
+      "psnr_unobs": 14.548713224593074,
+      "hf": 0.6230441250429976,
+      "dhf": 0.04070764031402285,
+      "gt_hf": 0.6637517653570204,
+      "res": 1871.1756591796875,
+      "time": 1120.9800899028778,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.73210906982422,
+          "ssim": 0.6646788120269775,
+          "lpips": 0.2854207158088684,
+          "psnr_unobs": 14.847310579665224
+        },
+        {
+          "idx": 1,
+          "psnr": 20.019046783447266,
+          "ssim": 0.7361928224563599,
+          "lpips": 0.22114500403404236,
+          "psnr_unobs": 14.113024935189307
+        },
+        {
+          "idx": 2,
+          "psnr": 20.345138549804688,
+          "ssim": 0.728843092918396,
+          "lpips": 0.20597121119499207,
+          "psnr_unobs": 14.500956167700332
+        },
+        {
+          "idx": 3,
+          "psnr": 19.425228118896484,
+          "ssim": 0.7241005897521973,
+          "lpips": 0.2183121144771576,
+          "psnr_unobs": 13.527671188744435
+        },
+        {
+          "idx": 4,
+          "psnr": 20.673189163208008,
+          "ssim": 0.6520282626152039,
+          "lpips": 0.2591632008552551,
+          "psnr_unobs": 14.801471568748498
+        },
+        {
+          "idx": 5,
+          "psnr": 16.973155975341797,
+          "ssim": 0.6648850440979004,
+          "lpips": 0.26655107736587524,
+          "psnr_unobs": 11.020875951222509
+        },
+        {
+          "idx": 6,
+          "psnr": 20.872081756591797,
+          "ssim": 0.7289518117904663,
+          "lpips": 0.1840590387582779,
+          "psnr_unobs": 15.015519674613051
+        },
+        {
+          "idx": 7,
+          "psnr": 24.2659969329834,
+          "ssim": 0.7099778056144714,
+          "lpips": 0.2256389558315277,
+          "psnr_unobs": 18.562875730861236
+        }
+      ]
+    },
+    {
+      "name": "pareto_dual_king_srs1e-4__fd1_tr1",
+      "kw": {
+        "num_langevin": 15,
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "lambda_reg": 150.0,
+        "noise_scale": 1.0,
+        "ode_steps_per_stage": 10,
+        "shift": 1.0,
+        "guidance_scale": 2.0,
+        "warm_restart": true,
+        "g_bypass_stage3": true,
+        "x1_init_mode": "model",
+        "lambda_x": 0.01,
+        "rho_s": 1.0,
+        "rho_e": 1.0,
+        "cg_tol": 1e-05,
+        "cg_max_iter": 50,
+        "dps_kick_zeta": null,
+        "terminal_replace_weight": 1.0,
+        "soft_replace_weight": 0.0,
+        "h_x_obs_ratio": 1.0,
+        "lambda_prox": 150.0,
+        "skip_eps_update": false,
+        "reset_eps_per_ode_step": false,
+        "lambda_eps_norm": 0.0,
+        "mask_aware_eps": false,
+        "lambda_eps_prox": 0.0,
+        "lambda_eps_inject": 0.0,
+        "sigma_ref_sq": 0.0001,
+        "final_denoise": true
+      },
+      "psnr": 20.569307327270508,
+      "ssim": 0.7978066727519035,
+      "lpips": 0.16002456657588482,
+      "psnr_unobs": 14.548713224593074,
+      "hf": 0.6230441250429976,
+      "dhf": 0.04070764031402285,
+      "gt_hf": 0.6637517653570204,
+      "res": 0.0,
+      "time": 1125.7751953601837,
+      "per_image": [
+        {
+          "idx": 0,
+          "psnr": 20.867904663085938,
+          "ssim": 0.7922000288963318,
+          "lpips": 0.16101935505867004,
+          "psnr_unobs": 14.847310579665224
+        },
+        {
+          "idx": 1,
+          "psnr": 20.13361930847168,
+          "ssim": 0.8325478434562683,
+          "lpips": 0.12344683706760406,
+          "psnr_unobs": 14.113024935189307
+        },
+        {
+          "idx": 2,
+          "psnr": 20.521549224853516,
+          "ssim": 0.7644064426422119,
+          "lpips": 0.1896325945854187,
+          "psnr_unobs": 14.500956167700332
+        },
+        {
+          "idx": 3,
+          "psnr": 19.548267364501953,
+          "ssim": 0.7698535919189453,
+          "lpips": 0.1966589391231537,
+          "psnr_unobs": 13.527671188744435
+        },
+        {
+          "idx": 4,
+          "psnr": 20.822067260742188,
+          "ssim": 0.7929309606552124,
+          "lpips": 0.1539733111858368,
+          "psnr_unobs": 14.801471568748498
+        },
+        {
+          "idx": 5,
+          "psnr": 17.041473388671875,
+          "ssim": 0.7760835886001587,
+          "lpips": 0.1802971214056015,
+          "psnr_unobs": 11.020875951222509
+        },
+        {
+          "idx": 6,
+          "psnr": 21.036113739013672,
+          "ssim": 0.813447117805481,
+          "lpips": 0.14228105545043945,
+          "psnr_unobs": 15.015519674613051
+        },
+        {
+          "idx": 7,
+          "psnr": 24.583463668823242,
+          "ssim": 0.8409838080406189,
+          "lpips": 0.1328873187303543,
+          "psnr_unobs": 18.562875730861236
+        }
+      ]
+    }
+  ],
+  "n": 36
+}

@@ -91,9 +91,17 @@ def main(args):
 
     logger.info(f"Config: {config}")
     model = config_utils.instantiate_from_config(config.model).to(device)
-    ema = copy.deepcopy(model).to(device)
-    for param in ema.parameters():
+
+    # Dual EMA: short (half-life ~1 epoch) and medium (half-life ~5 epochs)
+    ema_short_decay = float(getattr(config.train, "ema_short_decay", 0.99994455))
+    ema_medium_decay = float(getattr(config.train, "ema_medium_decay", 0.99998891))
+    ema_short = copy.deepcopy(model).to(device)
+    ema_medium = copy.deepcopy(model).to(device)
+    for param in ema_short.parameters():
         param.requires_grad = False
+    for param in ema_medium.parameters():
+        param.requires_grad = False
+    logger.info(f"Dual EMA: short decay={ema_short_decay}, medium decay={ema_medium_decay}")
 
     logger.info(f"Num of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
 
@@ -123,14 +131,22 @@ def main(args):
     if args.resume is not None:
         ckpt = torch.load(args.resume, map_location="cpu", weights_only=False)
         model.module.load_state_dict(ckpt["model"], strict=True)
-        ema.load_state_dict(ckpt["ema"], strict=True)
+        # Load dual EMA (fall back to single "ema" key for old checkpoints)
+        if "ema_short" in ckpt:
+            ema_short.load_state_dict(ckpt["ema_short"], strict=True)
+            ema_medium.load_state_dict(ckpt["ema_medium"], strict=True)
+        elif "ema" in ckpt:
+            ema_short.load_state_dict(ckpt["ema"], strict=True)
+            ema_medium.load_state_dict(ckpt["ema"], strict=True)
+            logger.info("Loaded old single EMA into both ema_short and ema_medium")
         optimizer.load_state_dict(ckpt["opt"])
         global_step = ckpt["global_step"]
         first_epoch = ckpt["epoch"]
         logger.info(f"***** Resumed from {args.resume} at step {global_step}, epoch {first_epoch} *****")
     else:
         # Prepare models for training:
-        update_ema(ema, model.module, decay=0)
+        update_ema(ema_short, model.module, decay=0)
+        update_ema(ema_medium, model.module, decay=0)
 
     warmup_steps = int(getattr(config.train, "warmup_steps", 0))
 
@@ -154,7 +170,8 @@ def main(args):
 
     logger.info(f"***** Running training ***** Total steps: {total_steps}")
     model.train()
-    ema.eval()
+    ema_short.eval()
+    ema_medium.eval()
 
     # Calculate how many steps to skip in the resumed epoch
     steps_per_epoch = len(data_loader)
@@ -162,6 +179,8 @@ def main(args):
 
     for epoch in range(first_epoch, config.train.epochs):
         sampler.set_epoch(epoch)
+        epoch_loss_sum = 0.0
+        epoch_loss_count = 0
         for step, batch in enumerate(data_loader):
             if skip_steps > 0:
                 skip_steps -= 1
@@ -195,7 +214,11 @@ def main(args):
             loss.backward()
             grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
-            update_ema(ema, model.module)
+            update_ema(ema_short, model.module, decay=ema_short_decay)
+            update_ema(ema_medium, model.module, decay=ema_medium_decay)
+
+            epoch_loss_sum += loss.item()
+            epoch_loss_count += 1
 
             if global_step % args.logging_steps == 0:
                 logger.info(f"Epoch: {epoch}, Step: {step}, Loss: {loss.item()}, Grad Norm: {grad_norm.item()}, LR: {lr:.6f}")
@@ -205,7 +228,9 @@ def main(args):
                     torch.save(
                         {
                             "model": model.module.state_dict(),
-                            "ema": ema.state_dict(),
+                            "ema": ema_short.state_dict(),
+                            "ema_short": ema_short.state_dict(),
+                            "ema_medium": ema_medium.state_dict(),
                             "opt": optimizer.state_dict(),
                             "args": args,
                             "global_step": global_step,
@@ -217,20 +242,26 @@ def main(args):
 
             global_step += 1
 
+        # Log epoch average loss
+        if epoch_loss_count > 0:
+            avg_loss = epoch_loss_sum / epoch_loss_count
+            logger.info(f"[Epoch {epoch}] Average Loss: {avg_loss:.6f} ({epoch_loss_count} steps)")
+
         # End-of-epoch: checkpoint and validation
-        # Save epoch+1 so resume starts from the next epoch, not re-entering this one
+        ckpt_dict = {
+            "model": model.module.state_dict(),
+            "ema": ema_short.state_dict(),
+            "ema_short": ema_short.state_dict(),
+            "ema_medium": ema_medium.state_dict(),
+            "opt": optimizer.state_dict(),
+            "args": args,
+            "global_step": global_step,
+            "epoch": epoch + 1,
+        }
+
         if checkpoint_every_n_epochs > 0 and (epoch + 1) % checkpoint_every_n_epochs == 0:
             if rank == 0:
-                torch.save(
-                    {
-                        "model": model.module.state_dict(),
-                        "ema": ema.state_dict(),
-                        "opt": optimizer.state_dict(),
-                        "args": args,
-                        "global_step": global_step,
-                        "epoch": epoch + 1,
-                    },
-                    os.path.join(args.output_dir, f"model_epoch{epoch + 1}.pt"))
+                torch.save(ckpt_dict, os.path.join(args.output_dir, f"model_epoch{epoch + 1}.pt"))
                 logger.info(f"Epoch checkpoint saved at epoch {epoch + 1}")
             dist.barrier()
 
@@ -238,7 +269,7 @@ def main(args):
             if rank == 0 and evaluator is not None:
                 val_save_dir = os.path.join(args.output_dir, f"val_epoch{epoch + 1}")
                 evaluator.compute_metrics(
-                    ema, epoch + 1, logger=logger, save_dir=val_save_dir,
+                    ema_short, epoch + 1, logger=logger, save_dir=val_save_dir,
                 )
             dist.barrier(device_ids=[local_rank])
             model.train()
@@ -248,7 +279,9 @@ def main(args):
         torch.save(
             {
                 "model": model.module.state_dict(),
-                "ema": ema.state_dict(),
+                "ema": ema_short.state_dict(),
+                "ema_short": ema_short.state_dict(),
+                "ema_medium": ema_medium.state_dict(),
                 "opt": optimizer.state_dict(),
                 "args": args,
                 "global_step": global_step,

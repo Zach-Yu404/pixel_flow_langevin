@@ -1,0 +1,13 @@
+{
+  "name": "3_T012_LO_LO_LO_HI_F1",
+  "rationale": "W1-equivalent perceptual, 25% faster (stage-3 stays HI since it's free to skip). Best 'free efficiency' variant.",
+  "kw": {
+    "h_epsilon": [
+      0.001,
+      0.001,
+      0.001,
+      0.01
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

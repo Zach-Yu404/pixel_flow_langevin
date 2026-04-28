@@ -21,6 +21,8 @@ def main():
     p.add_argument("--guidance_scale", type=float, default=1.0)
     p.add_argument("--num_inference_steps", type=int, default=10)
     p.add_argument("--out_dir", default=None)
+    p.add_argument("--ema", default="ema_short", choices=["ema_short", "ema_medium", "ema", "model"],
+                   help="Which weights to load: ema_short, ema_medium, ema (legacy), or model")
     args = p.parse_args()
 
     device = torch.device(f"cuda:{args.gpu}")
@@ -30,7 +32,17 @@ def main():
     config = OmegaConf.load(args.config)
     model = config_utils.instantiate_from_config(config.model).to(device)
     ckpt = torch.load(args.ckpt, map_location="cpu", weights_only=False)
-    state = ckpt["ema"] if isinstance(ckpt, dict) and "ema" in ckpt else (ckpt["model"] if isinstance(ckpt, dict) and "model" in ckpt else ckpt)
+    if isinstance(ckpt, dict):
+        # Priority: requested key -> ema_short -> ema -> model
+        for key in [args.ema, "ema_short", "ema", "model"]:
+            if key in ckpt:
+                state = ckpt[key]
+                print(f"Loading weights from key '{key}'")
+                break
+        else:
+            state = ckpt
+    else:
+        state = ckpt
     model.load_state_dict(state, strict=True)
     model.eval()
     print(f"[{args.ckpt}] loaded on GPU {args.gpu}")

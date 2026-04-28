@@ -1,0 +1,7 @@
+{
+  "name": "0_ref_baseline_F1",
+  "rationale": "Reference: no eps tempering, only terminal replacement (free data consistency)",
+  "kw": {
+    "terminal_replace_weight": 1.0
+  }
+}

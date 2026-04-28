@@ -1,0 +1,4945 @@
+{
+  "total": 167,
+  "winners_by_balanced": [
+    "F_cfg20_lr150_hxu02",
+    "F_cfg25_lr200_L7",
+    "C_L5",
+    "P_lreg_300",
+    "P_hxu_02",
+    "P_lreg_150",
+    "C_L10",
+    "P_lreg_75",
+    "N_cfg2",
+    "A_he1e-3",
+    "N_L_5510",
+    "F_cfg20_lr300",
+    "A_he2e-3",
+    "C_L15",
+    "P_cfg_25"
+  ],
+  "winners_by_lpips": [
+    "F_cfg20_lr150_hxu02",
+    "P_hxu_06",
+    "C_L10",
+    "F_cfg25_lr200_L7",
+    "P_hxu_04",
+    "C_L5",
+    "P_hxu_02",
+    "P_lreg_300",
+    "G_hx_uni3",
+    "P_lreg_150",
+    "C_L15",
+    "P_lreg_75",
+    "N_cfg2",
+    "A_he1e-3",
+    "N_L_5510"
+  ],
+  "winners_by_psnr": [
+    "I_ref_F1",
+    "A_he1e-2",
+    "B_he_dec",
+    "H_resetEps",
+    "B_he_s3vlow",
+    "B_he_s3low",
+    "B_he_v",
+    "A_he5e-2",
+    "A_he5e-3",
+    "B_he_dec_steep",
+    "N_he_dec_L5",
+    "Q_cfg2_he5e-3",
+    "A_he2e-3",
+    "P_he_5e-3",
+    "A_he1e-1"
+  ],
+  "all_rows": [
+    {
+      "name": "F_cfg20_lr150_hxu02",
+      "kw": {
+        "h_x": 0.2,
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 150.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.18059539794922,
+      "ssim": 0.8439858555793762,
+      "lpips": 0.12000110000371933,
+      "psnr_unobs": 11.15999723848755,
+      "hf": 0.6417147751051371,
+      "dhf": 0.010282961562252613,
+      "time": 257.1766257286072,
+      "source": "exploration_v3_final",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg20_lr150_hxu02.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg20_lr150_hxu02.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg20_lr150_hxu02.png",
+      "balanced": 0.12000110000371933
+    },
+    {
+      "name": "F_cfg25_lr200_L7",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 7,
+        "lambda_reg": 200.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.5
+      },
+      "psnr": 17.805524826049805,
+      "ssim": 0.8477868437767029,
+      "lpips": 0.12668514624238014,
+      "psnr_unobs": 11.78492722059487,
+      "hf": 0.617936660074968,
+      "dhf": 0.034061076592421746,
+      "time": 312.6437928676605,
+      "source": "exploration_v3_final",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_lr200_L7.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_lr200_L7.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_lr200_L7.png",
+      "balanced": 0.12668514624238014
+    },
+    {
+      "name": "C_L5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": 5
+      },
+      "psnr": 17.50876474380493,
+      "ssim": 0.8437568247318268,
+      "lpips": 0.12946692481637,
+      "psnr_unobs": 11.48816743050142,
+      "hf": 0.6441257037126794,
+      "dhf": 0.010997815458736016,
+      "time": 153.96269488334656,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L5.png",
+      "balanced": 0.12946692481637
+    },
+    {
+      "name": "P_lreg_300",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 300.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.59602403640747,
+      "ssim": 0.8288799822330475,
+      "lpips": 0.13281040638685226,
+      "psnr_unobs": 11.575427060011787,
+      "hf": 0.6295900497109541,
+      "dhf": 0.0347551034210849,
+      "time": 254.0710678100586,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lreg_300.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lreg_300.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lreg_300.png",
+      "balanced": 0.13281040638685226
+    },
+    {
+      "name": "P_hxu_02",
+      "kw": {
+        "h_x": 0.2,
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.378077507019043,
+      "ssim": 0.8480291962623596,
+      "lpips": 0.12975457310676575,
+      "psnr_unobs": 11.357480601632844,
+      "hf": 0.6819371170533555,
+      "dhf": 0.05622982772849894,
+      "time": 277.059800863266,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_02.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_02.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_02.png",
+      "balanced": 0.13286948697101522
+    },
+    {
+      "name": "P_lreg_150",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 150.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.552842140197754,
+      "ssim": 0.8310989439487457,
+      "lpips": 0.1329030878841877,
+      "psnr_unobs": 11.532243863540815,
+      "hf": 0.6354726989328353,
+      "dhf": 0.0288724541992037,
+      "time": 255.26262712478638,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lreg_150.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lreg_150.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lreg_150.png",
+      "balanced": 0.1329030878841877
+    },
+    {
+      "name": "C_L10",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": 10
+      },
+      "psnr": 16.595098972320557,
+      "ssim": 0.8508281111717224,
+      "lpips": 0.1252407170832157,
+      "psnr_unobs": 10.574501440428861,
+      "hf": 0.695964490335117,
+      "dhf": 0.040840971163701556,
+      "time": 259.915673494339,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L10.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L10.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L10.png",
+      "balanced": 0.1333387376368046
+    },
+    {
+      "name": "P_lreg_75",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 75.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.513655185699463,
+      "ssim": 0.832223653793335,
+      "lpips": 0.13349884003400803,
+      "psnr_unobs": 11.49305757461024,
+      "hf": 0.6438819978394609,
+      "dhf": 0.02046315529257814,
+      "time": 277.3463099002838,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lreg_75.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lreg_75.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lreg_75.png",
+      "balanced": 0.13349884003400803
+    },
+    {
+      "name": "N_cfg2",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 18.2939190864563,
+      "ssim": 0.8504328429698944,
+      "lpips": 0.13393153250217438,
+      "psnr_unobs": 12.27332166010909,
+      "hf": 0.6766820786419225,
+      "dhf": 0.016527153798632344,
+      "time": 246.6741907596588,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_cfg2.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_cfg2.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_cfg2.png",
+      "balanced": 0.13393153250217438
+    },
+    {
+      "name": "A_he1e-3",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": 10
+      },
+      "psnr": 18.375842094421387,
+      "ssim": 0.8722242712974548,
+      "lpips": 0.13449101150035858,
+      "psnr_unobs": 12.355245682495116,
+      "hf": 0.6886589584281021,
+      "dhf": 0.04381484908708111,
+      "time": 291.9281759262085,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-3.png",
+      "balanced": 0.13449101150035858
+    },
+    {
+      "name": "N_L_5510",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": [
+          5,
+          5,
+          5,
+          10
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.46826982498169,
+      "ssim": 0.8473779261112213,
+      "lpips": 0.1350325495004654,
+      "psnr_unobs": 11.447673036955152,
+      "hf": 0.6511826839737591,
+      "dhf": 0.01722330622175039,
+      "time": 219.29186034202576,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_L_5510.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_L_5510.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_L_5510.png",
+      "balanced": 0.1350325495004654
+    },
+    {
+      "name": "F_cfg20_lr300",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 300.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.6959285736084,
+      "ssim": 0.8325740396976471,
+      "lpips": 0.1351018324494362,
+      "psnr_unobs": 11.675330514137173,
+      "hf": 0.6248077774370776,
+      "dhf": 0.03012079102531995,
+      "time": 268.3731391429901,
+      "source": "exploration_v3_final",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg20_lr300.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg20_lr300.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg20_lr300.png",
+      "balanced": 0.1351018324494362
+    },
+    {
+      "name": "A_he2e-3",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.002,
+        "num_langevin": 10
+      },
+      "psnr": 19.200501918792725,
+      "ssim": 0.8758214116096497,
+      "lpips": 0.1352420225739479,
+      "psnr_unobs": 13.179907105278115,
+      "hf": 0.6848668710298748,
+      "dhf": 0.04002276168885377,
+      "time": 267.60011649131775,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he2e-3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he2e-3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he2e-3.png",
+      "balanced": 0.1352420225739479
+    },
+    {
+      "name": "C_L15",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": 15
+      },
+      "psnr": 16.86618995666504,
+      "ssim": 0.8537675440311432,
+      "lpips": 0.13299240171909332,
+      "psnr_unobs": 10.845592010136507,
+      "hf": 0.6982696527991472,
+      "dhf": 0.043146133627731786,
+      "time": 398.5037360191345,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L15.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L15.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L15.png",
+      "balanced": 0.13566860258579255
+    },
+    {
+      "name": "P_cfg_25",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.5
+      },
+      "psnr": 17.29607582092285,
+      "ssim": 0.8314251005649567,
+      "lpips": 0.13572581112384796,
+      "psnr_unobs": 11.275478490768275,
+      "hf": 0.6610508670325704,
+      "dhf": 0.0032942860994685796,
+      "time": 280.6850519180298,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_25.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_25.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_25.png",
+      "balanced": 0.13572581112384796
+    },
+    {
+      "name": "F_anchor_N_cfg2",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 18.90959072113037,
+      "ssim": 0.8531717658042908,
+      "lpips": 0.13599320501089096,
+      "psnr_unobs": 12.88899458070828,
+      "hf": 0.6412531066740641,
+      "dhf": 0.016936080263169284,
+      "time": 275.6727499961853,
+      "source": "exploration_v3_final",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_anchor_N_cfg2.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_anchor_N_cfg2.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_anchor_N_cfg2.png",
+      "balanced": 0.13599320501089096
+    },
+    {
+      "name": "G_hx_uni3",
+      "kw": {
+        "h_x": 0.3,
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 16.828696250915527,
+      "ssim": 0.8444121479988098,
+      "lpips": 0.13284513726830482,
+      "psnr_unobs": 10.808097703660849,
+      "hf": 0.6525079440043364,
+      "dhf": 0.007117436059374649,
+      "time": 158.85088086128235,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/G_hx_uni3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/G_hx_uni3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/G_hx_uni3.png",
+      "balanced": 0.13627121224999428
+    },
+    {
+      "name": "F_anchor_C_L5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 18.94152593612671,
+      "ssim": 0.8531148433685303,
+      "lpips": 0.13645927608013153,
+      "psnr_unobs": 12.920929595540539,
+      "hf": 0.6336573713605034,
+      "dhf": 0.02453181557673001,
+      "time": 160.53131222724915,
+      "source": "exploration_v3_final",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_anchor_C_L5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_anchor_C_L5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_anchor_C_L5.png",
+      "balanced": 0.13645927608013153
+    },
+    {
+      "name": "P_cfg_15",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 1.5
+      },
+      "psnr": 17.543660640716553,
+      "ssim": 0.8337424695491791,
+      "lpips": 0.1365724727511406,
+      "psnr_unobs": 11.523064333989932,
+      "hf": 0.6503129103359784,
+      "dhf": 0.014032242796060634,
+      "time": 269.75014996528625,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_15.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_15.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_15.png",
+      "balanced": 0.1365724727511406
+    },
+    {
+      "name": "F_cfg20_lr150",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 150.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.58862590789795,
+      "ssim": 0.8344923853874207,
+      "lpips": 0.1368357315659523,
+      "psnr_unobs": 11.568028223640955,
+      "hf": 0.6306171718198759,
+      "dhf": 0.024311396642521688,
+      "time": 274.2831676006317,
+      "source": "exploration_v3_final",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg20_lr150.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg20_lr150.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg20_lr150.png",
+      "balanced": 0.1368357315659523
+    },
+    {
+      "name": "P_cfg_10",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 1.0
+      },
+      "psnr": 17.61759853363037,
+      "ssim": 0.8348362147808075,
+      "lpips": 0.13804294914007187,
+      "psnr_unobs": 11.597001543708474,
+      "hf": 0.6467912576880617,
+      "dhf": 0.01755389544397734,
+      "time": 257.20156359672546,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_10.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_10.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_10.png",
+      "balanced": 0.13804294914007187
+    },
+    {
+      "name": "P_cfg_0",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 0.0
+      },
+      "psnr": 17.61759853363037,
+      "ssim": 0.8348361551761627,
+      "lpips": 0.13804295659065247,
+      "psnr_unobs": 11.597001932336205,
+      "hf": 0.646791281522702,
+      "dhf": 0.01755387160933697,
+      "time": 159.5570466518402,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_0.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_0.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_0.png",
+      "balanced": 0.13804295659065247
+    },
+    {
+      "name": "N_L_3_5_5_10",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": [
+          3,
+          5,
+          5,
+          10
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.70729160308838,
+      "ssim": 0.8480626046657562,
+      "lpips": 0.13834968209266663,
+      "psnr_unobs": 11.686695037293042,
+      "hf": 0.6489041850798785,
+      "dhf": 0.019501805115631043,
+      "time": 218.41468811035156,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_L_3_5_5_10.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_L_3_5_5_10.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_L_3_5_5_10.png",
+      "balanced": 0.13834968209266663
+    },
+    {
+      "name": "F_anchor_P_cfg25",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.5
+      },
+      "psnr": 17.501197814941406,
+      "ssim": 0.8333372175693512,
+      "lpips": 0.13877900689840317,
+      "psnr_unobs": 11.48060021490468,
+      "hf": 0.6478107796178376,
+      "dhf": 0.02559995957927874,
+      "time": 279.20465874671936,
+      "source": "exploration_v3_final",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_anchor_P_cfg25.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_anchor_P_cfg25.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_anchor_P_cfg25.png",
+      "balanced": 0.13877900689840317
+    },
+    {
+      "name": "A_he5e-3",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.005,
+        "num_langevin": 10
+      },
+      "psnr": 19.94435977935791,
+      "ssim": 0.8818149864673615,
+      "lpips": 0.13944582641124725,
+      "psnr_unobs": 13.923765051460233,
+      "hf": 0.6834084858792322,
+      "dhf": 0.03856437653821121,
+      "time": 282.5656626224518,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he5e-3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he5e-3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he5e-3.png",
+      "balanced": 0.13944582641124725
+    },
+    {
+      "name": "N_he_inc_n01",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": [
+          0.001,
+          0.001,
+          0.002,
+          0.005
+        ],
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.1,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.717313766479492,
+      "ssim": 0.8354929685592651,
+      "lpips": 0.14038289338350296,
+      "psnr_unobs": 11.696715415928852,
+      "hf": 0.6180784114435545,
+      "dhf": 0.05032757875195504,
+      "time": 149.77181887626648,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_he_inc_n01.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_he_inc_n01.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_he_inc_n01.png",
+      "balanced": 0.14054668275948048
+    },
+    {
+      "name": "N_cfg2_n01",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.1,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 18.284335136413574,
+      "ssim": 0.8376763761043549,
+      "lpips": 0.14163656532764435,
+      "psnr_unobs": 12.263738665763865,
+      "hf": 0.6757315760299633,
+      "dhf": 0.015576651186673063,
+      "time": 258.5060863494873,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_cfg2_n01.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_cfg2_n01.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_cfg2_n01.png",
+      "balanced": 0.14163656532764435
+    },
+    {
+      "name": "P_cfg_05",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 0.5
+      },
+      "psnr": 17.65730381011963,
+      "ssim": 0.8363810479640961,
+      "lpips": 0.14183156192302704,
+      "psnr_unobs": 11.63670677701414,
+      "hf": 0.6429863164504545,
+      "dhf": 0.02135883668158456,
+      "time": 282.4124927520752,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_05.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_05.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_05.png",
+      "balanced": 0.14183156192302704
+    },
+    {
+      "name": "N_wls",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "x1_init_mode": "wls"
+      },
+      "psnr": 18.013437747955322,
+      "ssim": 0.844838559627533,
+      "lpips": 0.14303430169820786,
+      "psnr_unobs": 11.992841414838622,
+      "hf": 0.6737975774672953,
+      "dhf": 0.013642652624005103,
+      "time": 129.58247542381287,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_wls.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_wls.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_wls.png",
+      "balanced": 0.14303430169820786
+    },
+    {
+      "name": "P_lp_100",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "lambda_prox": 100.0
+      },
+      "psnr": 17.24166965484619,
+      "ssim": 0.8333098590373993,
+      "lpips": 0.14317598193883896,
+      "psnr_unobs": 11.221071567941886,
+      "hf": 0.6740433979907294,
+      "dhf": 0.02618072005146277,
+      "time": 258.3301365375519,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_100.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_100.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_100.png",
+      "balanced": 0.14317598193883896
+    },
+    {
+      "name": "G_hx_hi",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          1.0
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.805851936340332,
+      "ssim": 0.8442197442054749,
+      "lpips": 0.14331526309251785,
+      "psnr_unobs": 11.78525424864823,
+      "hf": 0.6100860356700324,
+      "dhf": 0.049539344393678686,
+      "time": 145.59970450401306,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/G_hx_hi.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/G_hx_hi.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/G_hx_hi.png",
+      "balanced": 0.14331526309251785
+    },
+    {
+      "name": "B_he_w1+s3vlow",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": [
+          0.001,
+          0.001,
+          0.001,
+          1e-05
+        ],
+        "num_langevin": 10
+      },
+      "psnr": 17.89538860321045,
+      "ssim": 0.8375439345836639,
+      "lpips": 0.14335885643959045,
+      "psnr_unobs": 11.874790038951506,
+      "hf": 0.666135313354641,
+      "dhf": 0.019199351240365647,
+      "time": 262.2772011756897,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_w1+s3vlow.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_w1+s3vlow.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_w1+s3vlow.png",
+      "balanced": 0.14335885643959045
+    },
+    {
+      "name": "N_n01_lr100_hx05",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.5
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 100.0,
+        "noise_scale": 0.1,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 18.56185483932495,
+      "ssim": 0.8416411280632019,
+      "lpips": 0.14446281641721725,
+      "psnr_unobs": 12.541258581639667,
+      "hf": 0.650549477028245,
+      "dhf": 0.009605447815045243,
+      "time": 143.1609241962433,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_lr100_hx05.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_lr100_hx05.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_lr100_hx05.png",
+      "balanced": 0.14446281641721725
+    },
+    {
+      "name": "P_cfg_30",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 3.0
+      },
+      "psnr": 17.049935340881348,
+      "ssim": 0.8269765973091125,
+      "lpips": 0.14475961029529572,
+      "psnr_unobs": 11.029338057463308,
+      "hf": 0.6508948978330872,
+      "dhf": 0.0030322198938205203,
+      "time": 263.4916121959686,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_30.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_30.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_30.png",
+      "balanced": 0.14475961029529572
+    },
+    {
+      "name": "G_hx_late2",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.3,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.692946434020996,
+      "ssim": 0.8422336280345917,
+      "lpips": 0.1454487070441246,
+      "psnr_unobs": 11.672348650883553,
+      "hf": 0.6173120833742693,
+      "dhf": 0.042313296689441726,
+      "time": 156.3514542579651,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/G_hx_late2.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/G_hx_late2.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/G_hx_late2.png",
+      "balanced": 0.1454487070441246
+    },
+    {
+      "name": "Q_cfg3_L10",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 10,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 3.0
+      },
+      "psnr": 17.498175621032715,
+      "ssim": 0.8259037733078003,
+      "lpips": 0.14582125842571259,
+      "psnr_unobs": 11.477578280882671,
+      "hf": 0.6920204891266266,
+      "dhf": 0.006523181857571281,
+      "time": 489.50640392303467,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg3_L10.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg3_L10.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg3_L10.png",
+      "balanced": 0.14582125842571259
+    },
+    {
+      "name": "A_he1e-2",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.01,
+        "num_langevin": 10
+      },
+      "psnr": 20.703035354614258,
+      "ssim": 0.8900763988494873,
+      "lpips": 0.1458674520254135,
+      "psnr_unobs": 14.682441177684217,
+      "hf": 0.6871298148126888,
+      "dhf": 0.04228570547166777,
+      "time": 289.226683139801,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-2.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-2.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-2.png",
+      "balanced": 0.1458674520254135
+    },
+    {
+      "name": "P_lp_20",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "lambda_prox": 20.0
+      },
+      "psnr": 17.405245304107666,
+      "ssim": 0.8310067355632782,
+      "lpips": 0.14647198468446732,
+      "psnr_unobs": 11.384648101168096,
+      "hf": 0.6464968263389359,
+      "dhf": 0.0013658516003307586,
+      "time": 284.7798113822937,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_20.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_20.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_20.png",
+      "balanced": 0.14647198468446732
+    },
+    {
+      "name": "C_L20",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": 20
+      },
+      "psnr": 17.255657196044922,
+      "ssim": 0.8556048274040222,
+      "lpips": 0.14183758199214935,
+      "psnr_unobs": 11.235059257999827,
+      "hf": 0.7159099516941354,
+      "dhf": 0.06078643252271998,
+      "time": 507.34460639953613,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L20.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L20.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L20.png",
+      "balanced": 0.14723079825350935
+    },
+    {
+      "name": "N_he_dec_L5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": [
+          0.005,
+          0.002,
+          0.001,
+          0.001
+        ],
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 19.56544303894043,
+      "ssim": 0.8658111691474915,
+      "lpips": 0.14732572436332703,
+      "psnr_unobs": 13.544847331911804,
+      "hf": 0.6470560805420407,
+      "dhf": 0.013098844301249524,
+      "time": 139.53443837165833,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_he_dec_L5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_he_dec_L5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_he_dec_L5.png",
+      "balanced": 0.14732572436332703
+    },
+    {
+      "name": "Q_cfg2_L10",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 10,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.672645568847656,
+      "ssim": 0.8286347985267639,
+      "lpips": 0.14780546724796295,
+      "psnr_unobs": 11.652048202619286,
+      "hf": 0.6753463802510475,
+      "dhf": 0.010150927018007794,
+      "time": 456.7421021461487,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_L10.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_L10.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_L10.png",
+      "balanced": 0.14780546724796295
+    },
+    {
+      "name": "P_cfg_40",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 4.0
+      },
+      "psnr": 16.769903659820557,
+      "ssim": 0.8229287564754486,
+      "lpips": 0.14342506229877472,
+      "psnr_unobs": 10.749305898007181,
+      "hf": 0.6567382387199177,
+      "dhf": 0.008875560780650993,
+      "time": 270.2597918510437,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_40.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_40.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_40.png",
+      "balanced": 0.1480269891023636
+    },
+    {
+      "name": "P_lp_5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "lambda_prox": 5.0
+      },
+      "psnr": 17.409876823425293,
+      "ssim": 0.8298715353012085,
+      "lpips": 0.14809761196374893,
+      "psnr_unobs": 11.389279169565073,
+      "hf": 0.6418680783823913,
+      "dhf": 0.005994599556875313,
+      "time": 281.05035042762756,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_5.png",
+      "balanced": 0.14809761196374893
+    },
+    {
+      "name": "P_lp_2",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "lambda_prox": 2.0
+      },
+      "psnr": 17.40871810913086,
+      "ssim": 0.8296971321105957,
+      "lpips": 0.14838222414255142,
+      "psnr_unobs": 11.388120279290701,
+      "hf": 0.6410540932000601,
+      "dhf": 0.006808584739206536,
+      "time": 264.2611026763916,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_2.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_2.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_2.png",
+      "balanced": 0.14838222414255142
+    },
+    {
+      "name": "P_lp_005",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "lambda_prox": 0.05
+      },
+      "psnr": 17.40804672241211,
+      "ssim": 0.8295833468437195,
+      "lpips": 0.14862172305583954,
+      "psnr_unobs": 11.387449018061067,
+      "hf": 0.6405304560626104,
+      "dhf": 0.007332221876656275,
+      "time": 279.5274543762207,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_005.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_005.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lp_005.png",
+      "balanced": 0.14862172305583954
+    },
+    {
+      "name": "P_lx_0001",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "lambda_x": 0.001
+      },
+      "psnr": 17.40803575515747,
+      "ssim": 0.8295806050300598,
+      "lpips": 0.14862795174121857,
+      "psnr_unobs": 11.387437420912583,
+      "hf": 0.6405168064949326,
+      "dhf": 0.007345871444334073,
+      "time": 271.4544632434845,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_0001.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_0001.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_0001.png",
+      "balanced": 0.14862795174121857
+    },
+    {
+      "name": "P_lx_005",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "lambda_x": 0.05
+      },
+      "psnr": 17.40803575515747,
+      "ssim": 0.8295806050300598,
+      "lpips": 0.14862795174121857,
+      "psnr_unobs": 11.387437420912583,
+      "hf": 0.6405168064949326,
+      "dhf": 0.007345871444334073,
+      "time": 279.0158591270447,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_005.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_005.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_005.png",
+      "balanced": 0.14862795174121857
+    },
+    {
+      "name": "P_hxu_04",
+      "kw": {
+        "h_x": 0.4,
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 16.452610969543457,
+      "ssim": 0.8452323079109192,
+      "lpips": 0.1274772360920906,
+      "psnr_unobs": 10.432013268563786,
+      "hf": 0.6967509411143351,
+      "dhf": 0.07104365178947858,
+      "time": 255.44009828567505,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_04.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_04.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_04.png",
+      "balanced": 0.14894684259596075
+    },
+    {
+      "name": "P_L8",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 8,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 18.157410621643066,
+      "ssim": 0.8535749316215515,
+      "lpips": 0.13930638879537582,
+      "psnr_unobs": 12.136815098977129,
+      "hf": 0.695412485121323,
+      "dhf": 0.0697051957964665,
+      "time": 409.0487132072449,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_L8.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_L8.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_L8.png",
+      "balanced": 0.14915898669360908
+    },
+    {
+      "name": "Q_cfg2_L7",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 7,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.501017093658447,
+      "ssim": 0.8256669044494629,
+      "lpips": 0.15029160678386688,
+      "psnr_unobs": 11.480418931826836,
+      "hf": 0.6513210163633496,
+      "dhf": 0.03417629090570573,
+      "time": 356.73037004470825,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_L7.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_L7.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_L7.png",
+      "balanced": 0.15029160678386688
+    },
+    {
+      "name": "F_anchor_lreg300",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 300.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.95127010345459,
+      "ssim": 0.8256458938121796,
+      "lpips": 0.1435365229845047,
+      "psnr_unobs": 11.930673308266881,
+      "hf": 0.608486423367115,
+      "dhf": 0.06492431583000136,
+      "time": 147.57418632507324,
+      "source": "exploration_v3_final",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_anchor_lreg300.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_anchor_lreg300.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_anchor_lreg300.png",
+      "balanced": 0.15099868089950538
+    },
+    {
+      "name": "P_hxu_06",
+      "kw": {
+        "h_x": 0.6,
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 15.652101516723633,
+      "ssim": 0.8378115296363831,
+      "lpips": 0.12380023673176765,
+      "psnr_unobs": 9.631502333368005,
+      "hf": 0.7152878173954815,
+      "dhf": 0.050942664263442516,
+      "time": 260.5171117782593,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_06.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_06.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_06.png",
+      "balanced": 0.15122953852901627
+    },
+    {
+      "name": "G_hx_lo",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.4
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.968134880065918,
+      "ssim": 0.8439414501190186,
+      "lpips": 0.14156828820705414,
+      "psnr_unobs": 11.947537283956851,
+      "hf": 0.5894425475956184,
+      "dhf": 0.07018283246809265,
+      "time": 142.61652898788452,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/G_hx_lo.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/G_hx_lo.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/G_hx_lo.png",
+      "balanced": 0.15165970444110047
+    },
+    {
+      "name": "P_hx_s3_00",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.0
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 18.09663152694702,
+      "ssim": 0.8279395401477814,
+      "lpips": 0.15227537602186203,
+      "psnr_unobs": 12.076035312349642,
+      "hf": 0.6520349560643433,
+      "dhf": 0.02632766673948672,
+      "time": 276.3454668521881,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_00.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_00.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_00.png",
+      "balanced": 0.15227537602186203
+    },
+    {
+      "name": "F_lr100_C5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 100.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.98928451538086,
+      "ssim": 0.844143271446228,
+      "lpips": 0.1408196985721588,
+      "psnr_unobs": 11.96868846352227,
+      "hf": 0.5855673902701987,
+      "dhf": 0.07405798979351241,
+      "time": 157.14496231079102,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/F_lr100_C5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/F_lr100_C5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/F_lr100_C5.png",
+      "balanced": 0.15284869346891503
+    },
+    {
+      "name": "P_L7",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 7,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.313651084899902,
+      "ssim": 0.8151989579200745,
+      "lpips": 0.15351277589797974,
+      "psnr_unobs": 11.293054223182818,
+      "hf": 0.6176929510927686,
+      "dhf": 0.03895567572404368,
+      "time": 373.12339544296265,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_L7.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_L7.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_L7.png",
+      "balanced": 0.15351277589797974
+    },
+    {
+      "name": "P_hxu_01",
+      "kw": {
+        "h_x": 0.1,
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 18.11658763885498,
+      "ssim": 0.8306782245635986,
+      "lpips": 0.155082106590271,
+      "psnr_unobs": 12.095989845755517,
+      "hf": 0.6514327463017751,
+      "dhf": 0.025725456976918526,
+      "time": 276.84297585487366,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_01.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_01.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_01.png",
+      "balanced": 0.155082106590271
+    },
+    {
+      "name": "F_lr200_C5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 200.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 18.03223705291748,
+      "ssim": 0.842968225479126,
+      "lpips": 0.1399017870426178,
+      "psnr_unobs": 12.011639790239938,
+      "hf": 0.5780172585474165,
+      "dhf": 0.0816081215162946,
+      "time": 146.62335395812988,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/F_lr200_C5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/F_lr200_C5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/F_lr200_C5.png",
+      "balanced": 0.1557058478007651
+    },
+    {
+      "name": "M_C10_repeat",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 10,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.73570156097412,
+      "ssim": 0.8306120336055756,
+      "lpips": 0.15659070014953613,
+      "psnr_unobs": 11.715102947706786,
+      "hf": 0.6411353384684448,
+      "dhf": 0.027283850830190248,
+      "time": 274.1913402080536,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/M_C10_repeat.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/M_C10_repeat.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/M_C10_repeat.png",
+      "balanced": 0.15659070014953613
+    },
+    {
+      "name": "P_ode_12",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "ode_steps_per_stage": 12
+      },
+      "psnr": 17.440364837646484,
+      "ssim": 0.8230940699577332,
+      "lpips": 0.15516312420368195,
+      "psnr_unobs": 11.419765544887728,
+      "hf": 0.623635294154093,
+      "dhf": 0.05321187709870667,
+      "time": 314.9549889564514,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_ode_12.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_ode_12.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_ode_12.png",
+      "balanced": 0.1567690627530353
+    },
+    {
+      "name": "N_n03_lr100_ode15",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 100.0,
+        "noise_scale": 0.3,
+        "terminal_replace_weight": 1.0,
+        "ode_steps_per_stage": [
+          10,
+          10,
+          10,
+          15
+        ]
+      },
+      "psnr": 18.281545639038086,
+      "ssim": 0.812305212020874,
+      "lpips": 0.1568465754389763,
+      "psnr_unobs": 12.260950324488201,
+      "hf": 0.6644784795739979,
+      "dhf": 0.004323554730707668,
+      "time": 173.12894463539124,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n03_lr100_ode15.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n03_lr100_ode15.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n03_lr100_ode15.png",
+      "balanced": 0.1568465754389763
+    },
+    {
+      "name": "P_hx_s3_02",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.2
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 18.121696949005127,
+      "ssim": 0.8322017788887024,
+      "lpips": 0.1568785086274147,
+      "psnr_unobs": 12.101100386429138,
+      "hf": 0.6525625856597606,
+      "dhf": 0.026855296334904022,
+      "time": 250.26520228385925,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_02.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_02.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_02.png",
+      "balanced": 0.1568785086274147
+    },
+    {
+      "name": "Q_cfg3_hx05_lr100",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.5
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 100.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 3.0
+      },
+      "psnr": 16.97192907333374,
+      "ssim": 0.8033904433250427,
+      "lpips": 0.1572798639535904,
+      "psnr_unobs": 10.9513320632014,
+      "hf": 0.6109267809627339,
+      "dhf": 0.04474901368346329,
+      "time": 233.38140606880188,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg3_hx05_lr100.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg3_hx05_lr100.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg3_hx05_lr100.png",
+      "balanced": 0.1578412824869156
+    },
+    {
+      "name": "B_he_v",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": [
+          0.001,
+          0.01,
+          0.01,
+          0.001
+        ],
+        "num_langevin": 10
+      },
+      "psnr": 20.210542678833008,
+      "ssim": 0.8548001646995544,
+      "lpips": 0.15269223600625992,
+      "psnr_unobs": 14.189948221726073,
+      "hf": 0.6244911024277804,
+      "dhf": 0.060843562167226306,
+      "time": 287.66329979896545,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_v.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_v.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_v.png",
+      "balanced": 0.15811401708987308
+    },
+    {
+      "name": "P_obs_30",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "h_x_obs_ratio": 3.0
+      },
+      "psnr": 16.535998344421387,
+      "ssim": 0.8157257735729218,
+      "lpips": 0.14804790914058685,
+      "psnr_unobs": 10.51540029070443,
+      "hf": 0.6218027577936305,
+      "dhf": 0.05504441345916922,
+      "time": 246.6051206588745,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_obs_30.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_obs_30.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_obs_30.png",
+      "balanced": 0.15985014898174374
+    },
+    {
+      "name": "B_he_dec_steep",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": [
+          0.01,
+          0.001,
+          0.0001,
+          1e-05
+        ],
+        "num_langevin": 10
+      },
+      "psnr": 19.885629653930664,
+      "ssim": 0.851991593837738,
+      "lpips": 0.1600639522075653,
+      "psnr_unobs": 13.86503471853245,
+      "hf": 0.6808361531031295,
+      "dhf": 0.0037488782466921222,
+      "time": 294.0918734073639,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_dec_steep.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_dec_steep.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_dec_steep.png",
+      "balanced": 0.1600639522075653
+    },
+    {
+      "name": "P_hx_s3_05",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.5
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 18.075016021728516,
+      "ssim": 0.8325633406639099,
+      "lpips": 0.16031280905008316,
+      "psnr_unobs": 12.054418231481563,
+      "hf": 0.6615010285230581,
+      "dhf": 0.03579373919820161,
+      "time": 271.369957447052,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_05.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_05.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_05.png",
+      "balanced": 0.16031280905008316
+    },
+    {
+      "name": "P_he_7e-4",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.0007,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 16.99430751800537,
+      "ssim": 0.805607408285141,
+      "lpips": 0.15921780467033386,
+      "psnr_unobs": 10.973709305663732,
+      "hf": 0.6018116036594421,
+      "dhf": 0.05483702315737016,
+      "time": 278.7125720977783,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_7e-4.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_7e-4.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_7e-4.png",
+      "balanced": 0.16175016588891153
+    },
+    {
+      "name": "P_cfg_60",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 6.0
+      },
+      "psnr": 16.14896011352539,
+      "ssim": 0.8159768879413605,
+      "lpips": 0.14475638419389725,
+      "psnr_unobs": 10.12836159763863,
+      "hf": 0.6737410314888398,
+      "dhf": 0.02587835354957313,
+      "time": 280.51736068725586,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_60.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_60.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_cfg_60.png",
+      "balanced": 0.16177718192338944
+    },
+    {
+      "name": "Q_cfg2_lp5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "lambda_prox": 5.0
+      },
+      "psnr": 17.519285202026367,
+      "ssim": 0.8099353909492493,
+      "lpips": 0.16201144456863403,
+      "psnr_unobs": 11.498688902513674,
+      "hf": 0.6044244501984155,
+      "dhf": 0.05125134444778168,
+      "time": 249.48879647254944,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_lp5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_lp5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_lp5.png",
+      "balanced": 0.16263711679252488
+    },
+    {
+      "name": "B_he_dec",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": [
+          0.01,
+          0.005,
+          0.002,
+          0.001
+        ],
+        "num_langevin": 10
+      },
+      "psnr": 20.406197547912598,
+      "ssim": 0.8533859550952911,
+      "lpips": 0.16289262473583221,
+      "psnr_unobs": 14.385602222003545,
+      "hf": 0.6474265305514549,
+      "dhf": 0.03715850079836669,
+      "time": 288.5424544811249,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_dec.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_dec.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_dec.png",
+      "balanced": 0.16289262473583221
+    },
+    {
+      "name": "Q_cfg2_lreg25",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 25.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.89803123474121,
+      "ssim": 0.824237585067749,
+      "lpips": 0.15900545567274094,
+      "psnr_unobs": 11.87743371836778,
+      "hf": 0.6275877165201454,
+      "dhf": 0.05790959074890989,
+      "time": 273.05895018577576,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_lreg25.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_lreg25.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_lreg25.png",
+      "balanced": 0.1629602510471959
+    },
+    {
+      "name": "Q_cfg2_rho_05",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "rho_s": 0.5,
+        "rho_e": 0.5
+      },
+      "psnr": 17.51377296447754,
+      "ssim": 0.8098362982273102,
+      "lpips": 0.16210192441940308,
+      "psnr_unobs": 11.493175441518883,
+      "hf": 0.6039009922288283,
+      "dhf": 0.05177480241736887,
+      "time": 255.3396120071411,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_rho_05.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_rho_05.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_rho_05.png",
+      "balanced": 0.16298932562808752
+    },
+    {
+      "name": "Q_cfg2_rho_22",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "rho_s": 2.0,
+        "rho_e": 2.0
+      },
+      "psnr": 17.51377296447754,
+      "ssim": 0.8098362982273102,
+      "lpips": 0.16210192441940308,
+      "psnr_unobs": 11.493175441518883,
+      "hf": 0.6039009922288283,
+      "dhf": 0.05177480241736887,
+      "time": 262.3145053386688,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_rho_22.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_rho_22.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_rho_22.png",
+      "balanced": 0.16298932562808752
+    },
+    {
+      "name": "R_anchor_N_cfg2",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.51377296447754,
+      "ssim": 0.8098362982273102,
+      "lpips": 0.16210192441940308,
+      "psnr_unobs": 11.493175441518883,
+      "hf": 0.6039009922288283,
+      "dhf": 0.05177480241736887,
+      "time": 250.9045147895813,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/R_anchor_N_cfg2.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/R_anchor_N_cfg2.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/R_anchor_N_cfg2.png",
+      "balanced": 0.16298932562808752
+    },
+    {
+      "name": "P_he_5e-4",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.0005,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 16.800455570220947,
+      "ssim": 0.8028717935085297,
+      "lpips": 0.15978391468524933,
+      "psnr_unobs": 10.779857252773176,
+      "hf": 0.6054643599013225,
+      "dhf": 0.05118426691548972,
+      "time": 280.1830141544342,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_5e-4.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_5e-4.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_5e-4.png",
+      "balanced": 0.16436693673857525
+    },
+    {
+      "name": "Q_cfg2_he5e-4",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.0005,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.377943992614746,
+      "ssim": 0.8178843557834625,
+      "lpips": 0.1548086255788803,
+      "psnr_unobs": 11.357346286315067,
+      "hf": 0.6163158433762966,
+      "dhf": 0.0691814638927587,
+      "time": 240.589852809906,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_he5e-4.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_he5e-4.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_he5e-4.png",
+      "balanced": 0.16439935752525967
+    },
+    {
+      "name": "Q_cfg30_hx05",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.5
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 3.0
+      },
+      "psnr": 17.283442497253418,
+      "ssim": 0.8134720921516418,
+      "lpips": 0.1518581360578537,
+      "psnr_unobs": 11.262844316225584,
+      "hf": 0.6010485081259731,
+      "dhf": 0.0757986631268266,
+      "time": 259.64896941185,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg30_hx05.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg30_hx05.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg30_hx05.png",
+      "balanced": 0.164757467621267
+    },
+    {
+      "name": "Q_cfg3_he1e-3",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 3.0
+      },
+      "psnr": 17.521470069885254,
+      "ssim": 0.8146460950374603,
+      "lpips": 0.15695449709892273,
+      "psnr_unobs": 11.500871806746927,
+      "hf": 0.6195720931013088,
+      "dhf": 0.06592521416774655,
+      "time": 267.05883264541626,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg3_he1e-3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg3_he1e-3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg3_he1e-3.png",
+      "balanced": 0.164917104182796
+    },
+    {
+      "name": "P_hx_s3_09",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.9
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.969985008239746,
+      "ssim": 0.831229954957962,
+      "lpips": 0.16121965646743774,
+      "psnr_unobs": 11.949388047797282,
+      "hf": 0.6840508660330433,
+      "dhf": 0.058343576708186795,
+      "time": 275.6183006763458,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_09.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_09.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_09.png",
+      "balanced": 0.16539144482153115
+    },
+    {
+      "name": "P_lx_01",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "lambda_x": 0.1
+      },
+      "psnr": 17.43238639831543,
+      "ssim": 0.8093419671058655,
+      "lpips": 0.1655554324388504,
+      "psnr_unobs": 11.411788654341947,
+      "hf": 0.601320031232399,
+      "dhf": 0.050784473293124965,
+      "time": 260.24225306510925,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_01.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_01.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_01.png",
+      "balanced": 0.1659476690854129
+    },
+    {
+      "name": "P_lx_05",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "lambda_x": 0.5
+      },
+      "psnr": 17.43238639831543,
+      "ssim": 0.8093419671058655,
+      "lpips": 0.1655554324388504,
+      "psnr_unobs": 11.411788654341947,
+      "hf": 0.601320031232399,
+      "dhf": 0.050784473293124965,
+      "time": 257.3322777748108,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_05.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_05.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_05.png",
+      "balanced": 0.1659476690854129
+    },
+    {
+      "name": "P_lx_10",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "lambda_x": 1.0
+      },
+      "psnr": 17.43238639831543,
+      "ssim": 0.8093419671058655,
+      "lpips": 0.1655554324388504,
+      "psnr_unobs": 11.411788654341947,
+      "hf": 0.601320031232399,
+      "dhf": 0.050784473293124965,
+      "time": 240.00272154808044,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_10.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_10.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_10.png",
+      "balanced": 0.1659476690854129
+    },
+    {
+      "name": "P_lx_50",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "lambda_x": 5.0
+      },
+      "psnr": 17.43238639831543,
+      "ssim": 0.8093419671058655,
+      "lpips": 0.1655554324388504,
+      "psnr_unobs": 11.411788654341947,
+      "hf": 0.601320031232399,
+      "dhf": 0.050784473293124965,
+      "time": 254.59192895889282,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_50.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_50.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lx_50.png",
+      "balanced": 0.1659476690854129
+    },
+    {
+      "name": "P_rho_05_05",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "rho_s": 0.5,
+        "rho_e": 0.5
+      },
+      "psnr": 17.43238639831543,
+      "ssim": 0.8093419671058655,
+      "lpips": 0.1655554324388504,
+      "psnr_unobs": 11.411788654341947,
+      "hf": 0.601320031232399,
+      "dhf": 0.050784473293124965,
+      "time": 257.7705841064453,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_05_05.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_05_05.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_05_05.png",
+      "balanced": 0.1659476690854129
+    },
+    {
+      "name": "P_rho_05_1",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "rho_s": 0.5,
+        "rho_e": 1.0
+      },
+      "psnr": 17.43238639831543,
+      "ssim": 0.8093419671058655,
+      "lpips": 0.1655554324388504,
+      "psnr_unobs": 11.411788654341947,
+      "hf": 0.601320031232399,
+      "dhf": 0.050784473293124965,
+      "time": 231.89963030815125,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_05_1.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_05_1.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_05_1.png",
+      "balanced": 0.1659476690854129
+    },
+    {
+      "name": "P_rho_1_05",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "rho_s": 1.0,
+        "rho_e": 0.5
+      },
+      "psnr": 17.43238639831543,
+      "ssim": 0.8093419671058655,
+      "lpips": 0.1655554324388504,
+      "psnr_unobs": 11.411788654341947,
+      "hf": 0.601320031232399,
+      "dhf": 0.050784473293124965,
+      "time": 246.83920645713806,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_1_05.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_1_05.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_1_05.png",
+      "balanced": 0.1659476690854129
+    },
+    {
+      "name": "P_rho_1_2",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "rho_s": 1.0,
+        "rho_e": 2.0
+      },
+      "psnr": 17.43238639831543,
+      "ssim": 0.8093419671058655,
+      "lpips": 0.1655554324388504,
+      "psnr_unobs": 11.411788654341947,
+      "hf": 0.601320031232399,
+      "dhf": 0.050784473293124965,
+      "time": 258.3316476345062,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_1_2.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_1_2.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_1_2.png",
+      "balanced": 0.1659476690854129
+    },
+    {
+      "name": "P_rho_2_1",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "rho_s": 2.0,
+        "rho_e": 1.0
+      },
+      "psnr": 17.43238639831543,
+      "ssim": 0.8093419671058655,
+      "lpips": 0.1655554324388504,
+      "psnr_unobs": 11.411788654341947,
+      "hf": 0.601320031232399,
+      "dhf": 0.050784473293124965,
+      "time": 257.29970932006836,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_2_1.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_2_1.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_2_1.png",
+      "balanced": 0.1659476690854129
+    },
+    {
+      "name": "P_rho_2_2",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "rho_s": 2.0,
+        "rho_e": 2.0
+      },
+      "psnr": 17.43238639831543,
+      "ssim": 0.8093419671058655,
+      "lpips": 0.1655554324388504,
+      "psnr_unobs": 11.411788654341947,
+      "hf": 0.601320031232399,
+      "dhf": 0.050784473293124965,
+      "time": 237.64728999137878,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_2_2.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_2_2.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_rho_2_2.png",
+      "balanced": 0.1659476690854129
+    },
+    {
+      "name": "Q_cfg2_hx05_lr75",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.5
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 75.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.4698429107666,
+      "ssim": 0.8081710934638977,
+      "lpips": 0.1619373932480812,
+      "psnr_unobs": 11.449245046015838,
+      "hf": 0.5962408127380583,
+      "dhf": 0.059434981908138895,
+      "time": 262.4845016002655,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_hx05_lr75.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_hx05_lr75.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_hx05_lr75.png",
+      "balanced": 0.16665488420215066
+    },
+    {
+      "name": "Q_cfg2_hx04_lr100",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.4
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 100.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.438018798828125,
+      "ssim": 0.8072455525398254,
+      "lpips": 0.16117577999830246,
+      "psnr_unobs": 11.417420811976417,
+      "hf": 0.5944244957739386,
+      "dhf": 0.06125129887225855,
+      "time": 260.4292299747467,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_hx04_lr100.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_hx04_lr100.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_hx04_lr100.png",
+      "balanced": 0.16680142943443174
+    },
+    {
+      "name": "Q_cfg25_hx05",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.5
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.5
+      },
+      "psnr": 17.4225492477417,
+      "ssim": 0.8144171833992004,
+      "lpips": 0.15163786709308624,
+      "psnr_unobs": 11.4019513859323,
+      "hf": 0.5957305501923618,
+      "dhf": 0.08111662106043793,
+      "time": 252.84983849525452,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg25_hx05.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg25_hx05.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg25_hx05.png",
+      "balanced": 0.16719617762330521
+    },
+    {
+      "name": "P_he_3e-4",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.0003,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 16.59743881225586,
+      "ssim": 0.8001743853092194,
+      "lpips": 0.16026632487773895,
+      "psnr_unobs": 10.576841198989962,
+      "hf": 0.6083690018587982,
+      "dhf": 0.04827962495801408,
+      "time": 263.47503566741943,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_3e-4.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_3e-4.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_3e-4.png",
+      "balanced": 0.16831754863262177
+    },
+    {
+      "name": "Q_cfg25_hx04",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.4
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.5
+      },
+      "psnr": 17.46611785888672,
+      "ssim": 0.8142140209674835,
+      "lpips": 0.15117164701223373,
+      "psnr_unobs": 11.44551933458219,
+      "hf": 0.591991266651118,
+      "dhf": 0.08485590460168169,
+      "time": 234.9979498386383,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg25_hx04.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg25_hx04.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg25_hx04.png",
+      "balanced": 0.16859959931307458
+    },
+    {
+      "name": "B_he_lowall",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": [
+          0.001,
+          0.001,
+          0.001,
+          0.0001
+        ],
+        "num_langevin": 10
+      },
+      "psnr": 17.887770652770996,
+      "ssim": 0.8356610536575317,
+      "lpips": 0.1603923887014389,
+      "psnr_unobs": 11.867173424058468,
+      "hf": 0.6360490419510125,
+      "dhf": 0.06662360157605174,
+      "time": 299.829891204834,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_lowall.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_lowall.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_lowall.png",
+      "balanced": 0.16870418948946478
+    },
+    {
+      "name": "D_L_s3hi",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": [
+          10,
+          10,
+          10,
+          20
+        ]
+      },
+      "psnr": 17.408772468566895,
+      "ssim": 0.8204961717128754,
+      "lpips": 0.16893808543682098,
+      "psnr_unobs": 11.38817451030561,
+      "hf": 0.7237323895422818,
+      "dhf": 0.037658947712600144,
+      "time": 412.584388256073,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_s3hi.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_s3hi.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_s3hi.png",
+      "balanced": 0.16893808543682098
+    },
+    {
+      "name": "D_L_lowall",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": [
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      "psnr": 17.628318309783936,
+      "ssim": 0.8247188031673431,
+      "lpips": 0.16928694397211075,
+      "psnr_unobs": 11.607720786086192,
+      "hf": 0.5985199722100181,
+      "dhf": 0.04192547515351719,
+      "time": 102.89729356765747,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_lowall.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_lowall.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_lowall.png",
+      "balanced": 0.16928694397211075
+    },
+    {
+      "name": "Q_cfg3_lreg100",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 100.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 3.0
+      },
+      "psnr": 17.588065147399902,
+      "ssim": 0.8132360577583313,
+      "lpips": 0.15282446891069412,
+      "psnr_unobs": 11.567468136943354,
+      "hf": 0.5987442138952411,
+      "dhf": 0.0867530933738142,
+      "time": 255.33190035820007,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg3_lreg100.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg3_lreg100.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg3_lreg100.png",
+      "balanced": 0.17120101559760123
+    },
+    {
+      "name": "R_anchor_C_L5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.64520263671875,
+      "ssim": 0.8126834630966187,
+      "lpips": 0.16700316220521927,
+      "psnr_unobs": 11.624605752611949,
+      "hf": 0.5971011251929579,
+      "dhf": 0.0585746694532393,
+      "time": 145.5807580947876,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/R_anchor_C_L5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/R_anchor_C_L5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/R_anchor_C_L5.png",
+      "balanced": 0.17129049693183893
+    },
+    {
+      "name": "Q_cfg15_hx05",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.5
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 1.5
+      },
+      "psnr": 17.718303680419922,
+      "ssim": 0.8168674111366272,
+      "lpips": 0.151779904961586,
+      "psnr_unobs": 11.697706078556102,
+      "hf": 0.5857249460464802,
+      "dhf": 0.09112222520631952,
+      "time": 260.291517496109,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg15_hx05.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg15_hx05.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg15_hx05.png",
+      "balanced": 0.17234101756474576
+    },
+    {
+      "name": "Q_cfg2_lreg75",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 75.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.790644645690918,
+      "ssim": 0.8212429583072662,
+      "lpips": 0.15593993663787842,
+      "psnr_unobs": 11.770046196817969,
+      "hf": 0.6019079742464459,
+      "dhf": 0.0835893330226094,
+      "time": 266.84773993492126,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_lreg75.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_lreg75.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_lreg75.png",
+      "balanced": 0.17273460314918312
+    },
+    {
+      "name": "Q_cfg2_lreg150",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 150.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.784639358520508,
+      "ssim": 0.8186624050140381,
+      "lpips": 0.15239595621824265,
+      "psnr_unobs": 11.764041404975782,
+      "hf": 0.5941226574679681,
+      "dhf": 0.09137464980108723,
+      "time": 232.19783520698547,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_lreg150.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_lreg150.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_lreg150.png",
+      "balanced": 0.17308328111878626
+    },
+    {
+      "name": "Q_cfg15_hx04",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.4
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 1.5
+      },
+      "psnr": 17.749629020690918,
+      "ssim": 0.8167374432086945,
+      "lpips": 0.15117815136909485,
+      "psnr_unobs": 11.729030636223872,
+      "hf": 0.5829369922183298,
+      "dhf": 0.09391017903446985,
+      "time": 260.42568278312683,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg15_hx04.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg15_hx04.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg15_hx04.png",
+      "balanced": 0.17313324088632978
+    },
+    {
+      "name": "A_he5e-4",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.0005,
+        "num_langevin": 10
+      },
+      "psnr": 16.697153568267822,
+      "ssim": 0.8161550760269165,
+      "lpips": 0.16709958016872406,
+      "psnr_unobs": 10.676555187181998,
+      "hf": 0.6766519917161429,
+      "dhf": 0.031032801648820163,
+      "time": 284.388751745224,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he5e-4.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he5e-4.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he5e-4.png",
+      "balanced": 0.1731565088033676
+    },
+    {
+      "name": "N_obs_hi",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_x_obs_ratio": 2.0
+      },
+      "psnr": 16.85159158706665,
+      "ssim": 0.8187651038169861,
+      "lpips": 0.15599418431520462,
+      "psnr_unobs": 10.830992769904153,
+      "hf": 0.6186483509551219,
+      "dhf": 0.07918204708230347,
+      "time": 155.6459105014801,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_obs_hi.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_obs_hi.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_obs_hi.png",
+      "balanced": 0.17355337611502336
+    },
+    {
+      "name": "F_lr25_C5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 25.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.201428413391113,
+      "ssim": 0.810439258813858,
+      "lpips": 0.1704506203532219,
+      "psnr_unobs": 11.18083075660945,
+      "hf": 0.6090594349796912,
+      "dhf": 0.05620922819342056,
+      "time": 157.83761763572693,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/F_lr25_C5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/F_lr25_C5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/F_lr25_C5.png",
+      "balanced": 0.17355523444993218
+    },
+    {
+      "name": "P_he_1.5e-3",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.0015,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.729941368103027,
+      "ssim": 0.8170501589775085,
+      "lpips": 0.16207055747509003,
+      "psnr_unobs": 11.709344113579636,
+      "hf": 0.583640135383717,
+      "dhf": 0.07300849143309529,
+      "time": 253.4063823223114,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_1.5e-3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_1.5e-3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_1.5e-3.png",
+      "balanced": 0.17357480319163768
+    },
+    {
+      "name": "P_hxu_005",
+      "kw": {
+        "h_x": 0.05,
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 18.50700616836548,
+      "ssim": 0.8308270573616028,
+      "lpips": 0.17476394772529602,
+      "psnr_unobs": 12.486408284738387,
+      "hf": 0.5971646123108734,
+      "dhf": 0.028542677013983164,
+      "time": 260.39708256721497,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_005.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_005.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hxu_005.png",
+      "balanced": 0.17476394772529602
+    },
+    {
+      "name": "K_ode_s3_20",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "ode_steps_per_stage": [
+          10,
+          10,
+          10,
+          20
+        ]
+      },
+      "psnr": 17.21503448486328,
+      "ssim": 0.8081285953521729,
+      "lpips": 0.1750090941786766,
+      "psnr_unobs": 11.194437068341221,
+      "hf": 0.6087608070901949,
+      "dhf": 0.050549958463022904,
+      "time": 237.48348212242126,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/K_ode_s3_20.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/K_ode_s3_20.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/K_ode_s3_20.png",
+      "balanced": 0.17528407341018806
+    },
+    {
+      "name": "D_L_s3low",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": [
+          10,
+          10,
+          10,
+          5
+        ]
+      },
+      "psnr": 17.654915809631348,
+      "ssim": 0.8276095688343048,
+      "lpips": 0.16016287356615067,
+      "psnr_unobs": 11.634318355102778,
+      "hf": 0.6036840954944904,
+      "dhf": 0.08238934633519124,
+      "time": 215.76803469657898,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_s3low.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_s3low.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_s3low.png",
+      "balanced": 0.1763575467337463
+    },
+    {
+      "name": "P_ode_8",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "ode_steps_per_stage": 8
+      },
+      "psnr": 17.701701164245605,
+      "ssim": 0.8115304112434387,
+      "lpips": 0.15353849530220032,
+      "psnr_unobs": 11.681103893729738,
+      "hf": 0.5806399204677034,
+      "dhf": 0.09620725078509629,
+      "time": 196.01023840904236,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_ode_8.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_ode_8.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_ode_8.png",
+      "balanced": 0.17664212069474847
+    },
+    {
+      "name": "P_hx_s3_12",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          1.2
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.90702199935913,
+      "ssim": 0.8313632607460022,
+      "lpips": 0.16186174750328064,
+      "psnr_unobs": 11.886425157633788,
+      "hf": 0.7069690117286933,
+      "dhf": 0.08126172240383678,
+      "time": 254.90525579452515,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_12.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_12.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_hx_s3_12.png",
+      "balanced": 0.17749260870519903
+    },
+    {
+      "name": "P_L4",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 4,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.091193199157715,
+      "ssim": 0.8067283630371094,
+      "lpips": 0.16724218428134918,
+      "psnr_unobs": 11.070595454384804,
+      "hf": 0.5856673646648571,
+      "dhf": 0.0709812621519551,
+      "time": 226.22559523582458,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_L4.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_L4.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_L4.png",
+      "balanced": 0.17773281535732674
+    },
+    {
+      "name": "P_he_5e-3",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.005,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 19.168140411376953,
+      "ssim": 0.8402399122714996,
+      "lpips": 0.16539063304662704,
+      "psnr_unobs": 13.147543807024133,
+      "hf": 0.5812071020865266,
+      "dhf": 0.07544152473028565,
+      "time": 260.7015469074249,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_5e-3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_5e-3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_5e-3.png",
+      "balanced": 0.17811139541176987
+    },
+    {
+      "name": "N_n01_ode15",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.1,
+        "terminal_replace_weight": 1.0,
+        "ode_steps_per_stage": [
+          10,
+          10,
+          10,
+          15
+        ]
+      },
+      "psnr": 17.655932426452637,
+      "ssim": 0.8135095834732056,
+      "lpips": 0.16128990799188614,
+      "psnr_unobs": 11.635335366631194,
+      "hf": 0.6139040975996533,
+      "dhf": 0.08392630043777216,
+      "time": 205.71441268920898,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_ode15.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_ode15.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_ode15.png",
+      "balanced": 0.17825305821077223
+    },
+    {
+      "name": "N_n01_hxlate",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.3,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.1,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.629977226257324,
+      "ssim": 0.8090976774692535,
+      "lpips": 0.16711852699518204,
+      "psnr_unobs": 11.609380158266859,
+      "hf": 0.5939067368268439,
+      "dhf": 0.07451245247179117,
+      "time": 143.5860800743103,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_hxlate.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_hxlate.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_hxlate.png",
+      "balanced": 0.17937475323107763
+    },
+    {
+      "name": "N_n01_hx1",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          1.0
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.1,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.581984519958496,
+      "ssim": 0.8058470189571381,
+      "lpips": 0.16880209743976593,
+      "psnr_unobs": 11.561387756522915,
+      "hf": 0.5970552986196191,
+      "dhf": 0.07136389067901594,
+      "time": 153.48077392578125,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_hx1.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_hx1.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_hx1.png",
+      "balanced": 0.1794840427792739
+    },
+    {
+      "name": "E_N03_C10",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 10,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.3,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.412357807159424,
+      "ssim": 0.7895364463329315,
+      "lpips": 0.1795465052127838,
+      "psnr_unobs": 11.391759414510876,
+      "hf": 0.6166881747233096,
+      "dhf": 0.04858048844980212,
+      "time": 290.08995294570923,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N03_C10.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N03_C10.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N03_C10.png",
+      "balanced": 0.1795465052127838
+    },
+    {
+      "name": "P_he_2e-3",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.002,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 18.078832626342773,
+      "ssim": 0.8247287273406982,
+      "lpips": 0.16649451851844788,
+      "psnr_unobs": 12.058235884287555,
+      "hf": 0.5805034239510867,
+      "dhf": 0.07614520286572557,
+      "time": 277.0526673793793,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_2e-3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_2e-3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_2e-3.png",
+      "balanced": 0.17956711995131067
+    },
+    {
+      "name": "E_N01_C10",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 10,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.1,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.49173641204834,
+      "ssim": 0.8117973506450653,
+      "lpips": 0.17961613833904266,
+      "psnr_unobs": 11.471138804273131,
+      "hf": 0.624345158279173,
+      "dhf": 0.0409235048939387,
+      "time": 287.3793442249298,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N01_C10.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N01_C10.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N01_C10.png",
+      "balanced": 0.17961613833904266
+    },
+    {
+      "name": "K_ode_s3_15",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "ode_steps_per_stage": [
+          10,
+          10,
+          10,
+          15
+        ]
+      },
+      "psnr": 17.269365310668945,
+      "ssim": 0.8089965283870697,
+      "lpips": 0.17261789739131927,
+      "psnr_unobs": 11.248768232215632,
+      "hf": 0.5949706741844643,
+      "dhf": 0.06434009136875352,
+      "time": 213.37346744537354,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/K_ode_s3_15.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/K_ode_s3_15.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/K_ode_s3_15.png",
+      "balanced": 0.17978794307569604
+    },
+    {
+      "name": "H_resetEps",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "reset_eps_per_ode_step": true
+      },
+      "psnr": 20.330900192260742,
+      "ssim": 0.8136323392391205,
+      "lpips": 0.17991159856319427,
+      "psnr_unobs": 14.310304151906854,
+      "hf": 0.6826630121962529,
+      "dhf": 0.014327187180162348,
+      "time": 137.5747263431549,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/H_resetEps.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/H_resetEps.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/H_resetEps.png",
+      "balanced": 0.17991159856319427
+    },
+    {
+      "name": "P_he_3e-3",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.003,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 18.55372142791748,
+      "ssim": 0.8331219255924225,
+      "lpips": 0.1668209359049797,
+      "psnr_unobs": 12.533123583084048,
+      "hf": 0.5800200285591524,
+      "dhf": 0.07662859825765989,
+      "time": 278.99316787719727,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_3e-3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_3e-3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_he_3e-3.png",
+      "balanced": 0.18013523503380965
+    },
+    {
+      "name": "B_he_s3vlow",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": [
+          0.01,
+          0.01,
+          0.01,
+          0.0001
+        ],
+        "num_langevin": 10
+      },
+      "psnr": 20.26265048980713,
+      "ssim": 0.856422632932663,
+      "lpips": 0.1703108474612236,
+      "psnr_unobs": 14.242055235925008,
+      "hf": 0.631556797028933,
+      "dhf": 0.0711158464981313,
+      "time": 297.2982864379883,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_s3vlow.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_s3vlow.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_s3vlow.png",
+      "balanced": 0.18086877071028926
+    },
+    {
+      "name": "B_he_s3low",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": [
+          0.01,
+          0.01,
+          0.01,
+          0.001
+        ],
+        "num_langevin": 10
+      },
+      "psnr": 20.2526798248291,
+      "ssim": 0.8562048971652985,
+      "lpips": 0.17096176743507385,
+      "psnr_unobs": 14.232085440448307,
+      "hf": 0.6327025100294421,
+      "dhf": 0.06997013349762216,
+      "time": 279.79697585105896,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_s3low.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_s3low.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_s3low.png",
+      "balanced": 0.18094683418388494
+    },
+    {
+      "name": "J_dps_s3_2",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "dps_kick_zeta": [
+          0,
+          0,
+          0,
+          2.0
+        ]
+      },
+      "psnr": 17.514312744140625,
+      "ssim": 0.8187873959541321,
+      "lpips": 0.15837688744068146,
+      "psnr_unobs": 11.493715445109704,
+      "hf": 0.6012502011771406,
+      "dhf": 0.0957399981992747,
+      "time": 157.22754740715027,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/J_dps_s3_2.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/J_dps_s3_2.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/J_dps_s3_2.png",
+      "balanced": 0.1812468865403188
+    },
+    {
+      "name": "H_lprox05",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "lambda_prox": 0.5
+      },
+      "psnr": 17.523056983947754,
+      "ssim": 0.8188998401165009,
+      "lpips": 0.15848953276872635,
+      "psnr_unobs": 11.502460028152408,
+      "hf": 0.6011783386399696,
+      "dhf": 0.09581186073644565,
+      "time": 156.43119049072266,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/H_lprox05.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/H_lprox05.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/H_lprox05.png",
+      "balanced": 0.18139546313694918
+    },
+    {
+      "name": "H_lprox01",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "lambda_prox": 0.1
+      },
+      "psnr": 17.52310848236084,
+      "ssim": 0.8188876807689667,
+      "lpips": 0.15850943326950073,
+      "psnr_unobs": 11.502511292444591,
+      "hf": 0.6011474923048468,
+      "dhf": 0.0958427070715685,
+      "time": 160.73029279708862,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/H_lprox01.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/H_lprox01.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/H_lprox01.png",
+      "balanced": 0.181430786805285
+    },
+    {
+      "name": "H_einject",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "lambda_eps_inject": 0.1
+      },
+      "psnr": 17.52345371246338,
+      "ssim": 0.8188911974430084,
+      "lpips": 0.15850407630205154,
+      "psnr_unobs": 11.502856009678487,
+      "hf": 0.6011087313422745,
+      "dhf": 0.09588146803414077,
+      "time": 150.0162079334259,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/H_einject.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/H_einject.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/H_einject.png",
+      "balanced": 0.18144481031912194
+    },
+    {
+      "name": "E_N01_A2e3",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.002,
+        "num_langevin": 10,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.1,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 18.49129009246826,
+      "ssim": 0.8210397958755493,
+      "lpips": 0.17448818683624268,
+      "psnr_unobs": 12.470693120293927,
+      "hf": 0.6005395597568991,
+      "dhf": 0.06472910341621263,
+      "time": 270.97387170791626,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N01_A2e3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N01_A2e3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N01_A2e3.png",
+      "balanced": 0.181852738544349
+    },
+    {
+      "name": "F_cfg25_lr150_hxs05",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.5
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 150.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.5
+      },
+      "psnr": 17.470352172851562,
+      "ssim": 0.8144784569740295,
+      "lpips": 0.1525978073477745,
+      "psnr_unobs": 11.449755267832298,
+      "hf": 0.5850706925779068,
+      "dhf": 0.10867701925750306,
+      "time": 263.95631670951843,
+      "source": "exploration_v3_final",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_lr150_hxs05.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_lr150_hxs05.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_lr150_hxs05.png",
+      "balanced": 0.18193631697652604
+    },
+    {
+      "name": "N_n01_lr200",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 200.0,
+        "noise_scale": 0.1,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.66099262237549,
+      "ssim": 0.8096176087856293,
+      "lpips": 0.1609364002943039,
+      "psnr_unobs": 11.640394979392402,
+      "hf": 0.5760821317956643,
+      "dhf": 0.09233705750297083,
+      "time": 148.98826026916504,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_lr200.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_lr200.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_lr200.png",
+      "balanced": 0.18210492904578932
+    },
+    {
+      "name": "F_cfg25_hxu02",
+      "kw": {
+        "h_x": 0.2,
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.5
+      },
+      "psnr": 16.82223129272461,
+      "ssim": 0.8168067336082458,
+      "lpips": 0.15764012187719345,
+      "psnr_unobs": 10.801633954436923,
+      "hf": 0.6018558992375753,
+      "dhf": 0.09189181259783452,
+      "time": 264.2880070209503,
+      "source": "exploration_v3_final",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_hxu02.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_hxu02.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_hxu02.png",
+      "balanced": 0.18214140232161852
+    },
+    {
+      "name": "D_L_s3skip",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": [
+          10,
+          10,
+          10,
+          1
+        ]
+      },
+      "psnr": 17.777170181274414,
+      "ssim": 0.8270443975925446,
+      "lpips": 0.15792039036750793,
+      "psnr_unobs": 11.756572057514454,
+      "hf": 0.5836544061395854,
+      "dhf": 0.10241903569009625,
+      "time": 156.48766589164734,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_s3skip.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_s3skip.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_s3skip.png",
+      "balanced": 0.18412990821255606
+    },
+    {
+      "name": "N_n01_lr100",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 100.0,
+        "noise_scale": 0.1,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.66055393218994,
+      "ssim": 0.8093061149120331,
+      "lpips": 0.16455937922000885,
+      "psnr_unobs": 11.639957228470182,
+      "hf": 0.5790385201763121,
+      "dhf": 0.08938066912232301,
+      "time": 152.8969066143036,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_lr100.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_lr100.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n01_lr100.png",
+      "balanced": 0.18424971378117036
+    },
+    {
+      "name": "E_N01_C5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.1,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.13469123840332,
+      "ssim": 0.8007503151893616,
+      "lpips": 0.1686762347817421,
+      "psnr_unobs": 11.114093499981333,
+      "hf": 0.5840676628207429,
+      "dhf": 0.08120100035236888,
+      "time": 147.35324454307556,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N01_C5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N01_C5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N01_C5.png",
+      "balanced": 0.18427673495792654
+    },
+    {
+      "name": "F_cfg25_lr150",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 150.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.5
+      },
+      "psnr": 17.27042007446289,
+      "ssim": 0.8096644878387451,
+      "lpips": 0.1551092565059662,
+      "psnr_unobs": 11.249822247754407,
+      "hf": 0.5919573434280705,
+      "dhf": 0.10906399463982952,
+      "time": 263.2267122268677,
+      "source": "exploration_v3_final",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_lr150.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_lr150.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_lr150.png",
+      "balanced": 0.18464125382588095
+    },
+    {
+      "name": "M_C5_repeat",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.312849521636963,
+      "ssim": 0.8088899850845337,
+      "lpips": 0.17200184613466263,
+      "psnr_unobs": 11.29225101336667,
+      "hf": 0.5838128789612291,
+      "dhf": 0.07549788659198864,
+      "time": 161.30751776695251,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/M_C5_repeat.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/M_C5_repeat.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/M_C5_repeat.png",
+      "balanced": 0.18475078943065695
+    },
+    {
+      "name": "B_he_inc",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": [
+          0.001,
+          0.002,
+          0.005,
+          0.01
+        ],
+        "num_langevin": 10
+      },
+      "psnr": 18.572415351867676,
+      "ssim": 0.8408948481082916,
+      "lpips": 0.17029955983161926,
+      "psnr_unobs": 12.551818496419516,
+      "hf": 0.6237121798950138,
+      "dhf": 0.07896046363205045,
+      "time": 299.9606535434723,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_inc.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_inc.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/B_he_inc.png",
+      "balanced": 0.1847797916476445
+    },
+    {
+      "name": "P_lreg_10",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 10.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.718364715576172,
+      "ssim": 0.8090887665748596,
+      "lpips": 0.16806335747241974,
+      "psnr_unobs": 11.697766893060557,
+      "hf": 0.7492818192347159,
+      "dhf": 0.08493666610267692,
+      "time": 283.3128559589386,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lreg_10.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lreg_10.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_lreg_10.png",
+      "balanced": 0.1855316905237582
+    },
+    {
+      "name": "I_ref_F1",
+      "kw": {
+        "h_x": 0.1,
+        "h_epsilon": 0.01,
+        "num_langevin": 10,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 20.758872985839844,
+      "ssim": 0.8557663559913635,
+      "lpips": 0.173629492521286,
+      "psnr_unobs": 14.738278299903085,
+      "hf": 0.6229176509662118,
+      "dhf": 0.0740725484102035,
+      "time": 285.62092661857605,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/I_ref_F1.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/I_ref_F1.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/I_ref_F1.png",
+      "balanced": 0.18566576672638777
+    },
+    {
+      "name": "N_n03_lr100",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 100.0,
+        "noise_scale": 0.3,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.614891052246094,
+      "ssim": 0.7867600917816162,
+      "lpips": 0.16927322000265121,
+      "psnr_unobs": 11.594293388021573,
+      "hf": 0.5845700092528399,
+      "dhf": 0.08384918004579522,
+      "time": 154.18004369735718,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n03_lr100.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n03_lr100.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_n03_lr100.png",
+      "balanced": 0.18619781002554883
+    },
+    {
+      "name": "F_cfg25_lr300",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 300.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.5
+      },
+      "psnr": 17.387142181396484,
+      "ssim": 0.8085194230079651,
+      "lpips": 0.15346432477235794,
+      "psnr_unobs": 11.366544112853532,
+      "hf": 0.5837118897230542,
+      "dhf": 0.1173094483448458,
+      "time": 269.28105545043945,
+      "source": "exploration_v3_final",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_lr300.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_lr300.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_f/F_cfg25_lr300.png",
+      "balanced": 0.18711904894478085
+    },
+    {
+      "name": "N_lr100_hx1",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          1.0
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 100.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.73402976989746,
+      "ssim": 0.8217459321022034,
+      "lpips": 0.15470920503139496,
+      "psnr_unobs": 11.713431908012218,
+      "hf": 0.5812266879522986,
+      "dhf": 0.11660371008512682,
+      "time": 151.56353092193604,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_lr100_hx1.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_lr100_hx1.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_lr100_hx1.png",
+      "balanced": 0.18801106007395837
+    },
+    {
+      "name": "J_dps_all5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "dps_kick_zeta": 5.0
+      },
+      "psnr": 17.32152271270752,
+      "ssim": 0.8072952330112457,
+      "lpips": 0.1713433489203453,
+      "psnr_unobs": 11.300924850919317,
+      "hf": 0.5753800374005416,
+      "dhf": 0.08393072815267622,
+      "time": 165.69317889213562,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/J_dps_all5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/J_dps_all5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/J_dps_all5.png",
+      "balanced": 0.18830871299668342
+    },
+    {
+      "name": "E_N03_C5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.3,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.10981798171997,
+      "ssim": 0.7781111598014832,
+      "lpips": 0.17593558877706528,
+      "psnr_unobs": 11.089220150906339,
+      "hf": 0.5902220994905318,
+      "dhf": 0.07504656368257989,
+      "time": 149.22636079788208,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N03_C5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N03_C5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/E_N03_C5.png",
+      "balanced": 0.18845887061835523
+    },
+    {
+      "name": "N_lp01_n01",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.1,
+        "terminal_replace_weight": 1.0,
+        "lambda_prox": 0.1
+      },
+      "psnr": 17.75281524658203,
+      "ssim": 0.8136782050132751,
+      "lpips": 0.15988557040691376,
+      "psnr_unobs": 11.732217423547159,
+      "hf": 0.5885820532107052,
+      "dhf": 0.10924834482672019,
+      "time": 149.86905121803284,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_lp01_n01.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_lp01_n01.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_lp01_n01.png",
+      "balanced": 0.18950974282027386
+    },
+    {
+      "name": "N_lr200_hxlo",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.4
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 200.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 17.798359870910645,
+      "ssim": 0.8190872371196747,
+      "lpips": 0.15231220424175262,
+      "psnr_unobs": 11.777763353369235,
+      "hf": 0.5714073889366326,
+      "dhf": 0.12642300910079285,
+      "time": 128.03855419158936,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_lr200_hxlo.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_lr200_hxlo.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_lr200_hxlo.png",
+      "balanced": 0.19052370879214905
+    },
+    {
+      "name": "L_no_bypass",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "g_bypass_stage3": false
+      },
+      "psnr": 17.4529070854187,
+      "ssim": 0.8114563524723053,
+      "lpips": 0.1724998503923416,
+      "psnr_unobs": 11.432310389026155,
+      "hf": 0.5715448914149581,
+      "dhf": 0.08776587413825965,
+      "time": 162.29613542556763,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/L_no_bypass.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/L_no_bypass.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/L_no_bypass.png",
+      "balanced": 0.19138278746147144
+    },
+    {
+      "name": "A_he1e-4",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.0001,
+        "num_langevin": 10
+      },
+      "psnr": 15.993566036224365,
+      "ssim": 0.802171915769577,
+      "lpips": 0.17328771203756332,
+      "psnr_unobs": 9.972967514775798,
+      "hf": 0.6746715909289069,
+      "dhf": 0.0330132024360561,
+      "time": 274.5740954875946,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-4.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-4.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-4.png",
+      "balanced": 0.19341639131307603
+    },
+    {
+      "name": "C_L3",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": 3
+      },
+      "psnr": 18.12788963317871,
+      "ssim": 0.8149292469024658,
+      "lpips": 0.15933869034051895,
+      "psnr_unobs": 12.107291706052496,
+      "hf": 0.5659546110164065,
+      "dhf": 0.11938005357860015,
+      "time": 100.79251170158386,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L3.png",
+      "balanced": 0.19402871712981903
+    },
+    {
+      "name": "A_he5e-5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 5e-05,
+        "num_langevin": 10
+      },
+      "psnr": 15.872289657592773,
+      "ssim": 0.8003434240818024,
+      "lpips": 0.1735052391886711,
+      "psnr_unobs": 9.851691520373482,
+      "hf": 0.6755251820847995,
+      "dhf": 0.032159611280163536,
+      "time": 293.783673286438,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he5e-5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he5e-5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he5e-5.png",
+      "balanced": 0.19605944603681563
+    },
+    {
+      "name": "Q_cfg2_he5e-3",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.005,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 19.325139045715332,
+      "ssim": 0.8396522402763367,
+      "lpips": 0.17069405317306519,
+      "psnr_unobs": 13.304542939561586,
+      "hf": 0.5820424113219718,
+      "dhf": 0.10345489594708357,
+      "time": 257.7771489620209,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_he5e-3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_he5e-3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/Q_cfg2_he5e-3.png",
+      "balanced": 0.19742150114660698
+    },
+    {
+      "name": "A_he1e-5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 1e-05,
+        "num_langevin": 10
+      },
+      "psnr": 15.786634922027588,
+      "ssim": 0.7990606725215912,
+      "lpips": 0.17316387593746185,
+      "psnr_unobs": 9.766037229800022,
+      "hf": 0.6761377680813071,
+      "dhf": 0.03154702528365594,
+      "time": 285.3637821674347,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-5.png",
+      "balanced": 0.19743117749691008
+    },
+    {
+      "name": "C_L30",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": 30
+      },
+      "psnr": 18.198034286499023,
+      "ssim": 0.8252651989459991,
+      "lpips": 0.18036722391843796,
+      "psnr_unobs": 12.177436565013473,
+      "hf": 0.7799046433983989,
+      "dhf": 0.09383120156871727,
+      "time": 799.7479193210602,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L30.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L30.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L30.png",
+      "balanced": 0.2022828247027966
+    },
+    {
+      "name": "P_ode_5",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "ode_steps_per_stage": 5
+      },
+      "psnr": 18.048134803771973,
+      "ssim": 0.8054006695747375,
+      "lpips": 0.1700342744588852,
+      "psnr_unobs": 12.02753735604559,
+      "hf": 0.5524894370257858,
+      "dhf": 0.1243577342270139,
+      "time": 116.24758458137512,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_ode_5.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_ode_5.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_ode_5.png",
+      "balanced": 0.20721314157239215
+    },
+    {
+      "name": "P_L2",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 2,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0
+      },
+      "psnr": 17.17334794998169,
+      "ssim": 0.8039796650409698,
+      "lpips": 0.1861075460910797,
+      "psnr_unobs": 11.152750032584196,
+      "hf": 0.5614884874324799,
+      "dhf": 0.09516013938433232,
+      "time": 134.22281289100647,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_L2.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_L2.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_L2.png",
+      "balanced": 0.20868761578324588
+    },
+    {
+      "name": "D_L_rampup",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": [
+          3,
+          5,
+          10,
+          20
+        ]
+      },
+      "psnr": 17.039743423461914,
+      "ssim": 0.8351049423217773,
+      "lpips": 0.16554924845695496,
+      "psnr_unobs": 11.019146229830795,
+      "hf": 0.7853122990772158,
+      "dhf": 0.14486685171368052,
+      "time": 400.2381799221039,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_rampup.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_rampup.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_rampup.png",
+      "balanced": 0.21298267431379522
+    },
+    {
+      "name": "N_obs_lo",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_x_obs_ratio": 0.5
+      },
+      "psnr": 18.358829498291016,
+      "ssim": 0.8213195502758026,
+      "lpips": 0.16869783401489258,
+      "psnr_unobs": 12.338231599042455,
+      "hf": 0.5575237457867886,
+      "dhf": 0.14030665225063677,
+      "time": 150.92932963371277,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_obs_lo.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_obs_lo.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/N_obs_lo.png",
+      "balanced": 0.21385116014021097
+    },
+    {
+      "name": "A_he5e-2",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.05,
+        "num_langevin": 10
+      },
+      "psnr": 19.994478225708008,
+      "ssim": 0.8484779298305511,
+      "lpips": 0.20224159955978394,
+      "psnr_unobs": 13.973881866675127,
+      "hf": 0.5950014246503743,
+      "dhf": 0.08958360669944732,
+      "time": 284.8195278644562,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he5e-2.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he5e-2.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he5e-2.png",
+      "balanced": 0.2220334029095076
+    },
+    {
+      "name": "A_he1e-1",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.1,
+        "num_langevin": 10
+      },
+      "psnr": 19.10290813446045,
+      "ssim": 0.8141627311706543,
+      "lpips": 0.20775152742862701,
+      "psnr_unobs": 13.082311740282265,
+      "hf": 0.7788438758220043,
+      "dhf": 0.09425884447218269,
+      "time": 257.6394443511963,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-1.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-1.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/A_he1e-1.png",
+      "balanced": 0.22988094966471836
+    },
+    {
+      "name": "D_L_focuss3",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": [
+          5,
+          5,
+          5,
+          30
+        ]
+      },
+      "psnr": 16.820693492889404,
+      "ssim": 0.8329180479049683,
+      "lpips": 0.16547337174415588,
+      "psnr_unobs": 10.800095539214023,
+      "hf": 0.8223430308304777,
+      "dhf": 0.1818975834669424,
+      "time": 516.0029306411743,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_focuss3.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_focuss3.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_focuss3.png",
+      "balanced": 0.235008293619839
+    },
+    {
+      "name": "P_obs_025",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "guidance_scale": 2.0,
+        "h_x_obs_ratio": 0.25
+      },
+      "psnr": 18.358625411987305,
+      "ssim": 0.8124394714832306,
+      "lpips": 0.19517073035240173,
+      "psnr_unobs": 12.33802822789502,
+      "hf": 0.5446038657450638,
+      "dhf": 0.1322433055077359,
+      "time": 245.86615681648254,
+      "source": "exploration_v2_deep",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_obs_025.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_obs_025.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs_p/P_obs_025.png",
+      "balanced": 0.23629238310626968
+    },
+    {
+      "name": "C_L1",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": 1
+      },
+      "psnr": 17.661104202270508,
+      "ssim": 0.7985163033008575,
+      "lpips": 0.20317498594522476,
+      "psnr_unobs": 11.640506219817816,
+      "hf": 0.5404931052586097,
+      "dhf": 0.14484155933639697,
+      "time": 49.70132327079773,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L1.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L1.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/C_L1.png",
+      "balanced": 0.2505957656134232
+    },
+    {
+      "name": "D_L_s3max",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "h_epsilon": 0.001,
+        "num_langevin": [
+          10,
+          10,
+          10,
+          30
+        ]
+      },
+      "psnr": 15.706840515136719,
+      "ssim": 0.8348864316940308,
+      "lpips": 0.14955537021160126,
+      "psnr_unobs": 9.686241272836096,
+      "hf": 0.8694076481121946,
+      "dhf": 0.22896220074865936,
+      "time": 569.41366147995,
+      "source": "larger_box",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_s3max.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_s3max.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/results/D_L_s3max.png",
+      "balanced": 0.26489966028319656
+    },
+    {
+      "name": "L_no_warm",
+      "kw": {
+        "h_x": [
+          0.1,
+          0.1,
+          0.1,
+          0.7
+        ],
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 0.0,
+        "terminal_replace_weight": 1.0,
+        "warm_restart": false
+      },
+      "psnr": 14.027791976928711,
+      "ssim": 0.7474356889724731,
+      "lpips": 0.24985777586698532,
+      "psnr_unobs": 8.007192653508664,
+      "hf": 0.7538784966131022,
+      "dhf": 0.09456773105988447,
+      "time": 131.93660974502563,
+      "source": "exploration_v1",
+      "json_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/L_no_warm.json",
+      "pt_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/L_no_warm.pt",
+      "png_path": "/home/nvidia/Zach/MSFlow/PixelFlow/debug_IP4/larger_box/exploration/runs/L_no_warm.png",
+      "balanced": 0.3315858018583533
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Z_ULTIMATE",
+  "desc": "All-in: V (1e-4) + h_x multi-stage [0.2,0.4,0.7,1.0] + lam_stg3=20 + L=15 + F1",
+  "kw": {
+    "h_epsilon": 0.0001,
+    "h_x": [
+      0.2,
+      0.4,
+      0.7,
+      1.0
+    ],
+    "lambda_reg": [
+      50,
+      50,
+      50,
+      20
+    ],
+    "num_langevin": [
+      10,
+      10,
+      10,
+      15
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

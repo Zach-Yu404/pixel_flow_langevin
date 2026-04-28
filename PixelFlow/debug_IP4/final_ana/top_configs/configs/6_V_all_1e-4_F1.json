@@ -1,0 +1,8 @@
+{
+  "name": "6_V_all_1e-4_F1",
+  "rationale": "Extreme: h_eps=1e-4 globally. HF bullseye, most grain. Highest texture, lowest PSNR.",
+  "kw": {
+    "h_epsilon": 0.0001,
+    "terminal_replace_weight": 1.0
+  }
+}

@@ -1,0 +1,304 @@
+{
+  "R4_base": {
+    "psnr_obs": 39.30773973464966,
+    "psnr_all": 14.743632078170776,
+    "res": 46.11660385131836,
+    "time": 153.02279210090637,
+    "hf": 0.6177242378817644,
+    "kw": {}
+  },
+  "R4_F1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.758843183517456,
+    "res": 0.0,
+    "time": 153.23595571517944,
+    "hf": 0.6177242378817644,
+    "kw": {
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "L1_prox_1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.75417971611023,
+    "res": 0.0,
+    "time": 153.36743783950806,
+    "hf": 0.6177399948075357,
+    "kw": {
+      "lambda_prox": 1.0,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "L2_prox_5": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.736300706863403,
+    "res": 0.0,
+    "time": 152.89349722862244,
+    "hf": 0.6178344833199247,
+    "kw": {
+      "lambda_prox": 5.0,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "L3_prox_10": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.715404510498047,
+    "res": 0.0,
+    "time": 152.88385033607483,
+    "hf": 0.6180070733957539,
+    "kw": {
+      "lambda_prox": 10.0,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "L4_prox_50": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.589189291000366,
+    "res": 0.0,
+    "time": 152.39208507537842,
+    "hf": 0.6202645435341982,
+    "kw": {
+      "lambda_prox": 50.0,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "L5_prox_100": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.482206106185913,
+    "res": 0.0,
+    "time": 153.11921453475952,
+    "hf": 0.6258752798040603,
+    "kw": {
+      "lambda_prox": 100.0,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "M1_prox_stg3_1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.758601188659668,
+    "res": 0.0,
+    "time": 153.01475882530212,
+    "hf": 0.6177339312585269,
+    "kw": {
+      "lambda_prox": [
+        0,
+        0,
+        0,
+        1.0
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "M2_prox_stg3_10": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.75640058517456,
+    "res": 0.0,
+    "time": 153.29427671432495,
+    "hf": 0.6178262015827017,
+    "kw": {
+      "lambda_prox": [
+        0,
+        0,
+        0,
+        10.0
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "M3_prox_stg3_50": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.745509624481201,
+    "res": 0.0,
+    "time": 152.69910764694214,
+    "hf": 0.6183282526735723,
+    "kw": {
+      "lambda_prox": [
+        0,
+        0,
+        0,
+        50.0
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "N1_prox_decr_10to0": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.721277952194214,
+    "res": 0.0,
+    "time": 152.76390194892883,
+    "hf": 0.6179543884713703,
+    "kw": {
+      "lambda_prox": [
+        10.0,
+        5.0,
+        1.0,
+        0.0
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "N2_prox_decr_50to0": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.614932537078857,
+    "res": 0.0,
+    "time": 264.86589097976685,
+    "hf": 0.6206877318914014,
+    "kw": {
+      "lambda_prox": [
+        50.0,
+        10.0,
+        1.0,
+        0.0
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "O1_X4_prox1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.25035834312439,
+    "res": 0.0,
+    "time": 205.3355519771576,
+    "hf": 0.6491146820741819,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "lambda_prox": 1.0,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "O2_X4_prox10": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.134944677352905,
+    "res": 0.0,
+    "time": 265.1410171985626,
+    "hf": 0.65515413388683,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "lambda_prox": 10.0,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "O3_X4_prox50": {
+    "psnr_obs": Infinity,
+    "psnr_all": 13.304152488708496,
+    "res": 0.0,
+    "time": 264.79647731781006,
+    "hf": 0.7134403908417271,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "lambda_prox": 50.0,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "PR1_CB1_prox1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.20799732208252,
+    "res": 0.0,
+    "time": 264.1150505542755,
+    "hf": 0.6527000756940756,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.3
+      ],
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        20
+      ],
+      "lambda_prox": 1.0,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "PR2_CB1_prox10": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.097999334335327,
+    "res": 0.0,
+    "time": 265.24630904197693,
+    "hf": 0.6575593875926989,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.3
+      ],
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        20
+      ],
+      "lambda_prox": 10.0,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "PR3_CB1_prox50": {
+    "psnr_obs": Infinity,
+    "psnr_all": 13.376165628433228,
+    "res": 0.0,
+    "time": 261.1176769733429,
+    "hf": 0.7064894923497143,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.3
+      ],
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        20
+      ],
+      "lambda_prox": 50.0,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "Q1_paper_prox_eq_lamreg_50": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.589189291000366,
+    "res": 0.0,
+    "time": 260.0066878795624,
+    "hf": 0.6202645435341982,
+    "kw": {
+      "lambda_prox": 50.0,
+      "lambda_reg": 50.0,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "Q2_paper_X4_prox50": {
+    "psnr_obs": Infinity,
+    "psnr_all": 13.304152488708496,
+    "res": 0.0,
+    "time": 260.2271718978882,
+    "hf": 0.7134403908417271,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "lambda_prox": 50.0,
+      "terminal_replace_weight": 1.0
+    }
+  }
+}

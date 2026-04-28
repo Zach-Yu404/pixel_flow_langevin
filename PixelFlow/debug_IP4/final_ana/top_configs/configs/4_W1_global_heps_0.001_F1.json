@@ -1,0 +1,8 @@
+{
+  "name": "4_W1_global_heps_0.001_F1",
+  "rationale": "Classic W1: global low h_eps. Strong semantic bird in box. PSNR -3 to -4 dB.",
+  "kw": {
+    "h_epsilon": 0.001,
+    "terminal_replace_weight": 1.0
+  }
+}

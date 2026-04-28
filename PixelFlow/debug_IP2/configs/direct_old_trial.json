@@ -1,0 +1,48 @@
+{
+  "exp_name": "OLD_DIRECT_TRIAL",
+  "seed": 20000120,
+  "num_stages": 4,
+  "resolution": 256,
+  "num_examples": 2,
+  "sigma_n": 0.05,
+  "class_label": 10,
+  "shift": 1.0,
+  "inference_each_step": 3,
+  "guidance_scale": 0.0,
+  "num_langevin": 5,
+  "lambda_prior": 1e-05,
+  "proj": false,
+  "lr_base": 0.02,
+  "lr_min_ratio": 0.01,
+  "save_videos": false,
+  "combined_video_fps": 6,
+  "langevin_video_fps": 8,
+  "video_dpi": 220,
+  "video_batch_size": 4,
+  "record_every": 1,
+  "device": "cuda:0",
+  "data_dir": "/data/Zach_dataset/imagenet256/train/",
+  "model_dir": "../../pretrained_models/c2img",
+  "dict_path": "../results",
+  "active_operator": "box",
+  "measurement_mode": "measure",
+  "latent_update_mode": "f_x1",
+  "save_inner_latents": false,
+  "save_dict_to_pt": true,
+  "box_operator": {
+    "mask_type": "box",
+    "mask_len_range": [
+      80,
+      160
+    ],
+    "mask_prob_range": null
+  },
+  "random_operator": {
+    "mask_type": "random",
+    "mask_len_range": null,
+    "mask_prob_range": [
+      0.8,
+      0.8
+    ]
+  }
+}

@@ -1,0 +1,766 @@
+{
+  "all": [
+    {
+      "name": "he1e-2_hx01_L10_srs1e-3",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.1,
+        "num_langevin": 10,
+        "sigma_ref_sq": 0.001
+      },
+      "psnr": 18.816423416137695,
+      "ssim": 0.7019912600517273,
+      "lpips": 0.23661061376333237,
+      "psnr_unobs": 12.88837000739096,
+      "dhf": 0.004123508000021037,
+      "hf": 0.6650209931039086,
+      "time": 234.26570057868958
+    },
+    {
+      "name": "he1e-2_hx01_L10_srs1e-4",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.1,
+        "num_langevin": 10,
+        "sigma_ref_sq": 0.0001
+      },
+      "psnr": 18.82867431640625,
+      "ssim": 0.712196409702301,
+      "lpips": 0.234820157289505,
+      "psnr_unobs": 12.901322743949294,
+      "dhf": 0.0044236256409133645,
+      "hf": 0.6647208754630163,
+      "time": 231.29484248161316
+    },
+    {
+      "name": "he1e-2_hx01_L15_srs1e-3",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.1,
+        "num_langevin": 15,
+        "sigma_ref_sq": 0.001
+      },
+      "psnr": 19.893712043762207,
+      "ssim": 0.6824151277542114,
+      "lpips": 0.2621581703424454,
+      "psnr_unobs": 13.989604735099128,
+      "dhf": 0.04765811623511618,
+      "hf": 0.6063373989612878,
+      "time": 336.14353919029236
+    },
+    {
+      "name": "he1e-2_hx01_L15_srs1e-4",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.1,
+        "num_langevin": 15,
+        "sigma_ref_sq": 0.0001
+      },
+      "psnr": 19.932663917541504,
+      "ssim": 0.6972479820251465,
+      "lpips": 0.2592930495738983,
+      "psnr_unobs": 14.02915889227365,
+      "dhf": 0.04949931592957102,
+      "hf": 0.604496199266833,
+      "time": 333.28744435310364
+    },
+    {
+      "name": "he1e-2_hx01_L5_srs1e-3",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.1,
+        "num_langevin": 5,
+        "sigma_ref_sq": 0.001
+      },
+      "psnr": 19.44734477996826,
+      "ssim": 0.7310341000556946,
+      "lpips": 0.2509097680449486,
+      "psnr_unobs": 13.546975774339696,
+      "dhf": 0.11468106214559426,
+      "hf": 0.5544634389583354,
+      "time": 128.26266026496887
+    },
+    {
+      "name": "he1e-2_hx01_L5_srs1e-4",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.1,
+        "num_langevin": 5,
+        "sigma_ref_sq": 0.0001
+      },
+      "psnr": 19.45527935028076,
+      "ssim": 0.734719306230545,
+      "lpips": 0.25118356943130493,
+      "psnr_unobs": 13.556642550285018,
+      "dhf": 0.1156075734531532,
+      "hf": 0.5535369276507764,
+      "time": 126.93231391906738
+    },
+    {
+      "name": "he1e-2_hx02_L10_srs1e-3",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.2,
+        "num_langevin": 10,
+        "sigma_ref_sq": 0.001
+      },
+      "psnr": 19.128442764282227,
+      "ssim": 0.6585497260093689,
+      "lpips": 0.27290210127830505,
+      "psnr_unobs": 13.214878086044095,
+      "dhf": 0.1028455191094847,
+      "hf": 0.590548704811359,
+      "time": 452.99166774749756
+    },
+    {
+      "name": "he1e-2_hx02_L10_srs1e-4",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.2,
+        "num_langevin": 10,
+        "sigma_ref_sq": 0.0001
+      },
+      "psnr": 19.17363452911377,
+      "ssim": 0.672841489315033,
+      "lpips": 0.2695622891187668,
+      "psnr_unobs": 13.260408291293494,
+      "dhf": 0.10621138273410424,
+      "hf": 0.5871828411867395,
+      "time": 233.04542636871338
+    },
+    {
+      "name": "he1e-2_hx02_L15_srs1e-3",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.2,
+        "num_langevin": 15,
+        "sigma_ref_sq": 0.001
+      },
+      "psnr": 19.566322326660156,
+      "ssim": 0.6480076909065247,
+      "lpips": 0.27040737867355347,
+      "psnr_unobs": 13.666308765465384,
+      "dhf": 0.04700937892019463,
+      "hf": 0.6463848450006491,
+      "time": 339.995539188385
+    },
+    {
+      "name": "he1e-2_hx02_L15_srs1e-4",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.2,
+        "num_langevin": 15,
+        "sigma_ref_sq": 0.0001
+      },
+      "psnr": 19.62802505493164,
+      "ssim": 0.6660410165786743,
+      "lpips": 0.2657310515642166,
+      "psnr_unobs": 13.729280355033705,
+      "dhf": 0.048265962467508805,
+      "hf": 0.6451282614533349,
+      "time": 339.06375312805176
+    },
+    {
+      "name": "he1e-2_hx02_L5_srs1e-3",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.2,
+        "num_langevin": 5,
+        "sigma_ref_sq": 0.001
+      },
+      "psnr": 19.29293155670166,
+      "ssim": 0.6902192533016205,
+      "lpips": 0.25314152240753174,
+      "psnr_unobs": 13.36974828018359,
+      "dhf": 0.05151107882926287,
+      "hf": 0.6024844363671411,
+      "time": 125.26894474029541
+    },
+    {
+      "name": "he1e-2_hx02_L5_srs1e-4",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.2,
+        "num_langevin": 5,
+        "sigma_ref_sq": 0.0001
+      },
+      "psnr": 19.311187744140625,
+      "ssim": 0.6980166435241699,
+      "lpips": 0.2518262714147568,
+      "psnr_unobs": 13.388453971509872,
+      "dhf": 0.052836134034273785,
+      "hf": 0.6011593811621302,
+      "time": 124.49674582481384
+    },
+    {
+      "name": "he1e-3_hx01_L10_srs1e-3",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.1,
+        "num_langevin": 10,
+        "sigma_ref_sq": 0.001
+      },
+      "psnr": 16.136119842529297,
+      "ssim": 0.6851335763931274,
+      "lpips": 0.23095078021287918,
+      "psnr_unobs": 10.162117200022372,
+      "dhf": 0.05784693603168667,
+      "hf": 0.698863530473584,
+      "time": 234.5574734210968
+    },
+    {
+      "name": "he1e-3_hx01_L10_srs1e-4",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.1,
+        "num_langevin": 10,
+        "sigma_ref_sq": 0.0001
+      },
+      "psnr": 16.12700605392456,
+      "ssim": 0.6960569322109222,
+      "lpips": 0.22677350789308548,
+      "psnr_unobs": 10.151339146116587,
+      "dhf": 0.05817134202926,
+      "hf": 0.6991879364711573,
+      "time": 231.6044738292694
+    },
+    {
+      "name": "he1e-3_hx01_L15_srs1e-3",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.1,
+        "num_langevin": 15,
+        "sigma_ref_sq": 0.001
+      },
+      "psnr": 17.37268352508545,
+      "ssim": 0.6628857553005219,
+      "lpips": 0.265865296125412,
+      "psnr_unobs": 11.414869709634765,
+      "dhf": 0.07029290492670481,
+      "hf": 0.6212523211809229,
+      "time": 340.9790825843811
+    },
+    {
+      "name": "he1e-3_hx01_L15_srs1e-4",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.1,
+        "num_langevin": 15,
+        "sigma_ref_sq": 0.0001
+      },
+      "psnr": 17.38584041595459,
+      "ssim": 0.6765649318695068,
+      "lpips": 0.26176317036151886,
+      "psnr_unobs": 11.426467546191313,
+      "dhf": 0.07125969303805901,
+      "hf": 0.6202855330695687,
+      "time": 342.36795353889465
+    },
+    {
+      "name": "he1e-3_hx01_L5_srs1e-3",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.1,
+        "num_langevin": 5,
+        "sigma_ref_sq": 0.001
+      },
+      "psnr": 16.569554328918457,
+      "ssim": 0.6984044313430786,
+      "lpips": 0.24519117176532745,
+      "psnr_unobs": 10.611484038964957,
+      "dhf": 0.0023995963174247015,
+      "hf": 0.643416190759322,
+      "time": 128.7149121761322
+    },
+    {
+      "name": "he1e-3_hx01_L5_srs1e-4",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.1,
+        "num_langevin": 5,
+        "sigma_ref_sq": 0.0001
+      },
+      "psnr": 16.56819772720337,
+      "ssim": 0.7028115093708038,
+      "lpips": 0.2434481605887413,
+      "psnr_unobs": 10.609447651409601,
+      "dhf": 0.0022253610745641694,
+      "hf": 0.6432419555164615,
+      "time": 127.474862575531
+    },
+    {
+      "name": "he1e-3_hx02_L10_srs1e-3",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.2,
+        "num_langevin": 10,
+        "sigma_ref_sq": 0.001
+      },
+      "psnr": 16.010415077209473,
+      "ssim": 0.6555843353271484,
+      "lpips": 0.2448500543832779,
+      "psnr_unobs": 10.045162590428038,
+      "dhf": 0.06896868916959387,
+      "hf": 0.7122326075812203,
+      "time": 469.65598130226135
+    },
+    {
+      "name": "he1e-3_hx02_L10_srs1e-4",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.2,
+        "num_langevin": 10,
+        "sigma_ref_sq": 0.0001
+      },
+      "psnr": 15.975618362426758,
+      "ssim": 0.669539749622345,
+      "lpips": 0.24038128554821014,
+      "psnr_unobs": 10.008489675618783,
+      "dhf": 0.07041855145323694,
+      "hf": 0.7136824698648634,
+      "time": 298.3012025356293
+    },
+    {
+      "name": "he1e-3_hx02_L15_srs1e-3",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.2,
+        "num_langevin": 15,
+        "sigma_ref_sq": 0.001
+      },
+      "psnr": 16.18956184387207,
+      "ssim": 0.6459794044494629,
+      "lpips": 0.26482342183589935,
+      "psnr_unobs": 10.22865893027037,
+      "dhf": 0.059420996164168516,
+      "hf": 0.702684914575795,
+      "time": 333.7405197620392
+    },
+    {
+      "name": "he1e-3_hx02_L15_srs1e-4",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.2,
+        "num_langevin": 15,
+        "sigma_ref_sq": 0.0001
+      },
+      "psnr": 16.191280364990234,
+      "ssim": 0.6623975336551666,
+      "lpips": 0.25925976037979126,
+      "psnr_unobs": 10.23047467451093,
+      "dhf": 0.060518961566542684,
+      "hf": 0.7037828799781691,
+      "time": 334.18672585487366
+    },
+    {
+      "name": "he1e-3_hx02_L5_srs1e-3",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.2,
+        "num_langevin": 5,
+        "sigma_ref_sq": 0.001
+      },
+      "psnr": 16.505839347839355,
+      "ssim": 0.6647983193397522,
+      "lpips": 0.2535594403743744,
+      "psnr_unobs": 10.535583321316238,
+      "dhf": 0.053158005722300894,
+      "hf": 0.6383872203853268,
+      "time": 127.06291675567627
+    },
+    {
+      "name": "he1e-3_hx02_L5_srs1e-4",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "terminal_replace_weight": 0.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.2,
+        "num_langevin": 5,
+        "sigma_ref_sq": 0.0001
+      },
+      "psnr": 16.50392770767212,
+      "ssim": 0.6756492555141449,
+      "lpips": 0.2494729608297348,
+      "psnr_unobs": 10.531438356297862,
+      "dhf": 0.05331017637035618,
+      "hf": 0.6382350497372715,
+      "time": 127.53707480430603
+    },
+    {
+      "name": "he1e-2_hx01_L10_tr0 (sw2 srs=1e-2)",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.1,
+        "num_langevin": 10,
+        "terminal_replace_weight": 0.0
+      },
+      "psnr": 18.575650215148926,
+      "ssim": 0.6655201017856598,
+      "lpips": 0.2789776176214218,
+      "psnr_unobs": 12.648066136695286,
+      "dhf": 0.11255495616221256,
+      "hf": 0.5660950445059059,
+      "time": 459.10050797462463
+    },
+    {
+      "name": "he1e-2_hx01_L15_tr0 (sw2 srs=1e-2)",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.1,
+        "num_langevin": 15,
+        "terminal_replace_weight": 0.0
+      },
+      "psnr": 18.396886825561523,
+      "ssim": 0.6461145281791687,
+      "lpips": 0.2744429409503937,
+      "psnr_unobs": 12.478768449117114,
+      "dhf": 0.04302702236380318,
+      "hf": 0.6236722332839628,
+      "time": 694.2439241409302
+    },
+    {
+      "name": "he1e-2_hx01_L5_tr0 (sw2 srs=1e-2)",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.1,
+        "num_langevin": 5,
+        "terminal_replace_weight": 0.0
+      },
+      "psnr": 19.177305221557617,
+      "ssim": 0.7116837501525879,
+      "lpips": 0.25515782833099365,
+      "psnr_unobs": 13.261952945541163,
+      "dhf": 0.12254143862378963,
+      "hf": 0.5561085620443288,
+      "time": 265.1187117099762
+    },
+    {
+      "name": "he1e-2_hx02_L10_tr0 (sw2 srs=1e-2)",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.2,
+        "num_langevin": 10,
+        "terminal_replace_weight": 0.0
+      },
+      "psnr": 17.636956691741943,
+      "ssim": 0.6268023550510406,
+      "lpips": 0.26244647800922394,
+      "psnr_unobs": 11.718442085928114,
+      "dhf": 0.13132545567946274,
+      "hf": 0.7642374076470244,
+      "time": 446.41233134269714
+    },
+    {
+      "name": "he1e-2_hx02_L15_tr0 (sw2 srs=1e-2)",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.2,
+        "num_langevin": 15,
+        "terminal_replace_weight": 0.0
+      },
+      "psnr": 18.184568405151367,
+      "ssim": 0.6103076040744781,
+      "lpips": 0.286409929394722,
+      "psnr_unobs": 12.28888925383492,
+      "dhf": 0.016170152502954727,
+      "hf": 0.6490821044705164,
+      "time": 667.4140675067902
+    },
+    {
+      "name": "he1e-2_hx02_L5_tr0 (sw2 srs=1e-2)",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "h_epsilon": 0.01,
+        "h_x": 0.2,
+        "num_langevin": 5,
+        "terminal_replace_weight": 0.0
+      },
+      "psnr": 18.37343692779541,
+      "ssim": 0.6645870208740234,
+      "lpips": 0.2569143772125244,
+      "psnr_unobs": 12.445721508974113,
+      "dhf": 0.053779207189490474,
+      "hf": 0.6129200484582755,
+      "time": 264.08024406433105
+    },
+    {
+      "name": "he1e-3_hx01_L10_tr0 (sw2 srs=1e-2)",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.1,
+        "num_langevin": 10,
+        "terminal_replace_weight": 0.0
+      },
+      "psnr": 16.982275009155273,
+      "ssim": 0.6521200239658356,
+      "lpips": 0.24178186058998108,
+      "psnr_unobs": 11.037951686748595,
+      "dhf": 0.0769057414911205,
+      "hf": 0.7227429501055578,
+      "time": 449.5747694969177
+    },
+    {
+      "name": "he1e-3_hx01_L15_tr0 (sw2 srs=1e-2)",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.1,
+        "num_langevin": 15,
+        "terminal_replace_weight": 0.0
+      },
+      "psnr": 17.43842124938965,
+      "ssim": 0.6277063190937042,
+      "lpips": 0.27805379033088684,
+      "psnr_unobs": 11.498133303535436,
+      "dhf": 0.03927342793255684,
+      "hf": 0.6411403495281205,
+      "time": 649.0321357250214
+    },
+    {
+      "name": "he1e-3_hx01_L5_tr0 (sw2 srs=1e-2)",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.1,
+        "num_langevin": 5,
+        "terminal_replace_weight": 0.0
+      },
+      "psnr": 17.69536542892456,
+      "ssim": 0.6873593032360077,
+      "lpips": 0.23922182619571686,
+      "psnr_unobs": 11.7753757525108,
+      "dhf": 0.03216191824276304,
+      "hf": 0.6779991268572003,
+      "time": 235.98811411857605
+    },
+    {
+      "name": "he1e-3_hx02_L10_tr0 (sw2 srs=1e-2)",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.2,
+        "num_langevin": 10,
+        "terminal_replace_weight": 0.0
+      },
+      "psnr": 16.567999839782715,
+      "ssim": 0.606349915266037,
+      "lpips": 0.2836216986179352,
+      "psnr_unobs": 10.61940236239893,
+      "dhf": 0.014152276309035927,
+      "hf": 0.6619988004575057,
+      "time": 466.27567887306213
+    },
+    {
+      "name": "he1e-3_hx02_L15_tr0 (sw2 srs=1e-2)",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.2,
+        "num_langevin": 15,
+        "terminal_replace_weight": 0.0
+      },
+      "psnr": 17.07469367980957,
+      "ssim": 0.5937543511390686,
+      "lpips": 0.2957547903060913,
+      "psnr_unobs": 11.138234258904468,
+      "dhf": 0.013462070722539576,
+      "hf": 0.6896131474890812,
+      "time": 680.0800881385803
+    },
+    {
+      "name": "he1e-3_hx02_L5_tr0 (sw2 srs=1e-2)",
+      "kw": {
+        "lambda_reg": 150.0,
+        "lambda_prox": 150.0,
+        "noise_scale": 1.0,
+        "guidance_scale": 2.0,
+        "h_epsilon": 0.001,
+        "h_x": 0.2,
+        "num_langevin": 5,
+        "terminal_replace_weight": 0.0
+      },
+      "psnr": 16.671589374542236,
+      "ssim": 0.6377162337303162,
+      "lpips": 0.25969451665878296,
+      "psnr_unobs": 10.715075446940343,
+      "dhf": 0.015109093408815388,
+      "hf": 0.6653046840518619,
+      "time": 252.64440178871155
+    },
+    {
+      "name": "(BASE) noise=1 default",
+      "kw": {
+        "h_x": 0.3,
+        "h_epsilon": 0.001,
+        "num_langevin": 5,
+        "lambda_reg": 50.0,
+        "noise_scale": 1.0,
+        "terminal_replace_weight": 1.0
+      },
+      "psnr": 14.694897651672363,
+      "ssim": 0.7240175306797028,
+      "lpips": 0.18632180988788605,
+      "psnr_unobs": 8.674298042125596,
+      "dhf": 0.10933839109080912,
+      "hf": 0.7522953466439727,
+      "time": 146.72321939468384
+    }
+  ]
+}

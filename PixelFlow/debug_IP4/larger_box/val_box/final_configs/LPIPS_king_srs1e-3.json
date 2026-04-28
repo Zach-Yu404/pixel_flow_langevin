@@ -1,0 +1,27 @@
+{
+  "tag": "LPIPS_king_srs1e-3",
+  "srs": "1e-3",
+  "level": "LPIPS_king",
+  "source_run": "folder_woNoiseLast/runs/he1e-3_hx01_L10_srs1e-3.json",
+  "kw": {
+    "lambda_reg": 150.0,
+    "lambda_prox": 150.0,
+    "noise_scale": 1.0,
+    "guidance_scale": 2.0,
+    "terminal_replace_weight": 0.0,
+    "h_epsilon": 0.001,
+    "h_x": 0.1,
+    "num_langevin": 10,
+    "sigma_ref_sq": 0.001
+  },
+  "metrics": {
+    "psnr": 16.136119842529297,
+    "ssim": 0.6851335763931274,
+    "lpips": 0.23095078021287918,
+    "psnr_unobs": 10.162117200022372,
+    "hf": 0.698863530473584,
+    "dhf": 0.05784693603168667,
+    "gt_hf": 0.6410165944418973
+  },
+  "time_s": 234.5574734210968
+}

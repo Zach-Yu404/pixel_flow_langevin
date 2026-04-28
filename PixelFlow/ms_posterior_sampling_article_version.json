@@ -1,0 +1,63 @@
+{
+  "_comment_general": "PRINCIPLE algorithm config — PRogressive INterpolant with CG-Inner Preconditioned Langevin Estimation",
+
+  "exp_name": "trials",
+  "seed": 42,
+  "num_stages": 4,
+  "resolution": 256,
+  "num_examples": 4,
+  "sigma_n": 0.05,
+  "class_label": 10,
+  "shift": 1.0,
+  "inference_each_step": 10,
+  "guidance_scale": 0.0,
+
+  "_comment_langevin": "num_langevin=S_k (Langevin steps per time point); h_x=step size for x1 ULA; h_epsilon=step size for epsilon ULA",
+  "num_langevin": 20,
+  "h_x": 1e-3,
+  "h_epsilon": 1e-3,
+
+  "_comment_regularization": "lambda_x=ridge in WLS (Eq.9); lambda_reg=ridge in CG preconditioner P_k (step e); rho_s/rho_e=WLS weights for start/end endpoints (scalar or per-stage list)",
+  "lambda_x": 0.01,
+  "lambda_reg": 0.01,
+  "rho_s": [0.1, 0.3, 0.6, 1.0],
+  "rho_e": 1.0,
+
+  "_comment_cg": "cg_tol=CG convergence tolerance; cg_max_iter=max CG iterations (used in both WLS and preconditioned ULA)",
+  "cg_tol": 1e-5,
+  "cg_max_iter": 50,
+
+  "_comment_output": "save_videos/save_dict_to_pt control output; record_every=record Langevin inner traj every N steps",
+  "save_videos": true,
+  "combined_video_fps": 6,
+  "langevin_video_fps": 8,
+  "video_dpi": 220,
+  "video_batch_size": 4,
+  "record_every": 1,
+
+  "device": "cuda:0",
+  "data_dir": "/home/../mnt/data3/ruy45/dataset/imageNet256/ILSVRC/Data/CLS-LOC/train/",
+  "model_dir": "./pretrained_models/c2img",
+  "dict_path": "./trajectory_videos/posterior_sampling",
+
+  "_comment_operator": "active_operator selects box/random; measurement_mode='measure' adds N(0,sigma_n^2) noise to y (consistent with likelihood 1/sigma_n^2 weight); 'call' gives noiseless y (use sigma_n≈0 or very small for noiseless inverse problem)",
+  "active_operator": "box",
+  "measurement_mode": "measure",
+
+  "_comment_legacy": "latent_update_mode kept for load_run_config validation; not used by PRINCIPLE algorithm",
+  "latent_update_mode": "f_x1",
+
+  "save_inner_latents": false,
+  "save_dict_to_pt": false,
+
+  "box_operator": {
+    "mask_type": "box",
+    "mask_len_range": [80, 160],
+    "mask_prob_range": null
+  },
+  "random_operator": {
+    "mask_type": "random",
+    "mask_len_range": null,
+    "mask_prob_range": [0.8, 0.8]
+  }
+}

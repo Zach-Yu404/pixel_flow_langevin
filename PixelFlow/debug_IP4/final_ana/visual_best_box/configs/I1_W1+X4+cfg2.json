@@ -1,0 +1,15 @@
+{
+  "name": "I1_W1+X4+cfg2",
+  "desc": "WINNER3 with CFG=2.0 (was dead in earlier tests; quick retest at new recipe)",
+  "kw": {
+    "h_epsilon": 0.001,
+    "h_x": [
+      0.1,
+      0.1,
+      0.1,
+      0.7
+    ],
+    "guidance_scale": 2.0,
+    "terminal_replace_weight": 1.0
+  }
+}

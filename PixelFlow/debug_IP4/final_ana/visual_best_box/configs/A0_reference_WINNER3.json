@@ -1,0 +1,14 @@
+{
+  "name": "A0_reference_WINNER3",
+  "desc": "Reference: WINNER3 (W1 + X4 h_x=0.7 + F1). Baseline of best known visual.",
+  "kw": {
+    "h_epsilon": 0.001,
+    "h_x": [
+      0.1,
+      0.1,
+      0.1,
+      0.7
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

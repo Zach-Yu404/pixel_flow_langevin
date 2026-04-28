@@ -1,0 +1,14 @@
+{
+  "name": "D1_V+X4",
+  "desc": "V (h_eps=1e-4) + h_x stg3=0.7. Maximum eps entropy + X4 amplification.",
+  "kw": {
+    "h_epsilon": 0.0001,
+    "h_x": [
+      0.1,
+      0.1,
+      0.1,
+      0.7
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

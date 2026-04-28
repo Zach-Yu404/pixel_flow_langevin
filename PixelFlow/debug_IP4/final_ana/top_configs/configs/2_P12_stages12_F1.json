@@ -1,0 +1,13 @@
+{
+  "name": "2_P12_stages12_F1",
+  "rationale": "Balanced: stages 1+2 LO. PSNR cost ~0.8 dB, HF shifts toward GT.",
+  "kw": {
+    "h_epsilon": [
+      0.01,
+      0.001,
+      0.001,
+      0.01
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

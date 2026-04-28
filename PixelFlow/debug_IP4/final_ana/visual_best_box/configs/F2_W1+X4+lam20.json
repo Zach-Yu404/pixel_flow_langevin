@@ -1,0 +1,20 @@
+{
+  "name": "F2_W1+X4+lam20",
+  "desc": "W1 + X4 h_x=0.7 + lambda_reg stg3=20 \u2014 more moderate 3-lever",
+  "kw": {
+    "h_epsilon": 0.001,
+    "h_x": [
+      0.1,
+      0.1,
+      0.1,
+      0.7
+    ],
+    "lambda_reg": [
+      50,
+      50,
+      50,
+      20
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

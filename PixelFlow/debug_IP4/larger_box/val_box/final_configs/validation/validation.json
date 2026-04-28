@@ -1,0 +1,94 @@
+[
+  {
+    "name": "base_fd0_tr0",
+    "kw": {
+      "h_epsilon": 0.01,
+      "h_x": 0.1,
+      "num_langevin": 10,
+      "lambda_reg": 150.0,
+      "lambda_prox": 150.0,
+      "noise_scale": 1.0,
+      "guidance_scale": 2.0,
+      "sigma_ref_sq": 0.0001,
+      "terminal_replace_weight": 0.0,
+      "final_denoise": false
+    },
+    "psnr": 19.206419944763184,
+    "ssim": 0.7008863985538483,
+    "lpips": 0.2556901276111603,
+    "psnr_unobs": 13.280026842200309,
+    "hf": 0.6171554487347203,
+    "dhf": 0.0630416435713893,
+    "gt_hf": 0.6801970923061096,
+    "time": 233.40681672096252
+  },
+  {
+    "name": "base_fd1_tr0",
+    "kw": {
+      "h_epsilon": 0.01,
+      "h_x": 0.1,
+      "num_langevin": 10,
+      "lambda_reg": 150.0,
+      "lambda_prox": 150.0,
+      "noise_scale": 1.0,
+      "guidance_scale": 2.0,
+      "sigma_ref_sq": 0.0001,
+      "terminal_replace_weight": 0.0,
+      "final_denoise": true
+    },
+    "psnr": 19.215457916259766,
+    "ssim": 0.703203946352005,
+    "lpips": 0.25457871705293655,
+    "psnr_unobs": 13.286601597912306,
+    "hf": 0.6164875612008343,
+    "dhf": 0.06370953110527533,
+    "gt_hf": 0.6801970923061096,
+    "time": 231.26610255241394
+  },
+  {
+    "name": "base_fd0_tr1",
+    "kw": {
+      "h_epsilon": 0.01,
+      "h_x": 0.1,
+      "num_langevin": 10,
+      "lambda_reg": 150.0,
+      "lambda_prox": 150.0,
+      "noise_scale": 1.0,
+      "guidance_scale": 2.0,
+      "sigma_ref_sq": 0.0001,
+      "terminal_replace_weight": 1.0,
+      "final_denoise": false
+    },
+    "psnr": 19.300622940063477,
+    "ssim": 0.8057100772857666,
+    "lpips": 0.1480288878083229,
+    "psnr_unobs": 13.280026842200309,
+    "hf": 0.6171554487347203,
+    "dhf": 0.0630416435713893,
+    "gt_hf": 0.6801970923061096,
+    "time": 229.7922990322113
+  },
+  {
+    "name": "base_fd1_tr1",
+    "kw": {
+      "h_epsilon": 0.01,
+      "h_x": 0.1,
+      "num_langevin": 10,
+      "lambda_reg": 150.0,
+      "lambda_prox": 150.0,
+      "noise_scale": 1.0,
+      "guidance_scale": 2.0,
+      "sigma_ref_sq": 0.0001,
+      "terminal_replace_weight": 1.0,
+      "final_denoise": true
+    },
+    "psnr": 19.30719757080078,
+    "ssim": 0.8064951300621033,
+    "lpips": 0.14778118580579758,
+    "psnr_unobs": 13.286601597912306,
+    "hf": 0.6164875612008343,
+    "dhf": 0.06370953110527533,
+    "gt_hf": 0.6801970923061096,
+    "time": 229.50169587135315
+  }
+]

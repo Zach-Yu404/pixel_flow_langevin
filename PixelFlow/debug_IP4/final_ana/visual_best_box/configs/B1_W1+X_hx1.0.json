@@ -1,0 +1,14 @@
+{
+  "name": "B1_W1+X_hx1.0",
+  "desc": "More aggressive h_x stg3 = 1.0 (doubles the prior-score amplification)",
+  "kw": {
+    "h_epsilon": 0.001,
+    "h_x": [
+      0.1,
+      0.1,
+      0.1,
+      1.0
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

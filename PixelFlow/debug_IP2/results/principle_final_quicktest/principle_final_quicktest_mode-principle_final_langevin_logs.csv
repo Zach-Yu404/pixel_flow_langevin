@@ -1,0 +1,1 @@
+source,outer_step,inner_step,loss,l1,l2,l3,grad_norm,delta_norm,z_mean,z_std

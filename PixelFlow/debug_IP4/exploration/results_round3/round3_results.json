@@ -1,0 +1,456 @@
+{
+  "R3_base": {
+    "psnr_obs": 38.68098974227905,
+    "psnr_all": 19.82029438018799,
+    "res": 53.276100158691406,
+    "time": 158.83496379852295,
+    "hf": 0.5724482320789753,
+    "kw": {}
+  },
+  "R3_F1_termrep1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 19.877119064331055,
+    "res": 0.0,
+    "time": 155.6786675453186,
+    "hf": 0.5724482320789753,
+    "kw": {
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "X1_hx0.2_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 19.80281949043274,
+    "res": 0.0,
+    "time": 157.0768301486969,
+    "hf": 0.5748727564961158,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.2
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "X2_hx0.3_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 19.695035219192505,
+    "res": 0.0,
+    "time": 156.0676143169403,
+    "hf": 0.5779764894565994,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.3
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "X3_hx0.5_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 19.409817457199097,
+    "res": 0.0,
+    "time": 152.15702843666077,
+    "hf": 0.5861077103881318,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.5
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "X4_hx0.7_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 19.077928066253662,
+    "res": 0.0,
+    "time": 154.10677552223206,
+    "hf": 0.5960916728465278,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "X5_hx1.0_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 18.62929105758667,
+    "res": 0.0,
+    "time": 152.92574501037598,
+    "hf": 0.6080560847047655,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        1.0
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "CB1_hx0.3_lam20_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 18.94521951675415,
+    "res": 0.0,
+    "time": 154.68719792366028,
+    "hf": 0.5996946648363025,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.3
+      ],
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        20
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "CB2_hx0.3_lam10_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 18.021405935287476,
+    "res": 0.0,
+    "time": 157.65014362335205,
+    "hf": 0.6213199859628542,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.3
+      ],
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        10
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "CB3_hx0.5_lam20_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 18.342288732528687,
+    "res": 0.0,
+    "time": 156.5655460357666,
+    "hf": 0.6136686428596405,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.5
+      ],
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        20
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "CB4_hx0.5_lam10_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 16.211233139038086,
+    "res": 0.0,
+    "time": 157.0146074295044,
+    "hf": 0.6819597775804349,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.5
+      ],
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        10
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "HX1_stg23_0.3_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 19.353710412979126,
+    "res": 0.0,
+    "time": 157.75735473632812,
+    "hf": 0.585656600914092,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.3,
+        0.3
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "HX2_stg23_0.2_0.5_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 19.1438090801239,
+    "res": 0.0,
+    "time": 157.85674452781677,
+    "hf": 0.5918975297194276,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.2,
+        0.5
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "HXL1_hx0.3_L15_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 19.395086765289307,
+    "res": 0.0,
+    "time": 189.87963318824768,
+    "hf": 0.5857296479363889,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.3
+      ],
+      "num_langevin": [
+        10,
+        10,
+        10,
+        15
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "HXL2_hx0.5_L15_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 18.862639665603638,
+    "res": 0.0,
+    "time": 189.19031405448914,
+    "hf": 0.6008793933630115,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.5
+      ],
+      "num_langevin": [
+        10,
+        10,
+        10,
+        15
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "BT1_lam_stg3_7_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 19.040099382400513,
+    "res": 0.0,
+    "time": 154.4685561656952,
+    "hf": 0.5951188484793088,
+    "kw": {
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        7
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "BT2_lam_stg3_10_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 19.37729239463806,
+    "res": 0.0,
+    "time": 152.40893864631653,
+    "hf": 0.5862823419521603,
+    "kw": {
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        10
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "BT3_lam_stg3_15_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 19.61555242538452,
+    "res": 0.0,
+    "time": 155.87517499923706,
+    "hf": 0.579815984433637,
+    "kw": {
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        15
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "AB1_hx0.01_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 14.80691909790039,
+    "res": 0.0,
+    "time": 151.95857620239258,
+    "hf": 0.5307260007797869,
+    "kw": {
+      "h_x": 0.01,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "AB2_hx2.0_stg3_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 17.147306203842163,
+    "res": 0.0,
+    "time": 157.5385856628418,
+    "hf": 0.6502994406049424,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        2.0
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "AB3_heps0.1_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 16.8776273727417,
+    "res": 0.0,
+    "time": 152.5776882171631,
+    "hf": 0.6043533101116697,
+    "kw": {
+      "h_epsilon": 0.1,
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "ULTRA1_hx0.3_lam10_dpsZ10_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 18.032501935958862,
+    "res": 0.0,
+    "time": 156.75968432426453,
+    "hf": 0.6203956163378117,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.3
+      ],
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        10
+      ],
+      "dps_kick_zeta": [
+        0,
+        0,
+        0,
+        10
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "ULTRA2_hx0.5_lam10_dpsZ10_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 16.01936936378479,
+    "res": 0.0,
+    "time": 153.9661614894867,
+    "hf": 0.6852086814718129,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.5
+      ],
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        10
+      ],
+      "dps_kick_zeta": [
+        0,
+        0,
+        0,
+        10
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "ULTRA3_hx0.5_noise0.3_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 19.337059259414673,
+    "res": 0.0,
+    "time": 156.22373032569885,
+    "hf": 0.590289998580614,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.5
+      ],
+      "noise_scale": [
+        0,
+        0,
+        0,
+        0.3
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  },
+  "ULTRA4_hx0.7_noise0.2_lam15_term1": {
+    "psnr_obs": Infinity,
+    "psnr_all": 16.660456657409668,
+    "res": 0.0,
+    "time": 157.72265911102295,
+    "hf": 0.6765157554342274,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "noise_scale": [
+        0,
+        0,
+        0,
+        0.2
+      ],
+      "lambda_reg": [
+        50,
+        50,
+        50,
+        15
+      ],
+      "terminal_replace_weight": 1.0
+    }
+  }
+}

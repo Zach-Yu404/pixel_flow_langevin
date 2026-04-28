@@ -1,0 +1,123 @@
+Loading model...
+  GT from trajectory_videos/posterior_sampling/baseline_05/baseline_05_mode-f_x1.pt
+Starting Initialization...
+Model loaded.
+
+
+============================================================
+  BOX INPAINTING
+============================================================
+  baseline (baseline)... /home/nvidia/miniconda/envs/pixelflow/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3824: RuntimeWarning: Mean of empty slice
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/nvidia/miniconda/envs/pixelflow/lib/python3.12/site-packages/numpy/_core/_methods.py:142: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+res=41  PSNR_obs=39.78  PSNR_all=13.23  P/D_S3=nan  t=154.8s
+  nb_h0.005 (null_boost)... res=39  PSNR_obs=40.08  PSNR_all=13.15  P/D_S3=0.09  t=154.2s
+  nb_h0.01 (null_boost)... res=249  PSNR_obs=31.98  PSNR_all=12.80  P/D_S3=0.03  t=150.9s
+  nb_h0.02 (null_boost)... res=1431  PSNR_obs=24.39  PSNR_all=12.16  P/D_S3=0.01  t=143.6s
+  nb_h0.05 (null_boost)... res=9082  PSNR_obs=16.36  PSNR_all=8.59  P/D_S3=0.00  t=138.0s
+  nb_h0.10 (null_boost)... res=35849  PSNR_obs=10.40  PSNR_all=6.57  P/D_S3=0.00  t=135.7s
+  nb_staged_A (null_boost)... res=80  PSNR_obs=36.94  PSNR_all=11.64  P/D_S3=0.05  t=154.5s
+  nb_staged_B (null_boost)... res=731  PSNR_obs=27.31  PSNR_all=9.12  P/D_S3=0.02  t=152.3s
+  nb_clip100 (null_boost)... res=77  PSNR_obs=37.07  PSNR_all=12.74  P/D_S3=0.01  t=145.9s
+  nb_clip1k (null_boost)... res=5038  PSNR_obs=18.92  PSNR_all=11.26  P/D_S3=0.01  t=142.1s
+  lam20 (reduced_lambda)... res=37  PSNR_obs=40.31  PSNR_all=13.03  P/D_S3=nan  t=163.9s
+  lam10 (reduced_lambda)... res=35  PSNR_obs=40.48  PSNR_all=12.60  P/D_S3=nan  t=168.3s
+  lam30 (reduced_lambda)... res=38  PSNR_obs=40.13  PSNR_all=13.20  P/D_S3=nan  t=158.4s
+  tik_lam25 (tikhonov)... res=0  PSNR_obs=59.37  PSNR_all=9.13  P/D_S3=nan  t=18.8s
+  tik_lam50 (tikhonov)... res=2  PSNR_obs=53.85  PSNR_all=9.20  P/D_S3=nan  t=17.8s
+  tik_lam100 (tikhonov)... res=7  PSNR_obs=47.75  PSNR_all=9.25  P/D_S3=nan  t=17.2s
+  tik_lam200 (tikhonov)... res=29  PSNR_obs=41.27  PSNR_all=9.30  P/D_S3=nan  t=16.3s
+  tik_l50_20s (tikhonov)... res=1  PSNR_obs=57.67  PSNR_all=8.81  P/D_S3=nan  t=32.8s
+  tik_l100_20s (tikhonov)... res=3  PSNR_obs=51.63  PSNR_all=8.86  P/D_S3=nan  t=31.4s
+  tik_l50_30s (tikhonov)... res=0  PSNR_obs=59.61  PSNR_all=8.67  P/D_S3=nan  t=47.9s
+  tik_stgA (tikhonov)... res=7  PSNR_obs=47.73  PSNR_all=9.21  P/D_S3=nan  t=18.1s
+  tik_stgB (tikhonov)... res=30  PSNR_obs=41.24  PSNR_all=9.23  P/D_S3=nan  t=17.5s
+
+============================================================
+  RANDOM INPAINTING
+============================================================
+  baseline (baseline)... res=58  PSNR_obs=38.33  PSNR_all=17.06  P/D_S3=nan  t=136.5s
+  nb_h0.005 (null_boost)... res=53  PSNR_obs=38.69  PSNR_all=14.54  P/D_S3=0.09  t=138.4s
+  nb_h0.01 (null_boost)... res=54  PSNR_obs=38.62  PSNR_all=11.52  P/D_S3=0.09  t=139.5s
+  nb_h0.02 (null_boost)... res=56  PSNR_obs=38.49  PSNR_all=8.44  P/D_S3=0.07  t=139.5s
+  nb_h0.05 (null_boost)... res=248  PSNR_obs=32.01  PSNR_all=7.20  P/D_S3=0.03  t=164.0s
+  nb_h0.10 (null_boost)... res=876  PSNR_obs=26.52  PSNR_all=6.19  P/D_S3=0.01  t=205.0s
+  nb_staged_A (null_boost)... res=54  PSNR_obs=38.64  PSNR_all=3.69  P/D_S3=0.07  t=149.0s
+  nb_staged_B (null_boost)... res=52  PSNR_obs=38.82  PSNR_all=2.54  P/D_S3=0.07  t=136.2s
+  nb_clip100 (null_boost)... res=41  PSNR_obs=39.80  PSNR_all=16.42  P/D_S3=0.02  t=135.2s
+  nb_clip1k (null_boost)... res=61  PSNR_obs=38.07  PSNR_all=6.67  P/D_S3=0.10  t=135.2s
+  lam20 (reduced_lambda)... res=51  PSNR_obs=38.84  PSNR_all=14.30  P/D_S3=nan  t=144.8s
+  lam10 (reduced_lambda)... res=49  PSNR_obs=39.00  PSNR_all=10.86  P/D_S3=nan  t=152.9s
+  lam30 (reduced_lambda)... res=53  PSNR_obs=38.67  PSNR_all=15.73  P/D_S3=nan  t=140.3s
+  tik_lam25 (tikhonov)... res=0  PSNR_obs=60.24  PSNR_all=14.44  P/D_S3=nan  t=16.2s
+  tik_lam50 (tikhonov)... res=1  PSNR_obs=54.50  PSNR_all=14.88  P/D_S3=nan  t=15.6s
+  tik_lam100 (tikhonov)... res=6  PSNR_obs=48.30  PSNR_all=15.21  P/D_S3=nan  t=15.1s
+  tik_lam200 (tikhonov)... res=26  PSNR_obs=41.74  PSNR_all=15.37  P/D_S3=nan  t=14.8s
+  tik_l50_20s (tikhonov)... res=1  PSNR_obs=58.66  PSNR_all=14.43  P/D_S3=nan  t=28.9s
+  tik_l100_20s (tikhonov)... res=2  PSNR_obs=52.49  PSNR_all=14.70  P/D_S3=nan  t=28.0s
+  tik_l50_30s (tikhonov)... res=0  PSNR_obs=60.90  PSNR_all=14.27  P/D_S3=nan  t=42.0s
+  tik_stgA (tikhonov)... res=6  PSNR_obs=48.31  PSNR_all=14.92  P/D_S3=nan  t=23.0s
+  tik_stgB (tikhonov)... res=25  PSNR_obs=41.92  PSNR_all=15.07  P/D_S3=nan  t=24.3s
+
+==========================================================================================
+Config                             Res  PSNR_obs  PSNR_all   Time
+-----------------------------------------------------------------
+box_baseline                        41     39.78     13.23 154.8s
+box_lam10                           35     40.48     12.60 168.3s
+box_lam20                           37     40.31     13.03 163.9s
+box_lam30                           38     40.13     13.20 158.4s
+box_nb_clip100                      77     37.07     12.74 145.9s
+box_nb_clip1k                     5038     18.92     11.26 142.1s
+box_nb_h0.005                       39     40.08     13.15 154.2s
+box_nb_h0.01                       249     31.98     12.80 150.9s
+box_nb_h0.02                      1431     24.39     12.16 143.6s
+box_nb_h0.05                      9082     16.36      8.59 138.0s
+box_nb_h0.10                     35849     10.40      6.57 135.7s
+box_nb_staged_A                     80     36.94     11.64 154.5s
+box_nb_staged_B                    731     27.31      9.12 152.3s
+box_tik_l100_20s                     3     51.63      8.86  31.4s
+box_tik_l50_20s                      1     57.67      8.81  32.8s
+box_tik_l50_30s                      0     59.61      8.67  47.9s
+box_tik_lam100                       7     47.75      9.25  17.2s
+box_tik_lam200                      29     41.27      9.30  16.3s
+box_tik_lam25                        0     59.37      9.13  18.8s
+box_tik_lam50                        2     53.85      9.20  17.8s
+box_tik_stgA                         7     47.73      9.21  18.1s
+box_tik_stgB                        30     41.24      9.23  17.5s
+random_baseline                     58     38.33     17.06 136.5s
+random_lam10                        49     39.00     10.86 152.9s
+random_lam20                        51     38.84     14.30 144.8s
+random_lam30                        53     38.67     15.73 140.3s
+random_nb_clip100                   41     39.80     16.42 135.2s
+random_nb_clip1k                    61     38.07      6.67 135.2s
+random_nb_h0.005                    53     38.69     14.54 138.4s
+random_nb_h0.01                     54     38.62     11.52 139.5s
+random_nb_h0.02                     56     38.49      8.44 139.5s
+random_nb_h0.05                    248     32.01      7.20 164.0s
+random_nb_h0.10                    876     26.52      6.19 205.0s
+random_nb_staged_A                  54     38.64      3.69 149.0s
+random_nb_staged_B                  52     38.82      2.54 136.2s
+random_tik_l100_20s                  2     52.49     14.70  28.0s
+random_tik_l50_20s                   1     58.66     14.43  28.9s
+random_tik_l50_30s                   0     60.90     14.27  42.0s
+random_tik_lam100                    6     48.30     15.21  15.1s
+random_tik_lam200                   26     41.74     15.37  14.8s
+random_tik_lam25                     0     60.24     14.44  16.2s
+random_tik_lam50                     1     54.50     14.88  15.6s
+random_tik_stgA                      6     48.31     14.92  23.0s
+random_tik_stgB                     25     41.92     15.07  24.3s
+Saved v3_ablation_box.png
+Saved v3_ablation_random.png
+Saved v3_residuals.png
+
+============================================================
+TOP 5 by PSNR_all:
+  1. random_baseline: PSNR_all=17.06  res=58  t=136.5s
+  2. random_nb_clip100: PSNR_all=16.42  res=41  t=135.2s
+  3. random_lam30: PSNR_all=15.73  res=53  t=140.3s
+  4. random_tik_lam200: PSNR_all=15.37  res=26  t=14.8s
+  5. random_tik_lam100: PSNR_all=15.21  res=6  t=15.1s
+Saved v3_summary.txt
+
+DONE.

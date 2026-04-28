@@ -1,0 +1,14 @@
+{
+  "name": "E2_W1+lam10",
+  "desc": "W1 + lambda_reg stg3=10 (even softer CG)",
+  "kw": {
+    "h_epsilon": 0.001,
+    "lambda_reg": [
+      50,
+      50,
+      50,
+      10
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

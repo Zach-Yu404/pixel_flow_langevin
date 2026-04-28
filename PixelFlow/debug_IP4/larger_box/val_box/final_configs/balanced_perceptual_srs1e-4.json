@@ -1,0 +1,27 @@
+{
+  "tag": "balanced_perceptual_srs1e-4",
+  "srs": "1e-4",
+  "level": "balanced_perceptual",
+  "source_run": "folder_woNoiseLast/runs/he1e-2_hx01_L10_srs1e-4.json",
+  "kw": {
+    "lambda_reg": 150.0,
+    "lambda_prox": 150.0,
+    "noise_scale": 1.0,
+    "guidance_scale": 2.0,
+    "terminal_replace_weight": 0.0,
+    "h_epsilon": 0.01,
+    "h_x": 0.1,
+    "num_langevin": 10,
+    "sigma_ref_sq": 0.0001
+  },
+  "metrics": {
+    "psnr": 18.82867431640625,
+    "ssim": 0.712196409702301,
+    "lpips": 0.234820157289505,
+    "psnr_unobs": 12.901322743949294,
+    "hf": 0.6647208754630163,
+    "dhf": 0.0044236256409133645,
+    "gt_hf": 0.6691445011039296
+  },
+  "time_s": 231.29484248161316
+}

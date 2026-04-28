@@ -1,0 +1,40 @@
+{
+  "tag": "LPIPS_king_srs1e-3",
+  "level": "LPIPS_king",
+  "srs": "1e-3",
+  "provenance": {
+    "base_path": "final_configs/LPIPS_king_srs1e-3.json",
+    "note": "Complete spec: all run_ip4 kwargs explicit (defaults filled). seed/class_label set at run time."
+  },
+  "kw": {
+    "num_langevin": 10,
+    "h_x": 0.1,
+    "h_epsilon": 0.001,
+    "lambda_reg": 150.0,
+    "noise_scale": 1.0,
+    "ode_steps_per_stage": 10,
+    "shift": 1.0,
+    "guidance_scale": 2.0,
+    "warm_restart": true,
+    "g_bypass_stage3": true,
+    "x1_init_mode": "model",
+    "lambda_x": 0.01,
+    "rho_s": 1.0,
+    "rho_e": 1.0,
+    "cg_tol": 1e-05,
+    "cg_max_iter": 50,
+    "dps_kick_zeta": null,
+    "terminal_replace_weight": 0.0,
+    "soft_replace_weight": 0.0,
+    "h_x_obs_ratio": 1.0,
+    "lambda_prox": 150.0,
+    "skip_eps_update": false,
+    "reset_eps_per_ode_step": false,
+    "lambda_eps_norm": 0.0,
+    "mask_aware_eps": false,
+    "lambda_eps_prox": 0.0,
+    "lambda_eps_inject": 0.0,
+    "sigma_ref_sq": 0.001,
+    "final_denoise": false
+  }
+}

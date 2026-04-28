@@ -189,13 +189,16 @@ def Dn_k(x, y, mode = "bilinear"):
     return out
 
 
-def DownUp_operation(z, scale_factor=2):
-    _, _, H, W = z.shape
-    h_small = H // scale_factor
-    w_small = W // scale_factor
-    z_down = F.interpolate(z, size=(h_small, w_small), mode="bilinear", align_corners=False)
-    z_up = F.interpolate(z_down, size=(H, W), mode="nearest")
-    return z_up
+def DownUp_operation(z, scale_factor=2, stage_idx = None):
+    if stage_idx ==3:
+        return z
+    else:
+        _, _, H, W = z.shape
+        h_small = H // scale_factor
+        w_small = W // scale_factor
+        z_down = F.interpolate(z, size=(h_small, w_small), mode="bilinear", align_corners=False)
+        z_up = F.interpolate(z_down, size=(H, W), mode="nearest")
+        return z_up
 
 
 def get_xt_from_x1_sameStage(scheduler, D_x1, stage_idx, step_idx, device, DU_x0=None, noise=None):
@@ -205,11 +208,11 @@ def get_xt_from_x1_sameStage(scheduler, D_x1, stage_idx, step_idx, device, DU_x0
         if noise is None:
             noise = torch.randn_like(D_x1)
         pixel_values_end = end_t * D_x1 + (1.0 - end_t) * noise
-        pixel_values_start = start_t * DownUp_operation(D_x1) + (1.0 - start_t) * noise
+        pixel_values_start = start_t * DownUp_operation(D_x1, stage_idx=stage_idx) + (1.0 - start_t) * noise
     else:
         pixel_values_start = DU_x0.clone()
         pixel_values_end = end_t * D_x1 + (1.0 - end_t) / (1.0 - start_t) * (
-            pixel_values_start - start_t * DownUp_operation(D_x1)
+            pixel_values_start - start_t * DownUp_operation(D_x1, stage_idx=stage_idx)
         )
 
     t_step = scheduler.t[step_idx].float().to(device=device, dtype=D_x1.dtype)
@@ -567,6 +570,7 @@ def make_combined_video_with_y(
     batch_size=4,
     fps=6,
     dpi=220,
+    col_titles_override=None,
 ):
     target_len = min(
         len(xts_vpred_traj),
@@ -600,7 +604,7 @@ def make_combined_video_with_y(
         xe_exppred_traj[:target_len],
     ]
 
-    col_titles = [
+    col_titles = col_titles_override if col_titles_override is not None else [
         r"$y$",
         r"$x_t^k\ \mathrm{v_{pred}}$",
         r"$\hat{x}_{t+\Delta}^k\ \mathrm{v_{pred}}$",
@@ -795,7 +799,8 @@ def save_posterior_sampling_videos(
     combined_fps=6,
     langevin_fps=8,
     dpi=220,
-    save_inner_latents = False
+    save_inner_latents = False,
+    col_titles_override=None,
 ):
     os.makedirs(output_dir, exist_ok=True)
     exp_tag = normalize_experiment_name(exp_name)
@@ -823,6 +828,7 @@ def save_posterior_sampling_videos(
         batch_size=batch_size,
         fps=combined_fps,
         dpi=dpi,
+        col_titles_override=col_titles_override,
     )
     if save_inner_latents:
         make_langevin_inner_video(

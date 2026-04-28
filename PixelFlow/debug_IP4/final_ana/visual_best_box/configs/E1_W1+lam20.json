@@ -1,0 +1,14 @@
+{
+  "name": "E1_W1+lam20",
+  "desc": "W1 + lambda_reg stg3=20 (CG softer \u2192 Langevin steps bigger)",
+  "kw": {
+    "h_epsilon": 0.001,
+    "lambda_reg": [
+      50,
+      50,
+      50,
+      20
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

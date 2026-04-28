@@ -1,0 +1,14 @@
+{
+  "name": "B2_W1+X_hx1.5",
+  "desc": "Even larger h_x stg3 = 1.5",
+  "kw": {
+    "h_epsilon": 0.001,
+    "h_x": [
+      0.1,
+      0.1,
+      0.1,
+      1.5
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

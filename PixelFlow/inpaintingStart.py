@@ -399,57 +399,80 @@ class Inpainting(Operator):
         bmat = torch.sqrt(bmat)
         return bmat
 
-# @register_operator(name='down_sampling')
-# class DownSampling(Operator):
-#     def __init__(self, resolution=256, scale_factor=4, device='cuda', sigma=0.05):
-#         super().__init__(sigma)
-#         in_shape = [1, 3, resolution, resolution]
-#         self.down_sample = Resizer(in_shape, 1 / scale_factor).to(device)
+@register_operator(name='down_sampling')
+class DownSampling(Operator):
+    def __init__(self, resolution=256, scale_factor=4, device='cuda', sigma=0.05):
+        super().__init__(sigma)
+        self.scale_factor = scale_factor
+        self.resolution = resolution
+        self.target_size = resolution // scale_factor
 
-#     def __call__(self, x):
-#         return self.down_sample(x)
+    def __call__(self, x):
+        return F.interpolate(x, size=(self.target_size, self.target_size),
+                             mode='bicubic', align_corners=False)
 
-# class Blurkernel(nn.Module):
-#     def __init__(self, blur_type='gaussian', kernel_size=31, std=3.0, device=None):
-#         super().__init__()
-#         self.blur_type = blur_type
-#         self.kernel_size = kernel_size
-#         self.std = std
-#         self.device = device
-#         self.seq = nn.Sequential(
-#             nn.ReflectionPad2d(self.kernel_size // 2),
-#             nn.Conv2d(3, 3, self.kernel_size, stride=1, padding=0, bias=False, groups=3)
-#         )
+class Blurkernel(nn.Module):
+    def __init__(self, blur_type='gaussian', kernel_size=31, std=3.0, device=None):
+        super().__init__()
+        self.blur_type = blur_type
+        self.kernel_size = kernel_size
+        self.std = std
+        self.device = device
+        self.seq = nn.Sequential(
+            nn.ReflectionPad2d(self.kernel_size // 2),
+            nn.Conv2d(3, 3, self.kernel_size, stride=1, padding=0, bias=False, groups=3)
+        )
 
-#         self.weights_init()
+        self.weights_init()
 
-#     def forward(self, x):
-#         return self.seq(x)
+    def forward(self, x):
+        return self.seq(x)
 
-#     def weights_init(self):
-#         if self.blur_type == "gaussian":
-#             n = np.zeros((self.kernel_size, self.kernel_size))
-#             n[self.kernel_size // 2, self.kernel_size // 2] = 1
-#             k = scipy.ndimage.gaussian_filter(n, sigma=self.std)
-#             k = torch.from_numpy(k)
-#             self.k = k
-#             for name, f in self.named_parameters():
-#                 f.data.copy_(k)
-#         elif self.blur_type == "motion":
-#             k = Kernel(size=(self.kernel_size, self.kernel_size), intensity=self.std).kernelMatrix
-#             k = torch.from_numpy(k)
-#             self.k = k
-#             for name, f in self.named_parameters():
-#                 f.data.copy_(k)
+    def weights_init(self):
+        if self.blur_type == "gaussian":
+            n = np.zeros((self.kernel_size, self.kernel_size))
+            n[self.kernel_size // 2, self.kernel_size // 2] = 1
+            k = scipy.ndimage.gaussian_filter(n, sigma=self.std)
+            k = torch.from_numpy(k)
+            self.k = k
+            for name, f in self.named_parameters():
+                f.data.copy_(k)
+        elif self.blur_type == "motion":
+            # Generate a random motion blur kernel
+            k = self._generate_motion_kernel(self.kernel_size, self.std)
+            k = torch.from_numpy(k)
+            self.k = k
+            for name, f in self.named_parameters():
+                f.data.copy_(k)
 
-#     def update_weights(self, k):
-#         if not torch.is_tensor(k):
-#             k = torch.from_numpy(k).to(self.device)
-#         for name, f in self.named_parameters():
-#             f.data.copy_(k)
+    @staticmethod
+    def _generate_motion_kernel(kernel_size, intensity):
+        """Generate a motion blur kernel without external dependency."""
+        k = np.zeros((kernel_size, kernel_size), dtype=np.float64)
+        center = kernel_size // 2
+        angle = np.random.uniform(0, np.pi)
+        length = int(kernel_size * intensity)
+        length = max(1, min(length, kernel_size))
+        cos_a, sin_a = np.cos(angle), np.sin(angle)
+        for i in range(length):
+            t = i - length // 2
+            r = center + int(round(t * sin_a))
+            c = center + int(round(t * cos_a))
+            if 0 <= r < kernel_size and 0 <= c < kernel_size:
+                k[r, c] = 1.0
+        if k.sum() == 0:
+            k[center, center] = 1.0
+        k /= k.sum()
+        return k
 
-#     def get_kernel(self):
-#         return self.k
+    def update_weights(self, k):
+        if not torch.is_tensor(k):
+            k = torch.from_numpy(k).to(self.device)
+        for name, f in self.named_parameters():
+            f.data.copy_(k)
+
+    def get_kernel(self):
+        return self.k
 
 
 @register_operator(name='gaussian_blur')
@@ -470,25 +493,23 @@ class GaussianBlur(Operator):
         return self.conv(data)
 
 
-# @register_operator(name='motion_blur')
-# class MotionBlur(Operator):
-#     def __init__(self, kernel_size, intensity, device='cuda', sigma=0.05):
-#         super().__init__(sigma)
-#         self.device = device
-#         self.kernel_size = kernel_size
-#         self.conv = Blurkernel(blur_type='motion',
-#                                kernel_size=kernel_size,
-#                                std=intensity,
-#                                device=device).to(device)  # should we keep this device term?
+@register_operator(name='motion_blur')
+class MotionBlur(Operator):
+    def __init__(self, kernel_size, intensity, device='cuda', sigma=0.05):
+        super().__init__(sigma)
+        self.device = device
+        self.kernel_size = kernel_size
+        self.conv = Blurkernel(blur_type='motion',
+                               kernel_size=kernel_size,
+                               std=intensity,
+                               device=device).to(device)
 
-#         self.kernel = Kernel(size=(kernel_size, kernel_size), intensity=intensity)
-#         kernel = torch.tensor(self.kernel.kernelMatrix, dtype=torch.float32)
-#         self.conv.update_weights(kernel)
-#         self.conv.requires_grad_(False)
+        self.kernel = self.conv.get_kernel()
+        self.conv.update_weights(self.kernel.type(torch.float32))
+        self.conv.requires_grad_(False)
 
-#     def __call__(self, data):
-#         # A^T * A
-#         return self.conv(data)
+    def __call__(self, data):
+        return self.conv(data)
 
 
 # Non-linear Operator

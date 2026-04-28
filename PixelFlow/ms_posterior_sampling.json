@@ -1,6 +1,6 @@
 {
   "exp_name": "trials",
-  "seed": 20000120,
+  "seed": 12,
   "num_stages": 4,
   "resolution": 256,
   "num_examples": 4,
@@ -21,12 +21,12 @@
   "video_batch_size": 4,
   "record_every": 1,
   "device": "cuda:0",
-  "data_dir": "/home/../mnt/data3/ruy45/dataset/imageNet256/ILSVRC/Data/CLS-LOC/train/",
+  "data_dir": "/data/Zach_dataset/imageNet256/ILSVRC/Data/CLS-LOC/train/",
   "model_dir": "./pretrained_models/c2img",
   "dict_path": "./trajectory_videos/posterior_sampling",
   "active_operator": "box",
   "measurement_mode": "call",
-  "latent_update_mode": "f_x1",
+  "latent_update_mode": "intp",
   "save_inner_latents":false,
   "save_dict_to_pt":false,
   "box_operator": {

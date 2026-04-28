@@ -1,0 +1,62 @@
+[
+  {
+    "group_id": 0,
+    "num_images": 100,
+    "mask_seed": 1000,
+    "first_fname": "ILSVRC2012_val_00031212.JPEG",
+    "first_label": 56,
+    "last_fname": "ILSVRC2012_val_00040015.JPEG",
+    "last_label": 231,
+    "label_min": 2,
+    "label_max": 998,
+    "label_unique": 95
+  },
+  {
+    "group_id": 1,
+    "num_images": 100,
+    "mask_seed": 1001,
+    "first_fname": "ILSVRC2012_val_00023215.JPEG",
+    "first_label": 574,
+    "last_fname": "ILSVRC2012_val_00047323.JPEG",
+    "last_label": 732,
+    "label_min": 10,
+    "label_max": 977,
+    "label_unique": 93
+  },
+  {
+    "group_id": 2,
+    "num_images": 100,
+    "mask_seed": 1002,
+    "first_fname": "ILSVRC2012_val_00044800.JPEG",
+    "first_label": 816,
+    "last_fname": "ILSVRC2012_val_00025260.JPEG",
+    "last_label": 817,
+    "label_min": 18,
+    "label_max": 994,
+    "label_unique": 95
+  },
+  {
+    "group_id": 3,
+    "num_images": 100,
+    "mask_seed": 1003,
+    "first_fname": "ILSVRC2012_val_00047184.JPEG",
+    "first_label": 39,
+    "last_fname": "ILSVRC2012_val_00014477.JPEG",
+    "last_label": 190,
+    "label_min": 5,
+    "label_max": 994,
+    "label_unique": 95
+  },
+  {
+    "group_id": 4,
+    "num_images": 100,
+    "mask_seed": 1004,
+    "first_fname": "ILSVRC2012_val_00048883.JPEG",
+    "first_label": 294,
+    "last_fname": "ILSVRC2012_val_00031501.JPEG",
+    "last_label": 471,
+    "label_min": 3,
+    "label_max": 997,
+    "label_unique": 95
+  }
+]

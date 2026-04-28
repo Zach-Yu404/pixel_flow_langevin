@@ -1,0 +1,224 @@
+[
+  {
+    "rank": 1,
+    "name": "F_cfg20_lr150_hxu02",
+    "psnr": 17.18059539794922,
+    "lpips": 0.12000110000371933,
+    "ssim": 0.8439858555793762,
+    "dhf": 0.010282961562252613,
+    "balanced": 0.12000110000371933,
+    "kw": {
+      "h_x": 0.2,
+      "h_epsilon": 0.001,
+      "num_langevin": 5,
+      "lambda_reg": 150.0,
+      "noise_scale": 0.0,
+      "terminal_replace_weight": 1.0,
+      "guidance_scale": 2.0
+    }
+  },
+  {
+    "rank": 2,
+    "name": "F_cfg25_lr200_L7",
+    "psnr": 17.805524826049805,
+    "lpips": 0.12668514624238014,
+    "ssim": 0.8477868437767029,
+    "dhf": 0.034061076592421746,
+    "balanced": 0.12668514624238014,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "h_epsilon": 0.001,
+      "num_langevin": 7,
+      "lambda_reg": 200.0,
+      "noise_scale": 0.0,
+      "terminal_replace_weight": 1.0,
+      "guidance_scale": 2.5
+    }
+  },
+  {
+    "rank": 3,
+    "name": "C_L5",
+    "psnr": 17.50876474380493,
+    "lpips": 0.12946692481637,
+    "ssim": 0.8437568247318268,
+    "dhf": 0.010997815458736016,
+    "balanced": 0.12946692481637,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "lambda_reg": 50.0,
+      "noise_scale": 0.0,
+      "terminal_replace_weight": 1.0,
+      "h_epsilon": 0.001,
+      "num_langevin": 5
+    }
+  },
+  {
+    "rank": 4,
+    "name": "P_lreg_300",
+    "psnr": 17.59602403640747,
+    "lpips": 0.13281040638685226,
+    "ssim": 0.8288799822330475,
+    "dhf": 0.0347551034210849,
+    "balanced": 0.13281040638685226,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "h_epsilon": 0.001,
+      "num_langevin": 5,
+      "lambda_reg": 300.0,
+      "noise_scale": 0.0,
+      "terminal_replace_weight": 1.0,
+      "guidance_scale": 2.0
+    }
+  },
+  {
+    "rank": 5,
+    "name": "P_hxu_02",
+    "psnr": 17.378077507019043,
+    "lpips": 0.12975457310676575,
+    "ssim": 0.8480291962623596,
+    "dhf": 0.05622982772849894,
+    "balanced": 0.13286948697101522,
+    "kw": {
+      "h_x": 0.2,
+      "h_epsilon": 0.001,
+      "num_langevin": 5,
+      "lambda_reg": 50.0,
+      "noise_scale": 0.0,
+      "terminal_replace_weight": 1.0,
+      "guidance_scale": 2.0
+    }
+  },
+  {
+    "rank": 6,
+    "name": "P_lreg_150",
+    "psnr": 17.552842140197754,
+    "lpips": 0.1329030878841877,
+    "ssim": 0.8310989439487457,
+    "dhf": 0.0288724541992037,
+    "balanced": 0.1329030878841877,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "h_epsilon": 0.001,
+      "num_langevin": 5,
+      "lambda_reg": 150.0,
+      "noise_scale": 0.0,
+      "terminal_replace_weight": 1.0,
+      "guidance_scale": 2.0
+    }
+  },
+  {
+    "rank": 7,
+    "name": "C_L10",
+    "psnr": 16.595098972320557,
+    "lpips": 0.1252407170832157,
+    "ssim": 0.8508281111717224,
+    "dhf": 0.040840971163701556,
+    "balanced": 0.1333387376368046,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "lambda_reg": 50.0,
+      "noise_scale": 0.0,
+      "terminal_replace_weight": 1.0,
+      "h_epsilon": 0.001,
+      "num_langevin": 10
+    }
+  },
+  {
+    "rank": 8,
+    "name": "P_lreg_75",
+    "psnr": 17.513655185699463,
+    "lpips": 0.13349884003400803,
+    "ssim": 0.832223653793335,
+    "dhf": 0.02046315529257814,
+    "balanced": 0.13349884003400803,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "h_epsilon": 0.001,
+      "num_langevin": 5,
+      "lambda_reg": 75.0,
+      "noise_scale": 0.0,
+      "terminal_replace_weight": 1.0,
+      "guidance_scale": 2.0
+    }
+  },
+  {
+    "rank": 9,
+    "name": "N_cfg2",
+    "psnr": 18.2939190864563,
+    "lpips": 0.13393153250217438,
+    "ssim": 0.8504328429698944,
+    "dhf": 0.016527153798632344,
+    "balanced": 0.13393153250217438,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "h_epsilon": 0.001,
+      "num_langevin": 5,
+      "lambda_reg": 50.0,
+      "noise_scale": 0.0,
+      "terminal_replace_weight": 1.0,
+      "guidance_scale": 2.0
+    }
+  },
+  {
+    "rank": 10,
+    "name": "N_L_5510",
+    "psnr": 17.46826982498169,
+    "lpips": 0.1350325495004654,
+    "ssim": 0.8473779261112213,
+    "dhf": 0.01722330622175039,
+    "balanced": 0.1350325495004654,
+    "kw": {
+      "h_x": [
+        0.1,
+        0.1,
+        0.1,
+        0.7
+      ],
+      "h_epsilon": 0.001,
+      "num_langevin": [
+        5,
+        5,
+        5,
+        10
+      ],
+      "lambda_reg": 50.0,
+      "noise_scale": 0.0,
+      "terminal_replace_weight": 1.0
+    }
+  }
+]

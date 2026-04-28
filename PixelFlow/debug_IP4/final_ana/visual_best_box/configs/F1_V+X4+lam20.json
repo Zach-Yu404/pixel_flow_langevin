@@ -1,0 +1,20 @@
+{
+  "name": "F1_V+X4+lam20",
+  "desc": "V (h_eps=1e-4) + h_x stg3=0.7 + lambda_reg stg3=20 \u2014 3-lever push",
+  "kw": {
+    "h_epsilon": 0.0001,
+    "h_x": [
+      0.1,
+      0.1,
+      0.1,
+      0.7
+    ],
+    "lambda_reg": [
+      50,
+      50,
+      50,
+      20
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "C1_W1+hx_multistage",
+  "desc": "h_x progressively increases per stage: [0.1, 0.2, 0.4, 0.7]",
+  "kw": {
+    "h_epsilon": 0.001,
+    "h_x": [
+      0.1,
+      0.2,
+      0.4,
+      0.7
+    ],
+    "terminal_replace_weight": 1.0
+  }
+}
