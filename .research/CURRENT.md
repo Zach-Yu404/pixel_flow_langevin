@@ -26,4 +26,6 @@
    回到远端版本（会把本地 a7db725 之后的记忆提交一并对齐，需重新提交 CURRENT.md 的本节更新）
 1. **只在用户脑中的上下文**：接入时未获得"上次做到一半"的口头信息——如果有 in-flight 的实验/改动（例如 `ms_posterior_sampling.json`、`pipeline_pixelflow.py`、`train.py` 的未提交修改意图），请告知以补进记忆
 2. **外层 repo 工作区大量未提交变更**：`PixelFlow_train_code/` 整目录删除（−5226 行）、`IP_package/`、`debug_IP4/` 多数实验目录 untracked。是否按现状提交（大文件已被 .gitignore 排除）由用户决定
-3. 本机只装了 claude CLI，**codex 不在**——STATE.yaml 记为 single-agent-degraded；装上 codex 后改回 dual-agent
+3. codex CLI 已安装（2026-08-14，v0.147.0，GitHub releases musl 二进制 → `~/.local/bin/codex`），
+   但**尚未登录**——需用户本人跑 `codex login`（涉及账号，agent 不能代办）。登录后把 STATE.yaml
+   改回 `mode: dual-agent` 并清掉 unavailable_agent

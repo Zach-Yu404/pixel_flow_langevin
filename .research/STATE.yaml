@@ -1,9 +1,9 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 2
+memory_version: 3
 updated_at: "2026-08-14"
 updated_by: "claude"        # claude | codex | user
 
-mode: single-agent-degraded      # dual-agent | single-agent-degraded（本机未装 codex CLI）
+mode: single-agent-degraded      # dual-agent | single-agent-degraded（codex 已装 v0.147.0，待 codex login 后改回 dual-agent）
 unavailable_agent: codex         # mode 为 degraded 时填 claude | codex
 single_agent_execution_authorized: false
 authorized_agent: null
