@@ -38,6 +38,36 @@
 - **调参禁区**（跨任务，来自 `debug_IP4/memory_blur.md`）：`tr=1`、`ns=1`、`hx≥0.30`、`L=1`、`h_eps∈{1e-1,1e-4}` 都会大幅劣化
 - 输出目录结构与 Langevin 日志信号（loss/delta_norm/grad_norm 判读）见 PRINCIPLE_MANUAL §8
 
+## Sampler 世代谱系(2026-08-14 导入)
+
+- 三代主线:`ms_posterior_sampling.py`(legacy)→ `_article_version.py` → **`_article_version_final.py`(规范实现,rerun/benchmark 都 import 它的 `run_posterior_sampling`,绝不 fork)**
+- debug fork:`debug_IP4/ms_sampler_v5.py` + `langevin_v5.py`(批量 import article utils,数学同源)加了 12 个 sweep 旋钮——**除 terminal_replace_weight 外全部实证死路**(见 sampler_diff_v5_vs_article.md);run_ip4 对 blur/SR 靠 monkey-patch make_Ak_fns,get_mask 返回全 1 占位
+- 机制事实:warm_restart 每 ODE 步硬覆写 x1、eps 重推导 → 后验修正的跨步记忆**全部走 eps**;eps 熵是单调链(stage 1 是坍缩关键);掩码算子的 DPS 梯度在洞内恒 0;1/σ² 内层 floor=0.01(1e-3 会在 stage 3 尾部发散),外层 σ_τ<0.01 直接跳过 Langevin;warm-restart 的 x1 用 v-pred/direct 估计,不用 WLS(差 2-30 倍)
+- Legacy 版 on-disk 已坏(DownUp_operation 手补 bug,stage 0 除零),不可作参考
+
+## 度量约定(全项目,详见 rerun_imageNet/METRIC_AUDIT.md 与 contradictions-registry)
+
+- piq PSNR/SSIM data_range=1.0 于 (x+1)/2 clamp 后的 [0,1];SSIM 为 RGB 平均(非 Y 通道);PSNR=80.0 表示逐位相同(EPS 上限)
+- **三把 LPIPS 尺子**(piqT/alex/vgg):对外报 alex;piqT 只作历史连续性;metrics.py 三列并出
+- FID 只信 pooled N=500,且仅作 ranking(N=100 有偏);metric 从内存 float 算,不从重读的 uint8 PNG
+- 度量信任排序(inpainting):目测 > PSNR_unobs(偏爱平滑填充)> PSNR_all > HF 能量(mask 边界污染,不可信)
+
+## 已知代码陷阱
+
+- `rerun_imageNet/operators.py` `_daps_motion_kernel` 硬编码旧机器 DAPS 路径 → `use_daps_kernel=true` 在本机 import 即炸(**待修**)
+- 可复现随机性禁用 Python `hash()`(PYTHONHASHSEED 每进程随机)→ 用 `zlib.crc32`
+- bash 脚本禁用变量名 `GROUPS`(readonly 内建,赋值静默失败)
+- `CUDA_VISIBLE_DEVICES=N` 与 `--gpu N` 不可同用(重映射为 cuda:0);8 GPU 同时起 B=8 c2img 会静默 SIGKILL(1 job/GPU)
+- 批组成混淆:cuDNN 按 batch 形状选算法,长轨迹放大到 ~0.5-0.8 dB/图;逐位复现必须 batch parity
+- pgrep/pkill 自匹配(waiter 命令行含 watched pattern)→ `[d]emo_runner` 括号技巧
+
+## 工作区未提交改动的意图(2026-08-14 从 diff 读出)
+
+- `train.py`(+93):--resume 全量恢复、epoch 级 checkpoint、rank-0 epoch-end FID/LPIPS/SSIM eval(try/except 包裹)、NCCL timeout 2h、崩溃写 error_rank{RANK}.log(残留:eval_status 张量未 all-reduce)
+- `pipeline_pixelflow.py`:CFG 空类 token 改 `getattr(transformer,'num_classes',1000)`——服务非 1000 类模型(MRI/CelebA 先验)
+- `ms_posterior_sampling.json`:guidance_scale 0→2.0
+- `debug_IP4/random_inpainting/{prepare_data,run_chunk}.py`:OAT 数据契约 .pt→PNG(gts/masks/meta_data.json,~0.004 量化漂移可忽略),run_chunk 加 --configs_module(stage2_configs)与断点续跑守卫——**random_inpainting 第二阶段 OAT sweep 是当时的 in-flight 工作**
+
 ## 环境事实
 
 - conda env `pixelflow`（py3.12, torch 2.6.0+cu124, piq 0.8.0, lpips 0.1.4）——解释器与 dataset/checkpoint 的本机绝对路径一律见 `local.yaml`（gitignored）

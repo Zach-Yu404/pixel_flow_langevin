@@ -26,6 +26,26 @@
 ### 环境（来源：集群事实）
 - 登录节点无 GPU；跑采样/训练必须走 Slurm
 
+### 度量与引用(来源:rerun_imageNet/METRIC_AUDIT.md、celeba METRIC_AUDIT.md、baseline_audit_report.md)
+- 跨论文 LPIPS 必须同变体(默认官方 AlexNet);**piq replace_pooling=True 的数字永不对外引用**
+- FID:N=100 永不当绝对数;只信 pooled N=500 且仅作 ranking
+- 永不引用:修复前 demo inpainting(~35 dB)、DDNM-gaussian 6.21、减步 baseline 伪影、MAX=1 时代的 PSNR
+- DAPS 对其自身 torchvision GT 打分;两套表(piq-VGG vs alex)不得混
+
+### 采样器纪律(来源:DESIGN.md、sampler_diff、debug_IP4)
+- 永不 fork `run_posterior_sampling` / 算子——import 之(fork 即失去对齐保证)
+- warm_restart=True 与 g_bypass_stage3=True 不关;λ_prox 与 λ_reg 同步动
+- config 不跨任务迁移(ns/tr/fd/srs 全是任务相关;motion 伴随必须 flip(K))
+- inpainting tr=1;blur/SR tr=0(SR@tr=1 = bicubic,不是算法结果)
+- MMSE 类实验:y 跨 sampler seed 固定(测量后、采样前重播种)
+
+### 运维(来源:SESSION_HANDOFF*、INCIDENT_NOTES、random_memory)
+- baseline runner 用方法专属 OUT env var(DDNM_OUT 等),通用 OUT_ROOT 会静默 clobber 别人的结果目录
+- 永不 `cp -al` 硬链接实验数据目录(2026-05-03 事故:smoke 测试穿透覆写源数据)
+- 可复现随机性禁用 `hash()`;bash 禁用变量名 `GROUPS`
+- DAPS 采样不包 no_grad;piq 前 clip(0,1)
+- celeba_results/ 根会被外部进程重置,持久物只放 code/ 或数据盘符号链接
+
 ## 当前任务约束
 （无）
 
