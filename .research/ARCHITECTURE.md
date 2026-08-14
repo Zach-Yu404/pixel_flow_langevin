@@ -40,7 +40,6 @@
 
 ## 环境事实
 
-- conda env `pixelflow`（py3.12, torch 2.6.0+cu124, piq 0.8.0, lpips 0.1.4），`~/anaconda3/envs/pixelflow/bin/python`
+- conda env `pixelflow`（py3.12, torch 2.6.0+cu124, piq 0.8.0, lpips 0.1.4）——解释器与 dataset/checkpoint 的本机绝对路径一律见 `local.yaml`（gitignored）
 - CBIG 集群登录节点**无 GPU**；采样/训练需 Slurm 申请（复现实验原硬件 A100-80GB）
-- `/standard` 是 `/sfs/ceph/standard` 的符号链接；本机路径映射见 `local.yaml`（gitignored）
-- 2026-07 从旧机器迁移：`/home/nvidia/Zach/MSFlow` → 本目录；`/data/Zach_dataset` → dataset_root（注意**嵌套双层** `Zach_dataset/Zach_dataset`）；MRI prior 已恢复（`github_project_local/checkpoints/mri/CHECKPOINT_RESTORED.txt`）
+- 2026-07 从旧机器迁移到 CBIG 集群；dataset root 注意**嵌套双层** `Zach_dataset/Zach_dataset`（见 `local.yaml`）；MRI prior 已恢复（`github_project_local/checkpoints/mri/CHECKPOINT_RESTORED.txt`）
