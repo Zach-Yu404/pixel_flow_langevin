@@ -1,0 +1,12 @@
+# 本机路径映射 — 不需要手填！
+# 由 bin/research-discover-paths 自动扫描生成（onboard 和"初始化记忆"时自动跑）。
+# 本文件只是 schema 示例。local.yaml 已 gitignored；换机器后自动重新扫描。
+machine: "{{hostname}}"
+discovered:
+  checkpoints: []      # 自动发现的 *.pt/*.pth/*.ckpt/*.safetensors（>10MB）
+  datasets: []         # 自动发现的 data/ datasets/ 目录
+  large_files: []      # 其他 >100MB 文件
+# 显式 root：仅当自动发现不够（外部挂载、共享存储）时由 agent 与用户确认后补充
+dataset_root: null
+checkpoint_root: null
+worktree_root: null

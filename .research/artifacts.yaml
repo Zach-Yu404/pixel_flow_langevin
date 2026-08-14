@@ -1,0 +1,34 @@
+# 大文件 manifest — Git 不保存大文件，这里指向外部存储。
+# 位置用 local.yaml 中的 root + 相对路径表达，或显式 URI。
+# 完整自动发现清单（153 项）见 local.yaml；这里只登记有逻辑身份的关键资产。
+artifacts:
+  - logical_name: c2img-imagenet256-prior          # 主 ImageNet class-cond PixelFlow prior
+    location: "PixelFlow/pretrained_models/c2img/model.pt"
+    checksum: "sha256:37863b53bf26a60de50c5c700efde6a42157630c32ce68979020c10ec7cd30bb"
+    size_bytes: 2706601240
+    producer_task: null          # 迁移自旧机器；github_project_local/checkpoints/ours/ 符号链接指向它
+    producer_commit: null
+  - logical_name: mri-prior-exp0003-epoch40        # MRI flow prior（迁移后恢复）
+    location: "{dataset_root}/results/MSFlow/PixelFlow_train_code/exp0003/model_epoch40.pt"
+    checksum: "sha256:19c371fcf2b050435570a8e8f3b8887fef1e67dd8e8570aa9ecc3bddccbe01c2"
+    size_bytes: 7332280657
+    producer_task: null          # 自训（exp0003, val sweep 选 epoch40）；symlink 于 github_project_local/checkpoints/mri/
+    producer_commit: null
+  - logical_name: celeba-prior-exp155024-epoch20
+    location: "{dataset_root}/results/MSFlow/exp_155024/model_epoch0020.pt"
+    checksum: null               # 未计算（按需 sha256sum 补）
+    size_bytes: null
+    producer_task: null
+    producer_commit: null
+  - logical_name: afhq-prior-epoch100-fid41.28
+    location: "PixelFlow/pretrained_models/afhq/model_epoch100_fid41.28.pt"
+    checksum: null               # 未计算；同目录另有 epoch80/90 备选
+    size_bytes: 7332791000
+    producer_task: null
+    producer_commit: null
+  - logical_name: t2img-model
+    location: "PixelFlow/pretrained_models/t2img/model.pt"
+    checksum: null
+    size_bytes: 3528589624
+    producer_task: null
+    producer_commit: null

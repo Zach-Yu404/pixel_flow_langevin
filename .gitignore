@@ -80,3 +80,11 @@ env/
 *.pem
 *.key
 credentials.json
+*.pyc
+nohup.out
+.research/local.yaml
+data/
+datasets/
+checkpoints/
+outputs/
+wandb/
