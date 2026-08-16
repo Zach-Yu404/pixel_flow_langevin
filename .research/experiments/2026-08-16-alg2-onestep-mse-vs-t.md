@@ -51,3 +51,15 @@ solve + line 14 clean solve）的 x̂₁ᵏ MSE vs t；顺带测 score 误差与
 - pipeline._daps_motion_kernel 硬编码旧机器 DAPS 路径（registry #16）——实验侧预插当前
   路径解决，原代码未动；playground_runs 未写入。
 - v/score/γ² 与任务无关 → 跨任务缓存，网络调用与实验 1 相同（280 次 forward）。
+
+
+## 追加(2026-08-16 晚):统一版对比(用户改规格,覆盖 results/)
+
+用户裁定:三组唯一变量 = 算法,其余全同;Alg2 的测量**暂用 y=GT(A=I, stage 分辨率),η=0.05**
+("y 现在暂时用 gt",无任务退化,任务维度取消)。job 18597943(A100,sacct 验证)。
+- 产物(results/ 已按用户要求覆盖,旧分任务 png/mp4/csv 删除,git 历史保留;PDF 保留):
+  `unified_predictions.mp4`(40 帧,行序 GT|WLS|Model|Alg2|x_t,4.8MB)、
+  `mse_vs_t_unified.png`、`unified_mse.csv`(280 行)
+- 数字(pooled mean,WLS/Model 与实验 1 同源):stage0 Alg2 1.7e-9 / WLS 7.74 / Model 0.112 量级;
+  y=GT 时测量项主导,Alg2 接近精确复原(stage0/t0 单图 3.6e-13)——这是设计上限探针,
+  非真实测量下的算法比较(后者见本文件上方 5 任务结果)。
