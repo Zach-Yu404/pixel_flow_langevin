@@ -4,8 +4,12 @@
 Same frame format as onestep_visual.py (exp 1b) extended with Alg2 rows.
 Alg2 is task-dependent (line 14 uses A/y), so ONE video shows everything:
 
-    rows = [GT x1 | x_t | WLS | Model | Alg2:box | Alg2:random | Alg2:gaussian
-            | Alg2:motion | Alg2:SR]  x  7 playground images
+One mp4 PER TASK, rows in the user-specified order:
+
+    [GT x1 | WLS | Model | Alg2(task) | x_t]  x  7 playground images
+
+GT/WLS/Model/x_t rows are task-independent (identical across the five videos);
+only the Alg2 row differs. Frames land in frames_tmp/<task>/frame_%03d.png.
 
 40 frames ordered by (stage, step); Alg2 panels are blanked where
 sigma_tau < SIGMA_MIN (same skip rule as the experiment). Frames go to
@@ -53,8 +57,9 @@ def main():
     args = ap.parse_args()
     if not os.path.isabs(args.out):
         args.out = os.path.join(ORIG_CWD, args.out)
-    frames_dir = os.path.join(args.out, "frames_tmp")
-    os.makedirs(frames_dir, exist_ok=True)
+    frames_root = os.path.join(args.out, "frames_tmp")
+    for t in alg.TASKS:
+        os.makedirs(os.path.join(frames_root, t), exist_ok=True)
 
     device = "cuda:0"
     demos_all = load_demo_images(resolution=256,
@@ -91,9 +96,8 @@ def main():
     scheduler = PixelFlowScheduler(config.scheduler.num_train_timesteps,
                                    num_stages=num_stages, gamma=-1 / 3)
     pyr = base.gt_stage_pyramid(gt, num_stages)
-    row_labels = ([r"GT $x_1^k$", r"$x_t^k$", r"WLS $\hat{x}_1$",
-                   r"Model $\hat{x}_1$"] +
-                  [f"Alg2 {TASK_SHORT[t]}" for t in alg.TASKS])
+    row_labels = [r"GT $x_1^k$", r"WLS $\hat{x}_1$", r"Model $\hat{x}_1$",
+                  r"Alg2 $\hat{x}_1$", r"$x_t^k$"]
 
     frame_idx = 0
     t0 = time.time()
@@ -148,39 +152,41 @@ def main():
                             x1_model[bi:bi + 1].clone(), cg_tol))
                     alg2[task] = torch.cat(outs, dim=0)
 
-            rows_t = [x1_gt, x_tau, x1_wls, x1_model] + \
-                     [alg2.get(t) for t in alg.TASKS]
-            nrow = len(rows_t)
-            fig, axes = plt.subplots(nrow, B, figsize=(1.9 * B, 1.9 * nrow + 0.5))
-            for ri in range(nrow):
-                for bi in range(B):
-                    ax = axes[ri, bi]
-                    if rows_t[ri] is None:
-                        ax.text(0.5, 0.5, r"skipped ($\sigma_t<0.01$)",
-                                ha="center", va="center", fontsize=6)
-                        ax.set_facecolor("0.9")
-                    else:
-                        ax.imshow(to_img(rows_t[ri][bi]))
-                        if ri >= 2:
-                            mse = float(((rows_t[ri][bi] - x1_gt[bi]) ** 2).mean())
-                            ax.set_xlabel(f"{mse:.3g}", fontsize=6)
-                    ax.set_xticks([]); ax.set_yticks([])
-                    if ri == 0:
-                        ax.set_title(shorts[bi].replace("_", "\n"), fontsize=7)
-                    if bi == 0:
-                        ax.set_ylabel(row_labels[ri], fontsize=8)
-            fig.suptitle(
-                f"one-step $\\hat{{x}}_1$ incl. Algorithm 2 · stage {si} ({h}px) · "
-                f"step {step_idx + 1}/{steps_si} · t={tau:.3f} · "
-                f"$\\sigma_t$={float(sigma_t):.3f}   (x-labels = per-image MSE)",
-                fontsize=11)
-            fig.tight_layout(rect=[0, 0, 1, 0.97])
-            fig.savefig(os.path.join(frames_dir, f"frame_{frame_idx:03d}.png"), dpi=110)
-            plt.close(fig)
+            for task in alg.TASKS:
+                rows_t = [x1_gt, x1_wls, x1_model, alg2.get(task), x_tau]
+                nrow = len(rows_t)
+                fig, axes = plt.subplots(nrow, B, figsize=(1.9 * B, 1.9 * nrow + 0.5))
+                for ri in range(nrow):
+                    for bi in range(B):
+                        ax = axes[ri, bi]
+                        if rows_t[ri] is None:
+                            ax.text(0.5, 0.5, r"skipped ($\sigma_t<0.01$)",
+                                    ha="center", va="center", fontsize=6)
+                            ax.set_facecolor("0.9")
+                        else:
+                            ax.imshow(to_img(rows_t[ri][bi]))
+                            if 1 <= ri <= 3:      # estimator rows get MSE labels
+                                mse = float(((rows_t[ri][bi] - x1_gt[bi]) ** 2).mean())
+                                ax.set_xlabel(f"{mse:.3g}", fontsize=6)
+                        ax.set_xticks([]); ax.set_yticks([])
+                        if ri == 0:
+                            ax.set_title(shorts[bi].replace("_", "\n"), fontsize=7)
+                        if bi == 0:
+                            ax.set_ylabel(row_labels[ri], fontsize=8)
+                fig.suptitle(
+                    f"{task} · one-step $\\hat{{x}}_1$ · stage {si} ({h}px) · "
+                    f"step {step_idx + 1}/{steps_si} · t={tau:.3f} · "
+                    f"$\\sigma_t$={float(sigma_t):.3f}   (x-labels = per-image MSE)",
+                    fontsize=11)
+                fig.tight_layout(rect=[0, 0, 1, 0.97])
+                fig.savefig(os.path.join(frames_root, task,
+                                         f"frame_{frame_idx:03d}.png"), dpi=110)
+                plt.close(fig)
             frame_idx += 1
         print(f"[stage {si}] {steps_si} frames [{time.time()-t0:.0f}s]", flush=True)
 
-    print(f"[done] {frame_idx} frames -> {frames_dir}", flush=True)
+    print(f"[done] {frame_idx} frames x {len(alg.TASKS)} tasks -> {frames_root}",
+          flush=True)
 
 
 if __name__ == "__main__":
