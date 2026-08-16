@@ -1,7 +1,7 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 9
+memory_version: 11
 updated_at: "2026-08-16"
-updated_by: "codex"        # claude | codex | user
+updated_by: "claude"        # claude | codex | user
 
 mode: dual-agent                 # dual-agent | single-agent-degraded（codex v0.147.0 已装并登录，2026-08-14）
 unavailable_agent: null          # mode 为 degraded 时填 claude | codex
@@ -15,7 +15,7 @@ execution_allowed: true
 active_tasks:
 - name: onestep-mse-vs-t
   type: experiment
-  state: review
+  state: done
   owner: claude
   branch: null
   depends_on: []
@@ -37,4 +37,4 @@ active_tasks:
 # 各 agent 最后一次 sync 看到的版本（stale 检测用）
 last_seen:
   claude: { memory_version: 2, commit: "06e2ebf", github_event: null }
-  codex:  { memory_version: 8, commit: "4167561", github_event: "issue#1" }
+  codex:  { memory_version: 10, commit: "458d5af", github_event: "issue#1-approved" }

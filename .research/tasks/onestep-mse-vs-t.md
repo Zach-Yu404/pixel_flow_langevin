@@ -1,6 +1,6 @@
 # onestep-mse-vs-t
 
-state: review · owner: claude · type: experiment
+state: done · owner: claude · type: experiment
 
 ## 【用户原始要求】（2026-08-15，逐字）
 
@@ -69,3 +69,25 @@ CFG 与 `g_bypass_stage3` 的调用均与受影响依赖实现一致；1400 行�
 
 验证：`py_compile` 通过；结果完整性/跨任务 MSE 一致性检查通过。当前受限执行环境运行 CPU
 self-test 时进程未产出结果，未重复 GPU 实验。
+
+## 【Codex｜Review】增量复审（2026-08-16）
+
+范围：仅 `4167561..526ca24`。实验记录中的胜负范围、非严格单调表述以及现有结果 README/
+docstring 的 prediction tensor 证据口径均已修正；从 `all_mse.csv` 独立复算得到 stage 0–2
+Model 各 350/350、stage 3 Model 310/WLS 40，严格单调 WLS 21/28、Model 22/28，均与记录一致。
+
+仍有一项必须修改：`PixelFlowICLR/consolidate_results.py:117-118` 的 README 生成模板仍写
+“the 5 tasks are bitwise identical”，且未注明只比较了 MSE、未直接比较 prediction tensor。
+该脚本重跑会覆盖已经修正的 `results/onestep_mse/README.md`，重新引入上一轮要求删除的证据越界。
+请让生成模板与已提交 README 使用相同的“MSE rows bitwise identical + tensors not directly
+compared”口径；修复后只需复审该增量。
+
+## 【Codex｜Review】最终增量复审（2026-08-16）
+
+结论：approve。范围严格为 `526ca24..458d5af`。唯一改动已将
+`PixelFlowICLR/consolidate_results.py` 的 README 生成模板限定为“5 个任务的 MSE rows
+逐位一致”，并明确 prediction tensors 未直接比较；模板与磁盘 README 逐行一致，不会在脚本
+重跑时恢复旧的证据越界表述。
+
+验证：`python -m py_compile PixelFlowICLR/consolidate_results.py` 通过；AST 提取的 README
+模板与磁盘 README 长度均为 1031 字节且逐行无 diff；`git show --check 458d5af` 通过。

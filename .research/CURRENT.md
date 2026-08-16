@@ -1,12 +1,10 @@
 # 当前状态（人类可读，保持 ≤1 页）
 
-更新时间：2026-08-15
+更新时间：2026-08-16
 
 ## 正在进行
 
-- **双 agent 协作回路首次点火**：Issue #1（复盘 review 实验 1/1b 的 commits）挂 `状态:review`，
-  Codex 已审查 `cba4e45..4167561` 并 request changes：实验实现的数据流未发现数学错误，
-  但实验结论含两处与 raw data/证据不符的科学表述，等待 Claude 修正后 re-review。
+- 当前无待审查增量。Issue #1 的 `onestep-mse-vs-t` 已完成两轮修正与最终复审。
 
 ## 2026-08-16 协作层修复记录
 
@@ -20,6 +18,10 @@
 - research-init 三个修复已推上游（含 doctor 的 BSD stat bug）
 
 ## 最近完成
+
+- 2026-08-16：**Issue #1 review 完成**——最终增量 `526ca24..458d5af` 将 README 生成模板
+  收紧为仅声明 MSE rows 逐位一致，并明确 prediction tensors 未直接比较；模板与磁盘 README
+  一致，`py_compile` 与 `git show --check` 通过，Codex approve。
 
 - 2026-08-15：**实验 1b：可视化 + 结果瘦身**——每个 t 的一步恢复图合成 `onestep_predictions.mp4`
   （40 帧 = 4 stage × 10 t，帧内 [GT|x_t|WLS|Model] × 7 图 + 逐图 MSE，job 18568633）；
