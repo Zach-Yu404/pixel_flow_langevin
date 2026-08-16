@@ -19,9 +19,10 @@
 
 ## 最近完成
 
-- 2026-08-16：**Issue #1 review 完成**——最终增量 `526ca24..458d5af` 将 README 生成模板
-  收紧为仅声明 MSE rows 逐位一致，并明确 prediction tensors 未直接比较；模板与磁盘 README
-  一致，`py_compile` 与 `git show --check` 通过，Codex approve。
+- 2026-08-16：**Issue #1 review 完成并关闭——双 agent 回路首次完整闭环**：3 轮
+  （request changes ×2 → approve），全程 watcher/orchestrator 自动调度。
+  ①结论表述过强 ×2 + "bitwise identical" 证据越界 → 修正 526ca24（修正前逐项复算核实）；
+  ②README 生成模板漏改（会回归旧口径）→ 修正 458d5af；③approve（模板与磁盘逐字节一致）。
 
 - 2026-08-15：**实验 1b：可视化 + 结果瘦身**——每个 t 的一步恢复图合成 `onestep_predictions.mp4`
   （40 帧 = 4 stage × 10 t，帧内 [GT|x_t|WLS|Model] × 7 图 + 逐图 MSE，job 18568633）；
