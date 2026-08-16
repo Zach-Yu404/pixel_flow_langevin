@@ -42,13 +42,19 @@ Pooled mean MSE（5 任务 × 7 图；t 为 within-stage）：
 
 ## 结论与备注
 
-1. **Model（direct_estimate_x1）一致优于 WLS（wls_estimate_x1）**，stage 0 差距近 50×，
-   随 stage 递减，stage 3（G bypass → 两式几乎重合）打平。WLS 在小 s_k/e_k（早期 stage）
-   严重 ill-conditioned，是其误差主源。
-2. 两种预测的 MSE 都随 within-stage t 单调下降（噪声减小 → 预测更准），符合预期。
-3. **5 个任务的曲线完全相同**（数字逐位一致）：one-step 预测不经过 operator/y；
-   5 份 LPIPS_king 的相关 kw（steps=10/shift=1/gs=2/rho=1/cg 同）恰好一致，
-   ε 按设计跨任务共享 → 任务维度在此实验中无区分度。如需任务分化，
+1. **Model（direct_estimate_x1）在 stage 0–2 的全部 1050 个样本上 MSE 低于 WLS**
+   （stage 0 差距近 50×，随 stage 递减）；**stage 3 为多数而非全部**：350 个样本中
+   Model 310 / WLS 40（G bypass 下两式几乎重合，差异在噪声量级）。WLS 在小 s_k/e_k
+   （早期 stage）严重 ill-conditioned，是其误差主源。
+2. MSE **总体随 within-stage t 下降但并非逐点单调**：28 条逐图曲线中严格单调的
+   WLS 21 条 / Model 22 条；stage 0 的 pooled 曲线在 t=0→0.111 略升
+   （WLS 7.7950→7.8066，Model 0.15953→0.16095）；27/28 条曲线 t=1 低于 t=0
+   （1 条例外）。"噪声减小 → 预测更准"作为趋势成立，作为逐点断言不成立。
+3. **5 个任务的全部 MSE 数值逐位一致**：one-step 调用链不经过 operator/y，
+   5 份 LPIPS_king 被消费的 9 个 kw（steps/shift/gs/rho/λ_x/cg/g_bypass）恰好一致，
+   ε 按设计跨任务共享，同一代码路径 → 可判定任务维度在此实验中无区分度。
+   注意证据口径：**未直接比较预测 tensor**（MSE 相等 + 相同输入/参数/路径是间接论证；
+   如需 bitwise 断言需保存 tensor 或内容哈希）。如需任务分化，
    需引入测量一致性（operator 参与的预测）或各任务不同的 kw。
 4. 修复过程记录：首跑输出被 demo_runner import 时的 os.chdir(IP_package) 副作用
    写到 IP_package/results/（已搬回 PixelFlowICLR/results/ 并在脚本里以 ORIG_CWD 修复；
@@ -59,7 +65,7 @@ Pooled mean MSE（5 任务 × 7 图；t 为 within-stage）：
 - **onestep_predictions.mp4**(job 18568633,A100 udc-an34-13,~2.5min 渲染):40 帧 =
   4 stage × 10 t,每帧 4 行[GT x₁ᵏ | x_tᵏ | WLS x̂₁ | Model x̂₁]× 7 图,WLS/Model 行下标注
   逐图 MSE;2fps,20s,1462×892 H.264,4.0MB。脚本 `onestep_visual.py`(import 复用 1 的全部机制,
-  只跑 box config——已验证 5 任务预测逐位一致,故标注 task-independent)。
+  只跑 box config——5 任务 MSE 逐位一致 + 消费 kw 相同 + 同一代码路径,故标注 task-independent)。
   编码用 imageio-ffmpeg 静态二进制(`pip install imageio-ffmpeg` 进 pixelflow env;
   系统 /usr/bin/ffmpeg 缺 libvmaf.so.0 不可用)。
 - **PNG 去冗余**(`consolidate_results.py`,先做逐位一致性断言,失败即中止不删):

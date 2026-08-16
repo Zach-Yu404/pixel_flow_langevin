@@ -12,11 +12,12 @@ Frames go to <out>/frames_tmp/frame_%03d.png ordered by (stage, step); a login
 node then encodes them into ONE mp4 with ffmpeg (see run_onestep_visual.sbatch
 + the encode step) and deletes frames_tmp.
 
-Verified fact (all_mse.csv, max rel diff = 0): predictions are BITWISE
-IDENTICAL across the 5 task configs (one-step never touches operator/y and the
-relevant LPIPS_king kw coincide; eps is shared by design). So frames are
-computed ONCE with the box_inpainting LPIPS_king config and labeled
-task-independent.
+Verified fact (all_mse.csv): all per-image MSE values are bitwise identical
+across the 5 task configs; combined with identical consumed LPIPS_king kw,
+shared eps, and the operator/y never entering the one-step call path, the
+experiment is task-independent (prediction tensors themselves were not
+directly compared). So frames are computed ONCE with the box_inpainting
+LPIPS_king config and labeled task-independent.
 
 All math is imported from onestep_mse_vs_t (which re-exports the original
 IP_package utils). No Langevin / iteration / rollout. playground_runs untouched.

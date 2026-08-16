@@ -1,8 +1,9 @@
 # onestep_mse — PixelFlowICLR experiment 1 (+1b visuals)
 
 - `all_mse.csv` — raw MSE, 1400 rows = 5 tasks x 7 images x 4 stages x 10 t
-  (kept with the task column for completeness; the 5 tasks are bitwise identical —
-  one-step prediction never touches the operator/y).
+  (kept with the task column for completeness; the 5 tasks' MSE rows are bitwise
+  identical — one-step prediction never touches the operator/y; prediction
+  tensors were not directly compared).
 - `raw_mse.json` — one canonical copy of the per-row data (+ note); per-task kw in
   `task_configs.json`.
 - `mse_vs_t_summary.png` — THE curve figure (4 stage panels, WLS vs Model,

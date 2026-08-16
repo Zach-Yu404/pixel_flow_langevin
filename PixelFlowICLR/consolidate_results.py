@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 """Consolidate onestep_mse results (PixelFlowICLR experiment 1 cleanup).
 
-Rationale: the 5 task configs produce BITWISE-IDENTICAL predictions (verified:
-max rel diff of every mse value = 0 across tasks; one-step never touches the
-operator/y and the relevant LPIPS_king kw coincide). The original per-task
+Rationale: the 5 task configs produce bitwise-identical MSE rows (verified:
+every mse value equal across tasks; one-step never touches the operator/y and
+the consumed LPIPS_king kw coincide — note this is indirect evidence of
+task-independence; prediction tensors themselves were not compared). The
+original per-task
 output (5 x 28 curve pngs + 5 overview pngs + 5 raw_mse.json) is therefore
 5-fold redundant. This script:
 
@@ -53,7 +55,7 @@ def main():
             for a, b in zip(ref, rows):
                 assert a["mse_wls"] == b["mse_wls"] and a["mse_model"] == b["mse_model"], \
                     f"tasks NOT identical at {a['image']} stage{a['stage']} step{a['step']} — aborting, nothing deleted"
-        print(f"[check] {len(tasks_present)} tasks bitwise identical ✓")
+        print(f"[check] MSE rows bitwise identical across {len(tasks_present)} tasks ✓")
 
     ref_task = tasks_present[0] if tasks_present else "_root"
     rows = data[ref_task]["rows"]

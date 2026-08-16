@@ -1,6 +1,6 @@
 # onestep-mse-vs-t
 
-state: working · owner: claude · type: experiment
+state: review · owner: claude · type: experiment
 
 ## 【用户原始要求】（2026-08-15，逐字）
 
@@ -26,6 +26,10 @@ state: working · owner: claude · type: experiment
 >
 > （追加，实验准备期间）GPU可以申请A100
 
+## 【用户原始要求】（2026-08-16，逐字）
+
+> 按 AGENTS.md 执行 sync protocol。先 gh issue view 1 读正文，确定 review 对象：关联 PR，或 Issue 里指定的 commit 区间（无 PR 时）。用 base+diff+受影响代码/tests 审查（不重读整仓）。结论以【Codex｜Review】中文评论发在 PR（无 PR 则发在 Issue #1）：approve 或列出必须修改项。若列出必须修改项，另外执行 gh issue edit 1 --add-label 触发:needs-fix。同步 .research/ 相关 task 文件并提交。
+
 ## 【Claude｜方案】
 
 - 新目录 `PixelFlowICLR/`（repo 根下，与 PixelFlow 平级）：`onestep_mse_vs_t.py` + `run_onestep_mse.sbatch` + README。
@@ -44,3 +48,24 @@ state: working · owner: claude · type: experiment
 - GPU：Slurm `-p gpu --gres=gpu:a100:1 -A cbig-ece`（用户指定可用 A100）。
 - 备注：one-step 预测本身不经过 operator/y（WLS 是 xs_hat/xe_hat 的加权最小二乘，与测量无关）；
   任务间差异体现在 LPIPS_king kw（步数/shift/guidance/rho 等）。已在 CPU self-test 验证全链路。
+
+## 【Codex｜Review】（2026-08-16）
+
+结论：request changes。审查范围为 Issue #1 指定的 `cba4e45..4167561`。
+
+实现侧核对：`x1_gt` 链式 bilinear 金字塔、`x_t=H_t(x1)+sigma_t*eps`、WLS/direct estimate、
+CFG 与 `g_bypass_stage3` 的调用均与受影响依赖实现一致；1400 行结果按完整实验键覆盖 280 组，
+每组 5 个任务的 MSE 数值一致；9 个实际消费的 LPIPS_king 参数也一致。
+
+必须修改：
+
+1. `.research/experiments/2026-08-15-onestep-mse-vs-t.md:45-48` 的“一致优于”和“都单调下降”
+   与 raw data 不符。stage 3 有 WLS 40 次胜出；stage 0 pooled WLS/Model 在首步均上升，逐图仅
+   WLS 21/28、Model 22/28 曲线单调。需改成数据支持的限定表述。
+2. `PixelFlowICLR/consolidate_results.py:53-56` 只比较两个标量 MSE，却宣称 predictions bitwise
+   identical；`onestep_visual.py:15-18` 与实验记录沿用该表述。相同 MSE 不足以证明预测张量逐位
+   相同。需把表述收紧为“MSE 数值逐位一致，且由相同消费参数/相同输入/未经过 operator 的代码
+   路径推知任务无关”，或保存并比较预测 tensor/hash 后再声称 prediction bitwise identity。
+
+验证：`py_compile` 通过；结果完整性/跨任务 MSE 一致性检查通过。当前受限执行环境运行 CPU
+self-test 时进程未产出结果，未重复 GPU 实验。

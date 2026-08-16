@@ -4,7 +4,20 @@
 
 ## 正在进行
 
-- （无——onestep-mse-vs-t 已完结，等待用户定下一步）
+- **双 agent 协作回路首次点火**：Issue #1（复盘 review 实验 1/1b 的 commits）挂 `状态:review`，
+  Codex 已审查 `cba4e45..4167561` 并 request changes：实验实现的数据流未发现数学错误，
+  但实验结论含两处与 raw data/证据不符的科学表述，等待 Claude 修正后 re-review。
+
+## 2026-08-16 协作层修复记录
+
+- 用户发现"GitHub 上看不到项目 & Codex 零参与"。根因三件：
+  1. default branch 停在 `main`（初始骨架），工作全在 `IP_branch` → 已切 default=IP_branch。
+     repo 名是 `pixel_flow_langevin`（非 MSFlow）——改名与否待用户定
+  2. watcher 8月14日启动后即死：orchestrator 轮询裸奔 gh 调用，一次 TLS 超时整个进程崩
+     → research-init 已修（watch 模式容错重试，commit 4a47632）并重启
+  3. Issue/PR 从未创建过，label 状态机零触发 → Codex 自然零参与；另修掉
+     `状态:review` 每轮重复调 codex 的烧 token bug（commit e881ef0）
+- research-init 三个修复已推上游（含 doctor 的 BSD stat bug）
 
 ## 最近完成
 
