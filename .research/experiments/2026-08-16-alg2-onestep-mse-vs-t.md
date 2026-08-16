@@ -60,6 +60,7 @@ solve + line 14 clean solve）的 x̂₁ᵏ MSE vs t；顺带测 score 误差与
 - 产物(results/ 已按用户要求覆盖,旧分任务 png/mp4/csv 删除,git 历史保留;PDF 保留):
   `unified_predictions.mp4`(40 帧,行序 GT|WLS|Model|Alg2|x_t,4.8MB)、
   `mse_vs_t_unified.png`、`unified_mse.csv`(280 行)
-- 数字(pooled mean,WLS/Model 与实验 1 同源):stage0 Alg2 1.7e-9 / WLS 7.74 / Model 0.112 量级;
+- 数字(pooled mean,已从 unified_mse.csv 复算验证):Alg2 stage0-3 = 2.17e-7 / 1.82e-6 /
+  1.32e-5 / 1.72e-4;WLS = 7.74 / 1.08 / 0.13 / 5.3e-3;Model = 0.112 / 0.041 / 0.014 / 5.1e-3;
   y=GT 时测量项主导,Alg2 接近精确复原(stage0/t0 单图 3.6e-13)——这是设计上限探针,
   非真实测量下的算法比较(后者见本文件上方 5 任务结果)。
