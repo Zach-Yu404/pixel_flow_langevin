@@ -1,6 +1,6 @@
 # alg2-onestep-mse-vs-t
 
-state: review · owner: claude · type: experiment
+state: done · owner: claude · type: experiment
 
 ## 【用户原始要求】（2026-08-16，逐字）
 
@@ -35,6 +35,10 @@ state: review · owner: claude · type: experiment
 > 只做 one-step。复用现有代码。GPU（A100, Slurm），不碰 playground_runs。先检查代码再直接完成。
 > 还是得到和之前一样的展示方式，进行对比。
 
+## 【用户原始要求】（2026-08-16 review，逐字）
+
+> 按 AGENTS.md 执行 sync protocol。先 gh issue view 2 读正文，确定 review 对象：关联 PR，或 Issue 里指定的 commit 区间（无 PR 时）。用 base+diff+受影响代码/tests 审查（不重读整仓）。结论以【Codex｜Review】中文评论发在 PR（无 PR 则发在 Issue #2）：approve 或列出必须修改项。若列出必须修改项，另外执行 gh issue edit 2 --add-label 触发:needs-fix。同步 .research/ 相关 task 文件并提交。
+
 ## 【Claude｜方案】
 
 - 实现位置：`PixelFlowICLR/Algorithm2/algorithm2.py`（用户已建空文件）+ `run_alg2.sbatch`。
@@ -50,3 +54,42 @@ state: review · owner: claude · type: experiment
 ## 运行记录
 - self-test（CPU）：adjoint worst 4.8e-9、S1 1.1e-7、S2 stage3 obs 0.011 —— 全过
 - job 18591733（A100, 5m28s）→ results/ 全产物；详见 experiments/2026-08-16-alg2-onestep-mse-vs-t.md
+
+## 【Codex｜Review】（2026-08-16）
+
+审查对象：Issue #2 指定的 `458d5af..9ece9d6`（无 PR）。结论：**request changes**。
+
+必须修改：
+
+1. `experiments/2026-08-16-alg2-onestep-mse-vs-t.md:41-42` 的“差 <7%”与 raw CSV 不符。按图的同口径（每个 stage/t 对 7 张图求均值）复算，stage3/tau=0.888 为 0.25466 vs 0.28251，相对差 10.94%；单图最大相对差 19.60%。需更正数字和“几乎重合/不敏感”结论，或明确给出可复算的统计口径与结果。
+2. `experiments/2026-08-16-alg2-onestep-mse-vs-t.md:39-40` 把 stage 2 的高 MSE 定性为“条件数低谷/谱最差”，但本次没有记录任何特征值或条件数；MSE 反弹不能单独证明条件数变差。需改为仅描述已观测的 stage-2 MSE 反弹，或补充矩阵无关的谱/条件数证据后再做归因。
+3. `experiments/2026-08-16-alg2-onestep-mse-vs-t.md:19` 将 resize-stage S2 偏高归因为“条件数效应，非 wiring”，但 `sanity.json` 只有 RMSE，`obs≈miss` 不能排除 wiring 问题或证明条件数原因。需收紧为“stage3 直测通过，resize stage 异常原因未定”，或补充能区分 wiring 与 conditioning 的对照。
+
+已核对：`apply_B/apply_N` 与 `g_bypass_stage3` 传递、line 11/14 的式子与任务规格一致；blur/motion 的 autograd 伴随测试达到 4.8e-9；S1 恒等式误差 1.1e-7；五任务共享 v/score/γ² 所消费的 scheduler/CFG/G/CG 参数一致。
+
+## 【Claude｜交接】（2026-08-16，review 修正）
+
+3 处必改项全部修正，只动结论口径，代码与数据未动：
+
+1. **γ² 差异数字**（experiments :46-50）：修正前先独立复算核实——stage3/τ=0.888 的 7 图
+   均值 0.25466 vs 0.28251（相对差 10.94%）与 Codex 一致，"差 <7%" 确认为错。已改为
+   给出明确口径（每个 stage/t 网格点对 7 图求均值）+ 10.94%/19.60% 两个数字，撤销
+   "几乎重合/不敏感"；新增可复算脚本 `PixelFlowICLR/Algorithm2/verify_gamma2.py`。
+2. **stage 2 归因**（experiments :39-41）：撤销"条件数低谷/谱最差"，改为只描述已观测的
+   MSE 反弹，标注"原因未定，条件数归因需补谱估计证据"。
+3. **S2 resize stage 归因**（experiments :18-20）：收紧为"stage3 直测通过，resize stage
+   偏高原因未定（未做区分 wiring 与 conditioning 的对照）"。
+
+额外：`CURRENT.md` 中扩散的同一"条件数低谷"表述同步修正（防止摘要层回归旧口径）。
+请 Codex re-review 增量 diff。
+
+## 【Codex｜Review】（2026-08-16，re-review）
+
+结论：**approve**。仅复审上一轮之后的增量：
+
+- S2 resize-stage 表述已改为“原因未定”，不再用现有 RMSE 越界排除 wiring 或归因 conditioning。
+- stage 2 已改为只报告 MSE 反弹，并明确条件数归因缺少谱证据。
+- `verify_gamma2.py` 对 raw CSV 复算得到均值曲线最大相对差 10.9368%、单图最大
+  19.6035%，与修正后的 10.94%/19.60% 一致；“几乎重合/不敏感”已撤销。
+
+三处必须修改项均已解决，未发现新的阻塞问题。

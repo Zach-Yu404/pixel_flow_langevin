@@ -4,9 +4,7 @@
 
 ## 正在进行
 
-- **alg2-onestep-mse-vs-t 已跑完待 review**（Issue #2）：Algorithm 2 one-step 估计器 vs WLS/Model，
-  job 18591733；核心观察：Alg2 任务分化、早 stage 强测量任务上 ~10× 优于 Model、
-  晚 stage Model 更好、stage 2 条件数低谷。详见 experiments/2026-08-16-alg2-onestep-mse-vs-t.md
+- 当前无待 review 的任务。
 
 ## 2026-08-16 协作层修复记录
 
@@ -21,6 +19,8 @@
 
 ## 最近完成
 
+- 2026-08-16：**Issue #2 re-review 通过**：Algorithm 2 one-step 估计器实验的 3 处证据口径
+  已修正；Codex 增量复审确认 10.94%/19.60% 可复算，结论 approve。
 - 2026-08-16：**Issue #1 review 完成并关闭——双 agent 回路首次完整闭环**：3 轮
   （request changes ×2 → approve），全程 watcher/orchestrator 自动调度。
   ①结论表述过强 ×2 + "bitwise identical" 证据越界 → 修正 526ca24（修正前逐项复算核实）；

@@ -16,7 +16,9 @@ solve + line 14 clean solve）的 x̂₁ᵏ MSE vs t；顺带测 score 误差与
 ## Sanity（全过，先于 GPU 跑）
 - 伴随测试（blur/motion 换 autograd 精确伴随后）：worst 4.8e-9（flip(K) 解析伴随在 32² 差 1.8e-3——reflection padding 的伴随不是 reflection padding，已弃用）
 - S1 恒等式（解析证明 σ_τB+(e−s)H_τ≡N ⇒ v:=d_exact 时 x̂₀=x₀）：worst rel err 1.1e-7
-- S2 判决（stage 3 直测，无噪 y）：random obs RMSE 0.0110 ≪ η=0.05 ✓；resize stage 的 obs 误差偏高（~0.09-0.11）是双线性上采样×稀疏掩码的条件数效应（obs≈miss 佐证），非 wiring
+- S2 判决（stage 3 直测，无噪 y）：random obs RMSE 0.0110 ≪ η=0.05 ✓（stage3 直测通过）；
+  resize stage 的 obs 误差偏高（~0.09-0.11，obs≈miss）——偏高原因未定：sanity.json 只有
+  RMSE，未做能区分 wiring 与 conditioning 的对照
 
 ## 结果（pooled mean MSE，A=Alg2 / W=WLS / M=Model；W、M 与实验 1 逐位同源）
 
@@ -36,10 +38,14 @@ solve + line 14 clean solve）的 x̂₁ᵏ MSE vs t；顺带测 score 误差与
 3. **晚 stage Model 全面更好**（s3 全任务 M≈0.005 < A 0.035-0.13）：one-step line 14 的 b
    只用 (y, x_t)，不含网络 v（按 spec；v 只进 warm start 与 line 11），σ→小时先验项把
    x̂₁ 拉向 x_t 本身。
-4. **stage 2 是 Alg2 的条件数低谷**（SR 6.17、gaussian 2.82 反超 s1/s3）——中等 σ 下
-   AᵀA/η² 与 H²/σ² 二项都不占优，谱最差；胜负计数：SR 全程 alg2<model 118/273，box 11/273。
+4. **stage 2 出现 Alg2 的 MSE 反弹**（SR 6.17、gaussian 2.82 反超 s1/s3）。本次未记录
+   任何特征值/条件数数据，反弹原因未定（条件数归因需补矩阵无关的谱估计后才可下）；
+   胜负计数：SR 全程 alg2<model 118/273，box 11/273。
 5. score solve：err 随 stage 升（s0 2.7e-3 → s3 8.7e-2）；γ²_meas ~0.009-0.020;
-   γ²=γ²_meas 的第二组曲线与 γ²=0 几乎重合（差 <7%）——γ² 修正在此量级不敏感。
+   γ²=γ²_meas vs γ²=0 的差异（口径：每个 stage/t 网格点对 7 张图求均值，复算脚本
+   `Algorithm2/verify_gamma2.py`）：均值曲线最大相对差 10.94%（stage3/τ=0.888：
+   0.25466 vs 0.28251），单图最大 19.60%。两组曲线形态与量级一致，但差异达
+   ~11%（均值）/~20%（单图），不能称"几乎重合"。
 
 ## 备注
 - pipeline._daps_motion_kernel 硬编码旧机器 DAPS 路径（registry #16）——实验侧预插当前
