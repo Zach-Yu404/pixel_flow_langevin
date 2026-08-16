@@ -4,7 +4,9 @@
 
 ## 正在进行
 
-- 当前无待审查增量。Issue #1 的 `onestep-mse-vs-t` 已完成两轮修正与最终复审。
+- **alg2-onestep-mse-vs-t 已跑完待 review**（Issue #2）：Algorithm 2 one-step 估计器 vs WLS/Model，
+  job 18591733；核心观察：Alg2 任务分化、早 stage 强测量任务上 ~10× 优于 Model、
+  晚 stage Model 更好、stage 2 条件数低谷。详见 experiments/2026-08-16-alg2-onestep-mse-vs-t.md
 
 ## 2026-08-16 协作层修复记录
 
