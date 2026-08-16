@@ -32,3 +32,10 @@ artifacts:
     size_bytes: 3528589624
     producer_task: null
     producer_commit: null
+  - logical_name: onestep-mse-vs-t-results          # PixelFlowICLR 实验 1(+1b)raw 数据+总图+视频
+    location: "PixelFlowICLR/results/onestep_mse/"
+    checksum: "md5:ae009557c89474a18e7233068b7990ff"   # all_mse.csv（1400 行,未变）
+    size_bytes: null             # 合并后 6 文件：all_mse.csv + raw_mse.json + task_configs.json
+                                 #   + mse_vs_t_summary.png + onestep_predictions.mp4(4.0MB,40帧) + README
+    producer_task: onestep-mse-vs-t
+    producer_commit: null        # jobs 18567584(数据)+18568633(帧,2026-08-15);png/mp4 gitignored,只在本机

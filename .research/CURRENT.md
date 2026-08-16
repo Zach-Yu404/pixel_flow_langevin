@@ -1,12 +1,21 @@
 # 当前状态（人类可读，保持 ≤1 页）
 
-更新时间：2026-08-14
+更新时间：2026-08-15
 
 ## 正在进行
 
-- （无明确进行中的任务——本次为 Research OS 接入 + 记忆初始化。上一次实质工作是 2026-07 的迁移验证与 benchmark 打包）
+- （无——onestep-mse-vs-t 已完结，等待用户定下一步）
 
 ## 最近完成
+
+- 2026-08-15：**实验 1b：可视化 + 结果瘦身**——每个 t 的一步恢复图合成 `onestep_predictions.mp4`
+  （40 帧 = 4 stage × 10 t，帧内 [GT|x_t|WLS|Model] × 7 图 + 逐图 MSE，job 18568633）；
+  145 张冗余曲线 PNG 合并为 1 张 `mse_vs_t_summary.png`（合并前逐位一致性校验）。
+  结果目录收敛到 6 个文件；png/mp4 按仓库纪律 gitignored，见 artifacts.yaml
+- 2026-08-15：**PixelFlowICLR 实验 1（onestep-mse-vs-t）完成**——one-step x̂₁ MSE vs t，
+  5 任务 × 7 图 × 4 stage，A100 job 18567584。核心发现：Model(direct) 一致优于 WLS
+  （stage0 差 ~50×，stage3 打平）；5 任务曲线因 kw 相同而完全一致（one-step 不经过 operator）。
+  详见 experiments/2026-08-15-onestep-mse-vs-t.md；数据 PixelFlowICLR/results/onestep_mse/
 
 - 2026-08-14：**全量记忆导入**——13 路并行读完项目内 130+ 份 .md(含前代 agent 的 SESSION_HANDOFF/global_memory)+ 关键代码/未提交 diff → 写入 experiments/{imagenet-5task-tuning, imagenet-baselines, multimodal-celeba-afhq-mri}.md、context/{authoritative-entries, contradictions-registry}.md、ARCHITECTURE/CONSTRAINTS 增补
 - 2026-08-14：接入 Research OS（.research/ 初始化、GitHub label、watcher 启动、codex 装好并登录、dual-agent 就绪）

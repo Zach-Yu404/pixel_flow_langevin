@@ -47,7 +47,17 @@
 - celeba_results/ 根会被外部进程重置,持久物只放 code/ 或数据盘符号链接
 
 ## 当前任务约束
-（无）
+
+### 2026-08-15 · onestep-mse-vs-t（PixelFlowICLR 实验 1）
+【用户原始要求】（节选，全文见 tasks/onestep-mse-vs-t.md）
+> 只做 one-step prediction，不做 Langevin、迭代优化或 ODE rollout。
+> 尽量复用现有 scheduler、stage construction、WLS、model prediction 和 operator 代码，
+> 不要重新实现已有逻辑，也不要修改 `playground_runs`。
+> 实验需要 GPU，请按服务器现有方式申请 GPU 后运行，不要直接在 login node 跑。
+> GPU可以申请A100
+
+生效动作：`playground_runs/` 只读；实验代码全部 import 现有实现；GPU 经 Slurm `gpu` 分区
+`--gres=gpu:a100:1` 申请；login node 仅允许 CPU self-test（无模型前向）。
 
 <!-- 格式示例：
 ### 2026-08-13 · 关于 temporal-consistency 任务
