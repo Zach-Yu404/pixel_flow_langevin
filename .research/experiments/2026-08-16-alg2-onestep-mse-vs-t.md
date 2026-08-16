@@ -11,7 +11,7 @@ solve + line 14 clean solve）的 x̂₁ᵏ MSE vs t；顺带测 score 误差与
 | command | `sbatch PixelFlowICLR/Algorithm2/run_alg2.sbatch`（内含 `PYTHONHASHSEED=0`——demo_runner 掩码种子仍用 hash()，registry #6 残留） |
 | config | 各任务 LPIPS_king*.json：operator 块 + sigma_n=0.05（=η）+ kw（与实验 1 相同的 9 个消费参数） |
 | job | 18591733（A100 udc-an37-1，5m28s，2026-08-16） |
-| 产物 | `PixelFlowICLR/Algorithm2/results/`：alg2_mse.csv（1400 行，35 个 σ<0.01 跳过点 Alg2=NaN）、alg2_<task>.png ×5（全局 t 拼接、log-y、粗均值+细逐图；inpainting 加 obs/miss 面板）、score_gamma2.png、gamma2_meas.json、sanity.json、**alg2_predictions.mp4**（实验 2b，job 18593101，40 帧 = 4 stage × 10 t，9 行 [GT\|x_t\|WLS\|Model\|Alg2×5任务] × 7 图，逐图 MSE 标注，σ<0.01 面板标灰；13MB，gitignored） |
+| 产物 | `PixelFlowICLR/Algorithm2/results/`：alg2_mse.csv（1400 行，35 个 σ<0.01 跳过点 Alg2=NaN）、alg2_<task>.png ×5（全局 t 拼接、log-y、粗均值+细逐图；inpainting 加 obs/miss 面板）、score_gamma2.png、gamma2_meas.json、sanity.json、**alg2_predictions.mp4**（实验 2b，job 18592798，40 帧 = 4 stage × 10 t，9 行 [GT\|x_t\|WLS\|Model\|Alg2×5任务] × 7 图，逐图 MSE 标注，σ<0.01 面板标灰；13MB，gitignored） |
 
 ## Sanity（全过，先于 GPU 跑）
 - 伴随测试（blur/motion 换 autograd 精确伴随后）：worst 4.8e-9（flip(K) 解析伴随在 32² 差 1.8e-3——reflection padding 的伴随不是 reflection padding，已弃用）
