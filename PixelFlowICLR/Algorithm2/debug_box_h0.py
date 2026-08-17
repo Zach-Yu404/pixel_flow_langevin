@@ -18,7 +18,7 @@ ORIG_CWD = os.getcwd()
 
 import algorithm2 as alg  # noqa: E402  (chdir side effect via base import chain)
 import onestep_mse_vs_t as base  # noqa: E402
-import full_ip_compare as fic  # noqa: E402
+import full_ip_compare as full_ip  # noqa: E402
 
 import torch  # noqa: E402
 import torch.nn.functional as F  # noqa: E402
@@ -59,13 +59,12 @@ def main():
     model.eval()
     print("[setup] model loaded", flush=True)
 
-    cfg, op_cfg = fic.best_cfg(task)
+    cfg, op_cfg = full_ip.best_cfg(task)
     kw = dict(cfg["kw"])
     kw["class_label"] = int(demo["class_idx"])
     sigma_n = float(cfg.get("sigma_n", 0.05))
-    op, mask, y, _, _, mkA, _ = build_setup_and_measurement(
+    op, mask, y, _, _, make_Ak_fns_fn, _ = build_setup_and_measurement(
         task, op_cfg, demo, sigma_n, 256, device)
-    setup = dict(op=op, y=y, mkA=mkA)
     gamma2_tab = json.load(open(os.path.join(alg.HERE, "gamma2_meas.json")))["table"]
     num_stages = int(config.scheduler.num_stages)
     pyr = base.gt_stage_pyramid(gt, num_stages)
@@ -77,10 +76,13 @@ def main():
         variants = [(f"h0={h}", h, 0.0) for h in args.h0]
     all_rows = []
     finals = {}
-    for label, h0, anc in variants:
-        x1, rows, traj = fic.sample_alg2(model, config, gt, y, setup, kw,
-                                         sigma_n, gamma2_tab, device,
-                                         seed=42, record=True, h0=h0, anchor=anc)
+    for label, h0, anchor_val in variants:
+        x1, rows, traj = full_ip.run_posterior_sampling_alg2(
+            model, config, gt, y, op, sigma_n, device,
+            gamma2_tab=gamma2_tab, make_Ak_fns_fn=make_Ak_fns_fn,
+            seed=42, record_trajectory=True, h0=h0, anchor=anchor_val,
+            **{k: v for k, v in kw.items() if k not in ("class_label", "seed")},
+            class_label=int(demo["class_idx"]))
         # traj entries follow the same (stage, step) order as rows
         for r, (x_tau_rec, x1_rec, _) in zip(rows, traj):
             k = r["stage"]
@@ -92,7 +94,7 @@ def main():
             r2 = dict(r)
             r2["variant"] = label
             r2["h0"] = h0
-            r2["anchor"] = anc
+            r2["anchor"] = anchor_val
             r2["mse_hole"] = float((err * m_k).sum() / (m_k.sum() * 3))
             r2["mse_obs"] = float((err * (1 - m_k)).sum() / ((1 - m_k).sum() * 3))
             all_rows.append(r2)

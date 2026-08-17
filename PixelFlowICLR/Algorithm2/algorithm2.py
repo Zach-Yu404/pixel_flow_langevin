@@ -130,7 +130,7 @@ def mse_masked(a, b, m):
     return float(((a - b) ** 2 * m).sum() / n)
 
 
-def score_solve(x_tau, v, s_k, e_k, tau, gamma2, eff_si, cg_tol, cg_max_iter):
+def score_solve(x_tau, v, s_k, e_k, tau, gamma2, eff_si, cg_tol, L):
     """line 11: [N^2 + gamma2*H_tau^2] x0_hat = N(B x_tau - H_tau v)."""
     def op(u):
         Nu = apply_N(apply_N(u, s_k, e_k, eff_si), s_k, e_k, eff_si)
@@ -140,13 +140,13 @@ def score_solve(x_tau, v, s_k, e_k, tau, gamma2, eff_si, cg_tol, cg_max_iter):
         return Nu
     rhs = apply_N(apply_B(x_tau, s_k, e_k, eff_si) - apply_H_tau(v, tau, s_k, e_k, eff_si),
                   s_k, e_k, eff_si)
-    return cg_solve(op, rhs, tol=cg_tol, max_iter=cg_max_iter)
+    return cg_solve(op, rhs, tol=cg_tol, max_iter=L)
 
 
-def alg2_x1_solve(x_tau, A_fn, AT_fn, y, eta, sigma_t, tau, s_k, e_k, eff_si,
+def clean_image_solve(x_tau, A_fn, AT_fn, y, eta, sigma_tau, tau, s_k, e_k, eff_si,
                   x1_warm, cg_tol):
     """line 14 (deterministic): M x = b, warm-started CG, max_iter=200."""
-    inv_e2, inv_s2 = 1.0 / eta ** 2, 1.0 / float(sigma_t) ** 2
+    inv_e2, inv_s2 = 1.0 / eta ** 2, 1.0 / float(sigma_tau) ** 2
 
     def M0(x):
         return inv_e2 * AT_fn(A_fn(x)) + \
@@ -287,7 +287,7 @@ def main():
             x_tau = apply_H_tau(x1_gt, tau, sk, ek, eff_si) + sig * x0
             y_clean = st["op"](gt[:1]).detach()          # xi = 0
             A_fn, AT_fn = st["mkA"](st["op"], st["y"], x1_gt.shape, device)
-            x1_hat = alg2_x1_solve(x_tau, A_fn, AT_fn, y_clean, sigma_n_t, sig,
+            x1_hat = clean_image_solve(x_tau, A_fn, AT_fn, y_clean, sigma_n_t, sig,
                                    tau, sk, ek, eff_si, x1_gt.clone(), cg_tol)
             m_st = F.interpolate(st["mask"], size=x1_gt.shape[-2:], mode="nearest")
             obs_rmse = math.sqrt(mse_masked(x1_hat, x1_gt, m_st))
@@ -336,8 +336,8 @@ def main():
         for step_idx in range(len(sc.Timesteps)):
             T = sc.Timesteps[step_idx]
             tau = float(sc.t[step_idx])
-            sigma_t = compute_sigma_tau(tau, sk, ek)
-            x_tau = apply_H_tau(x1_gt, tau, sk, ek, eff_si) + sigma_t * x0
+            sigma_tau = compute_sigma_tau(tau, sk, ek)
+            x_tau = apply_H_tau(x1_gt, tau, sk, ek, eff_si) + sigma_tau * x0
 
             # ONE velocity call (shared by all tasks)
             mus = []
@@ -361,7 +361,7 @@ def main():
             g2_meas = float(g2_per_img.mean())
             gamma2_tab.setdefault(si, {})[round(tau, 6)] = g2_meas
 
-            skip_alg2 = sigma_t < SIGMA_MIN
+            skip_alg2 = sigma_tau < SIGMA_MIN
             if not skip_alg2:
                 x0_hat = score_solve(x_tau, v, sk, ek, tau, 0.0, eff_si, cg_tol, cg_max_iter)
                 x0_hat_g2 = score_solve(x_tau, v, sk, ek, tau, g2_meas, eff_si,
@@ -383,11 +383,11 @@ def main():
                         x1_a2 = None
                     else:
                         A_fn, AT_fn = stage_A[task][bi]
-                        x1_a2 = alg2_x1_solve(x_tau[sl], A_fn, AT_fn,
-                                              setups[bi]["y"], eta, sigma_t, tau,
+                        x1_a2 = clean_image_solve(x_tau[sl], A_fn, AT_fn,
+                                              setups[bi]["y"], eta, sigma_tau, tau,
                                               sk, ek, eff_si, x1_model[sl].clone(), cg_tol)
                     row = dict(task=task, image=name, stage=si, step=step_idx,
-                               tau=tau, T=float(T), sigma_tau=float(sigma_t),
+                               tau=tau, T=float(T), sigma_tau=float(sigma_tau),
                                s_k=sk, e_k=ek, resolution=h,
                                mse_alg2=float(((x1_a2 - x1_gt[sl]) ** 2).mean())
                                if x1_a2 is not None else float("nan"),

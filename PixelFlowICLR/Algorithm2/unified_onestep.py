@@ -4,7 +4,7 @@
 Per user spec (2026-08-16): all three estimators see the identical setup —
   x1^k   = chain-of-bilinear-halving downsample of the same 7 playground GTs
   x0^k   = the same fixed-seed noise (eps_for contract from onestep_mse_vs_t)
-  x_t^k  = H_t(x1) + sigma_t * x0
+  x_t^k  = H_t(x1) + sigma_tau * x0
 and produce x1-hat, compared to x1^k by MSE:
   WLS    = wls_estimate_x1      (one velocity call)
   Model  = direct_estimate_x1   (same call)
@@ -112,8 +112,8 @@ def main():
         for step_idx in range(len(sc.Timesteps)):
             T = sc.Timesteps[step_idx]
             tau = float(sc.t[step_idx])
-            sigma_t = compute_sigma_tau(tau, sk, ek)
-            x_tau = apply_H_tau(x1_gt, tau, sk, ek, eff_si) + sigma_t * x0
+            sigma_tau = compute_sigma_tau(tau, sk, ek)
+            x_tau = apply_H_tau(x1_gt, tau, sk, ek, eff_si) + sigma_tau * x0
 
             mus = []
             for lo in range(0, B, args.chunk):
@@ -130,17 +130,17 @@ def main():
             x1_model = direct_estimate_x1(xs_hat, xe_hat, sk, ek)
             x1_wls = wls_estimate_x1(xs_hat, xe_hat, sk, ek, rho_s, rho_e,
                                      lambda_x, cg_tol, cg_max_iter, stage_idx=eff_si)
-            skip = sigma_t < alg.SIGMA_MIN
+            skip = sigma_tau < alg.SIGMA_MIN
             x1_a2 = None
             if not skip:
-                x1_a2 = alg.alg2_x1_solve(x_tau, identity, identity, x1_gt, ETA,
-                                          sigma_t, tau, sk, ek, eff_si,
+                x1_a2 = alg.clean_image_solve(x_tau, identity, identity, x1_gt, ETA,
+                                          sigma_tau, tau, sk, ek, eff_si,
                                           x1_model.clone(), cg_tol)
 
             for bi, name in enumerate(shorts):
                 rows_out.append(dict(
                     image=name, stage=si, step=step_idx, tau=tau,
-                    sigma_tau=float(sigma_t), resolution=h,
+                    sigma_tau=float(sigma_tau), resolution=h,
                     mse_wls=float(((x1_wls[bi] - x1_gt[bi]) ** 2).mean()),
                     mse_model=float(((x1_model[bi] - x1_gt[bi]) ** 2).mean()),
                     mse_alg2=float(((x1_a2[bi] - x1_gt[bi]) ** 2).mean())
@@ -152,7 +152,7 @@ def main():
                 for bi in range(B):
                     ax = axes[ri, bi]
                     if rows_t[ri] is None:
-                        ax.text(0.5, 0.5, r"skipped ($\sigma_t<0.01$)",
+                        ax.text(0.5, 0.5, r"skipped ($\sigma_tau<0.01$)",
                                 ha="center", va="center", fontsize=6)
                         ax.set_facecolor("0.9")
                     else:
@@ -168,7 +168,7 @@ def main():
             fig.suptitle(
                 f"unified one-step $\\hat{{x}}_1$ (y=GT, A=I, $\\eta$={ETA}) · "
                 f"stage {si} ({h}px) · step {step_idx + 1}/{steps_si} · "
-                f"t={tau:.3f} · $\\sigma_t$={float(sigma_t):.3f}", fontsize=11)
+                f"t={tau:.3f} · $\\sigma_tau$={float(sigma_tau):.3f}", fontsize=11)
             fig.tight_layout(rect=[0, 0, 1, 0.97])
             fig.savefig(os.path.join(frames_dir, f"frame_{frame_idx:03d}.png"), dpi=110)
             plt.close(fig)

@@ -119,8 +119,8 @@ def main():
         for step_idx in range(len(sc.Timesteps)):
             T = sc.Timesteps[step_idx]
             tau = float(sc.t[step_idx])
-            sigma_t = compute_sigma_tau(tau, sk, ek)
-            x_tau = apply_H_tau(x1_gt, tau, sk, ek, eff_si) + sigma_t * x0
+            sigma_tau = compute_sigma_tau(tau, sk, ek)
+            x_tau = apply_H_tau(x1_gt, tau, sk, ek, eff_si) + sigma_tau * x0
 
             mus = []
             for lo in range(0, B, args.chunk):
@@ -137,7 +137,7 @@ def main():
             x1_model = direct_estimate_x1(xs_hat, xe_hat, sk, ek)
             x1_wls = wls_estimate_x1(xs_hat, xe_hat, sk, ek, rho_s, rho_e,
                                      lambda_x, cg_tol, cg_max_iter, stage_idx=eff_si)
-            skip = sigma_t < alg.SIGMA_MIN
+            skip = sigma_tau < alg.SIGMA_MIN
 
             alg2 = {}
             if not skip:
@@ -146,9 +146,9 @@ def main():
                     outs = []
                     for bi in range(B):
                         A_fn, AT_fn = stage_A[task][bi]
-                        outs.append(alg.alg2_x1_solve(
+                        outs.append(alg.clean_image_solve(
                             x_tau[bi:bi + 1], A_fn, AT_fn, setups[bi]["y"], eta,
-                            sigma_t, tau, sk, ek, eff_si,
+                            sigma_tau, tau, sk, ek, eff_si,
                             x1_model[bi:bi + 1].clone(), cg_tol))
                     alg2[task] = torch.cat(outs, dim=0)
 
@@ -160,7 +160,7 @@ def main():
                     for bi in range(B):
                         ax = axes[ri, bi]
                         if rows_t[ri] is None:
-                            ax.text(0.5, 0.5, r"skipped ($\sigma_t<0.01$)",
+                            ax.text(0.5, 0.5, r"skipped ($\sigma_tau<0.01$)",
                                     ha="center", va="center", fontsize=6)
                             ax.set_facecolor("0.9")
                         else:
@@ -176,7 +176,7 @@ def main():
                 fig.suptitle(
                     f"{task} · one-step $\\hat{{x}}_1$ · stage {si} ({h}px) · "
                     f"step {step_idx + 1}/{steps_si} · t={tau:.3f} · "
-                    f"$\\sigma_t$={float(sigma_t):.3f}   (x-labels = per-image MSE)",
+                    f"$\\sigma_tau$={float(sigma_tau):.3f}   (x-labels = per-image MSE)",
                     fontsize=11)
                 fig.tight_layout(rect=[0, 0, 1, 0.97])
                 fig.savefig(os.path.join(frames_root, task,

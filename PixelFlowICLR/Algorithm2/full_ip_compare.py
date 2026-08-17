@@ -23,7 +23,6 @@ import json
 import math
 import os
 import time
-import zlib
 
 ORIG_CWD = os.getcwd()
 
@@ -39,9 +38,11 @@ import matplotlib  # noqa: E402
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-from ms_posterior_sampling_article_version_final import run_posterior_sampling  # noqa: E402
+from ms_posterior_sampling_article_version_final import (  # noqa: E402
+    run_posterior_sampling, _per_stage,
+)
 from ms_posterior_sampling_article_version_final_utils import (  # noqa: E402
-    apply_H_tau, compute_sigma_tau, cg_solve, make_velocity_fn,
+    apply_H_tau, compute_sigma_tau, cg_solve, make_velocity_fn, make_Ak_fns,
 )
 from pixelflow.scheduling_pixelflow import PixelFlowScheduler  # noqa: E402
 from pixelflow.utils import config as config_utils             # noqa: E402
@@ -68,105 +69,153 @@ def best_cfg(task):
     return c, op
 
 
-def sample_alg2(model, config, gt, y, setup, kw, eta, gamma2_tab, device,
-                seed=42, record=False, h0=H0, anchor=0.0):
-    # anchor > 0: EXPERIMENTAL Tweedie-anchored Block 1 (task debug-box-alg2-hole).
-    # Treats x1_model = direct_estimate_x1(v) as a Gaussian pseudo-observation with
-    # precision `anchor`: M += anchor*I, b += anchor*x1_model + sqrt(anchor)*xi_a
-    # (keeps the Lem.-5 exact-draw semantics for the anchored conditional; zero
-    # extra NFE — reuses the l.10 velocity). anchor=0.0 reproduces the paper's
-    # Algorithm 2 unchanged. Rationale: in ker(A) the paper's conditional (62)
-    # carries no image prior on x1; oracle simulation shows the x1 hole chain is
-    # a non-contracting random walk (std ~24x prior) — see .research task file.
-    """Algorithm 2 (PDF p.13) for ONE image [1,3,256,256]. Returns x1, metrics
-    rows (stage/step/mse), and optional trajectory (x_tau, x1, x0_hat per tau)."""
-    num_stages = int(config.scheduler.num_stages)
-    scheduler = PixelFlowScheduler(config.scheduler.num_train_timesteps,
-                                   num_stages=num_stages, gamma=-1 / 3)
-    shift = float(kw.get("shift", 1.0))
-    guidance_scale = float(kw.get("guidance_scale", 0.0))
-    do_cfg = guidance_scale > 0
-    g_bypass = bool(kw.get("g_bypass_stage3", True))
-    cg_tol = float(kw.get("cg_tol", 1e-5))
-    L = int(kw.get("cg_max_iter", 50))
-    S = int(float(kw.get("num_langevin", 10)))
-    grid_n = int(float(kw.get("ode_steps_per_stage", 10)))
-    class_label = int(kw.get("class_label", 10))
-    num_classes = int(model.num_classes)
+def run_posterior_sampling_alg2(
+    model, config, gt, y, operator, eta, device,
+    *,
+    # Per-stage schedules — same names/positions as run_posterior_sampling
+    num_langevin=10,                 # paper: inner iterations S
+    ode_steps_per_stage=10, shift=1.0,
+    # Structural / physical
+    guidance_scale=0.0, class_label=10,
+    g_bypass_stage3=True,
+    cg_tol=1e-5, cg_max_iter=50,     # paper: CG iterations L
+    make_Ak_fns_fn=None,
+    seed=42,
+    record_trajectory=False,
+    # Algorithm-2 specific
+    gamma2_tab=None,                 # measured gamma^2(k, tau) table (Cor. 8)
+    h0=H0,                           # paper: Block-2 step size h_0
+    anchor=0.0,                      # EXPERIMENTAL Tweedie anchor, see below
+    **unused_kw,                     # PRINCIPLE-only kw (h_x, lambda_reg, ...) ignored
+):
+    """Algorithm 2 (draft p.13) with the SAME section layout as
+    ``run_posterior_sampling`` (ms_posterior_sampling_article_version_final.py)
+    so the two samplers can be compared side by side. Differences are the
+    paper-line comments: x1 init to 0 (l.1), exact Block-1 draw (l.12-14, no
+    h1), x0 recompute (l.15), Block-2 x0 Langevin (l.16-17), and the ancestral
+    transition U^(1) + fresh x0 (l.20) instead of the renoise transition.
 
-    pyr = base.gt_stage_pyramid(gt, num_stages)
-    g = torch.Generator(device="cpu").manual_seed(seed)
+    anchor > 0 (EXPERIMENTAL, task debug-box-alg2-hole): treats the l.10
+    velocity's x1_model = direct_estimate_x1(v) as a Gaussian pseudo-observation
+    with precision `anchor` (M_tau += anchor*I, b_tilde += anchor*x1_model +
+    sqrt(anchor)*xi_a — Lem.-5 exact-draw semantics kept, zero extra NFE).
+    anchor=0.0 reproduces the paper's Algorithm 2 unchanged. Rationale: in
+    ker(A) the conditional (62) carries no image prior on x1; the hole chain is
+    a non-contracting random walk (oracle sim: std ~24x prior).
+
+    Returns (x1, rows, traj): rows = per-(stage, step) MSE vs the GT stage
+    pyramid (instrumentation only), traj = (x_tau, x1, x0_hat) per step when
+    ``record_trajectory``.
+    """
+    if make_Ak_fns_fn is None:
+        make_Ak_fns_fn = make_Ak_fns
+
+    B = gt.shape[0]
+    S = int(float(num_langevin))         # paper symbol
+    L = int(cg_max_iter)                 # paper symbol
+
+    num_stages = int(config.scheduler.num_stages)
+    scheduler = PixelFlowScheduler(
+        config.scheduler.num_train_timesteps,
+        num_stages=num_stages, gamma=-1 / 3,
+    )
+
+    # CFG / class-label setup — identical to run_posterior_sampling
+    pe_labels = torch.tensor([int(class_label)] * B, dtype=torch.int32, device=device)
+    do_cfg = guidance_scale > 0
+    if do_cfg:
+        uncond_label = int(model.num_classes)
+        prompt_embeds = torch.cat([uncond_label * torch.ones_like(pe_labels),
+                                   pe_labels], dim=0)
+    else:
+        prompt_embeds = pe_labels
+
+    # Initial spatial size derives from gt — identical to run_posterior_sampling
+    target_h, target_w = int(gt.shape[-2]), int(gt.shape[-1])
+    init_factor = 2 ** (num_stages - 1)
+    h, w = target_h // init_factor, target_w // init_factor
+
+    # Deterministic CPU noise stream (all xi draws) + GT stage pyramid (metrics)
+    g = torch.Generator(device="cpu").manual_seed(int(seed))
 
     def randn_like_cpu(x):
         return torch.randn(x.shape, generator=g).to(x.device)
 
-    x1 = torch.zeros_like(pyr[0])                       # line 1 (stage-0 res)
+    pyr = base.gt_stage_pyramid(gt, num_stages)
+    x1 = torch.zeros((B, 3, h, w), device=device)                    # l.1
     rows, traj = [], []
-    for k in range(num_stages):
-        x0 = randn_like_cpu(pyr[k])                     # line 3 / line 20 fresh draw
+
+    # ── main loop ──────────────────────────────────────────────────────
+    for si in range(num_stages):
         sc = copy.deepcopy(scheduler)
-        sc.set_timesteps(grid_n, k, device=device, shift=shift)
-        sk, ek = float(sc.start_t[k]), float(sc.end_t[k])
-        eff = k if g_bypass else None
-        h, w = pyr[k].shape[-2:]
-        A_fn, AT_fn = setup["mkA"](setup["op"], setup["y"], pyr[k][:1].shape, device)
+        ode_steps_si = int(float(_per_stage(ode_steps_per_stage, si, num_stages)))
+        sc.set_timesteps(ode_steps_si, si, device=device, shift=shift)
+        s_k = float(sc.start_t[si])
+        e_k = float(sc.end_t[si])
+        eff_si = si if g_bypass_stage3 else None
+
+        if si > 0:                                                   # l.20: U^(1)
+            h *= 2
+            w *= 2
+            x1 = F.interpolate(x1, size=(h, w), mode="nearest")
+        x0 = randn_like_cpu(pyr[si])                                 # l.3 / l.20 fresh x0
+
+        Ak, ATk = make_Ak_fns_fn(operator, y, (B, 3, h, w), device)
+
         size_tensor, rope_pos = base.rope_for(model, h, w, device)
-        pe = torch.tensor([class_label], dtype=torch.int32, device=device)
-        if do_cfg:
-            pe = torch.cat([num_classes * torch.ones_like(pe), pe], dim=0)
-        g2_stage = gamma2_tab[str(k)]
+        gamma2_stage = gamma2_tab[str(si)]
 
-        for step_idx in range(len(sc.Timesteps)):   # grid convention == exp-1 loop
+        for step_idx, T in enumerate(sc.Timesteps):
             tau = float(sc.t[step_idx])
-            sigma_t = compute_sigma_tau(tau, sk, ek)
-            T = sc.Timesteps[step_idx]
-            vfn = make_velocity_fn(model, T, pe, size_tensor, rope_pos,
-                                   do_cfg, guidance_scale, k)
-            g2 = float(g2_stage.get(f"{round(tau, 6)}",
-                                    list(g2_stage.values())[step_idx]))
+            sigma_tau = compute_sigma_tau(tau, s_k, e_k)             # l.5
+            velocity_fn = make_velocity_fn(
+                model, T, prompt_embeds, size_tensor, rope_pos,
+                do_cfg, guidance_scale, si,
+            )
+            gamma2 = float(gamma2_stage.get(f"{round(tau, 6)}",
+                                            list(gamma2_stage.values())[step_idx]))
             x0_hat = None
-            if sigma_t >= alg.SIGMA_MIN:
-                inv_e2, inv_s2 = 1.0 / eta ** 2, 1.0 / float(sigma_t) ** 2
+            if sigma_tau >= alg.SIGMA_MIN:
+                inv_e2, inv_s2 = 1.0 / eta ** 2, 1.0 / float(sigma_tau) ** 2
 
-                def M0(x):
-                    return inv_e2 * AT_fn(A_fn(x)) + inv_s2 * apply_H_tau(
-                        apply_H_tau(x, tau, sk, ek, eff), tau, sk, ek, eff)
-                ridge = alg.power_iter_norm(M0, x1.shape, device) * 1e-6 \
-                    if tau == 0.0 else 0.0
-                diag = ridge + anchor
-                M_fn = (lambda x: M0(x) + diag * x) if diag else M0
+                def M0(x):                                           # l.7 (pre-ridge)
+                    return inv_e2 * ATk(Ak(x)) + inv_s2 * apply_H_tau(
+                        apply_H_tau(x, tau, s_k, e_k, eff_si), tau, s_k, e_k, eff_si)
+                epsilon = alg.power_iter_norm(M0, x1.shape, device) * 1e-6 \
+                    if tau == 0.0 else 0.0                           # Prop. 4
+                diag = epsilon + anchor
+                M_tau = (lambda x: M0(x) + diag * x) if diag else M0
 
-                for s in range(S):
-                    x_tau = apply_H_tau(x1, tau, sk, ek, eff) + sigma_t * x0  # l.9
+                for s in range(S):                                   # l.8
+                    x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + sigma_tau * x0  # l.9
                     with torch.no_grad():
-                        v = vfn(x_tau)                                        # l.10
-                    x0_hat = alg.score_solve(x_tau, v, sk, ek, tau, g2, eff,
-                                             cg_tol, L)                       # l.11
-                    xi_y = randn_like_cpu(y)                                  # l.12
+                        v = velocity_fn(x_tau)                       # l.10
+                    x0_hat = alg.score_solve(x_tau, v, s_k, e_k, tau, gamma2,
+                                             eff_si, cg_tol, L)      # l.11
+                    xi_y = randn_like_cpu(y)                         # l.12
                     xi_h = randn_like_cpu(x1)
-                    b = inv_e2 * AT_fn(setup["y"]) + \
-                        inv_s2 * apply_H_tau(x_tau, tau, sk, ek, eff) + \
-                        (1.0 / eta) * AT_fn(xi_y) + \
-                        (1.0 / float(sigma_t)) * apply_H_tau(xi_h, tau, sk, ek, eff)  # l.13
-                    if anchor > 0:
+                    b_tilde = inv_e2 * ATk(y) + \
+                        inv_s2 * apply_H_tau(x_tau, tau, s_k, e_k, eff_si) + \
+                        (1.0 / eta) * ATk(xi_y) + \
+                        (1.0 / float(sigma_tau)) * apply_H_tau(xi_h, tau, s_k, e_k, eff_si)  # l.13
+                    if anchor > 0:                                   # EXPERIMENTAL anchor
                         x1_model = alg.direct_estimate_x1(
-                            x_tau - tau * v, x_tau + (1.0 - tau) * v, sk, ek)
-                        b = b + anchor * x1_model + \
+                            x_tau - tau * v, x_tau + (1.0 - tau) * v, s_k, e_k)
+                        b_tilde = b_tilde + anchor * x1_model + \
                             math.sqrt(anchor) * randn_like_cpu(x1)
-                    x1 = cg_solve(M_fn, b, x0=x1.clone(), tol=cg_tol,
-                                  max_iter=200 if tau == 0.0 else L)          # l.14
-                    x0 = (x_tau - apply_H_tau(x1, tau, sk, ek, eff)) / float(sigma_t)  # l.15
-                    xi0 = randn_like_cpu(x0)                                  # l.16
-                    x0 = x0 - (h0 / 2.0) * (x0 + x0_hat) + math.sqrt(h0) * xi0  # l.17
-            mse = float(((x1 - pyr[k]) ** 2).mean())
-            rows.append(dict(stage=k, step=step_idx, tau=tau,
-                             sigma_tau=float(sigma_t), mse_x1=mse))
-            if record:
-                x_tau_rec = apply_H_tau(x1, tau, sk, ek, eff) + float(sigma_t) * x0
+                    x1 = cg_solve(M_tau, b_tilde, x0=x1.clone(), tol=cg_tol,
+                                  max_iter=200 if tau == 0.0 else L)  # l.14
+                    x0 = (x_tau - apply_H_tau(x1, tau, s_k, e_k, eff_si)) / float(sigma_tau)  # l.15
+                    xi_0 = randn_like_cpu(x0)                        # l.16
+                    x0 = x0 - (h0 / 2.0) * (x0 + x0_hat) + math.sqrt(h0) * xi_0  # l.17
+
+            rows.append(dict(stage=si, step=step_idx, tau=tau,
+                             sigma_tau=float(sigma_tau),
+                             mse_x1=float(((x1 - pyr[si]) ** 2).mean())))
+            if record_trajectory:
+                x_tau_rec = apply_H_tau(x1, tau, s_k, e_k, eff_si) + float(sigma_tau) * x0
                 traj.append((x_tau_rec[0].cpu(), x1[0].cpu(),
                              (x0_hat if x0_hat is not None else x0)[0].cpu()))
-        if k < num_stages - 1:                            # line 20: U^(1) + fresh x0
-            x1 = F.interpolate(x1, scale_factor=2, mode="nearest")
     return x1, rows, traj
 
 
@@ -213,15 +262,14 @@ def main():
         sigma_n = float(cfg.get("sigma_n", 0.05))
         for d in demos:
             name = d["short_name"]
-            op, mask, y, _, _, mkA, term_fn = build_setup_and_measurement(
+            op, mask, y, _, _, make_Ak_fns_fn, term_fn = build_setup_and_measurement(
                 task, op_cfg, d, sigma_n, 256, device)
             if task in ("gaussian_blur", "motion_blur"):
-                inner = mkA
+                inner = make_Ak_fns_fn
 
-                def mkA(operator, y_, ss, dev, _inner=inner):
+                def make_Ak_fns_fn(operator, y_, ss, dev, _inner=inner):
                     Af, _ = _inner(operator, y_, ss, dev)
                     return Af, alg.make_exact_AT(Af, tuple(ss))
-            setup = dict(op=op, y=y, mkA=mkA)
             gt = d["gt"].unsqueeze(0).to(device)
             pyr = base.gt_stage_pyramid(gt, num_stages)
             record = (name == TRAJ_IMAGE)
@@ -230,16 +278,20 @@ def main():
                 NFE["n"] = 0
                 ts = time.time()
                 if method == "alg2":
-                    _, rows, traj = sample_alg2(
-                        model, config, gt, y, setup, kw, sigma_n, gamma2_tab,
-                        device, seed=int(kw.get("seed", 42)), record=record)
+                    _, rows, traj = run_posterior_sampling_alg2(
+                        model, config, gt, y, op, sigma_n, device,
+                        gamma2_tab=gamma2_tab, make_Ak_fns_fn=make_Ak_fns_fn,
+                        seed=int(kw.get("seed", 42)), record_trajectory=record,
+                        **{k_: v for k_, v in kw.items()
+                           if k_ not in ("class_label", "seed")},
+                        class_label=int(d["class_idx"]))
                 else:
                     kw_run = {k_: v for k_, v in kw.items()}
                     kw_run["x1_init_mode"] = method          # 'wls' | 'model'
                     _, tj = run_posterior_sampling(
                         model, config, gt, y, op, sigma_n, device,
                         record_trajectory=True,
-                        terminal_replacement_fn=term_fn, make_Ak_fns_fn=mkA,
+                        terminal_replacement_fn=term_fn, make_Ak_fns_fn=make_Ak_fns_fn,
                         **{k_: v for k_, v in kw_run.items()
                            if k_ not in ("class_label",)},
                         class_label=int(d["class_idx"]))

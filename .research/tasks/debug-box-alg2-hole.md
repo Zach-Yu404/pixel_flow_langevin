@@ -16,7 +16,7 @@ state: done · owner: claude · type: debug
 模型内容填充；对照 Alg1-Model 洞区填充完好。metrics 佐证：box s0-s2 Alg2 MSE 7.29/3.12/1.45。
 
 排除项：
-- 实现≠论文？否——full_ip_compare.sample_alg2 与草稿 p.13 Algorithm 2 逐行一致（含 l.17 的
+- 实现≠论文？否——full_ip_compare.run_posterior_sampling_alg2 与草稿 p.13 Algorithm 2 逐行一致（含 l.17 的
   (x₀+x̂₀) 号——式(35)(36) 推导自洽，x̂₀ 项即对 x_τ 的去噪方向，非符号错误）。
 - one-step 版 line14 不用 x̂₀？按 spec 如此（b 只含 y,x_t），非本 bug 主因。
 
@@ -48,7 +48,7 @@ h₀↑ 反而更差 ⇒ h₀ 非杠杆。
    oracle 下 λ=25 时 mean 1.002 / std 0.200 —— 与目标后验完全一致。
 
 ### 轮 2：anchor 假设（进行中）
-偏离登记：sample_alg2 新增 anchor 参数（默认 0.0 = 论文原算法逐位不变；实验性变体
+偏离登记：run_posterior_sampling_alg2 新增 anchor 参数（默认 0.0 = 论文原算法逐位不变；实验性变体
 明确标注）。job 18635053：box·junco，anchor∈{0,1,5,25}，h₀=0.1，S=10，seed 42。
 判据：anchor>0 使洞区 MSE 显著下降且末图洞区出现语义内容。
 算法修改的最终采纳（是否写进论文/成为默认）待用户裁决。
@@ -87,3 +87,15 @@ x̂₁_model 作为精度 λ 的高斯伪观测（M += λI，b += λx̂₁ + √
 以及 λ 的取值/调度（本轮只试了常数 λ∈{1,5,25}，未做 per-stage 调度与更大 λ）。
 
 state: done（调试闭环；采纳与否待用户）
+
+## 【后记：重构与命名统一】（2026-08-17，用户指令）
+
+1. 变量名统一：先与旧代码对齐，再按用户升级指令与**论文符号**对齐
+   （S/L/h0/gamma2/eta/epsilon/x1/x0/x_tau/sigma_tau/M_tau/b_tilde/xi_*；kw/config 键名不变）。
+2. `sample_alg2` → `run_posterior_sampling_alg2`：签名与段落结构对齐旧 inference
+   `run_posterior_sampling`（CFG setup→尺寸推导→stage 循环→内循环），论文行号注释标差异；
+   `alg2_x1_solve` → `clean_image_solve`（论文 "clean-image solve"）。
+3. 重构中发现并修复 **class_label 公平性 bug**：full_ip main 里 Alg2 兜底类别 10 vs
+   wls/model 真实类别 → 旧 full_ip_metrics.csv 的 alg2 行引用前需重跑
+   （debug/anchor 系列不受影响——该路径显式传了正确类别）。
+4. 行为等价验证：job 18640239 ✅ 通过——junco anchor=0 洞区 MSE 0.9691 / obs 0.0018，与重构前逐位一致。
