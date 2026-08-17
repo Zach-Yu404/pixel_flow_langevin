@@ -64,3 +64,10 @@ solve + line 14 clean solve）的 x̂₁ᵏ MSE vs t；顺带测 score 误差与
   1.32e-5 / 1.72e-4;WLS = 7.74 / 1.08 / 0.13 / 5.3e-3;Model = 0.112 / 0.041 / 0.014 / 5.1e-3;
   y=GT 时测量项主导,Alg2 接近精确复原(stage0/t0 单图 3.6e-13)——这是设计上限探针,
   非真实测量下的算法比较(后者见本文件上方 5 任务结果)。
+
+## 后记（2026-08-17）
+- 收尾提交工作区遗留的 `Algorithm2/algorithm2.py` 修复：`make_exact_AT` 的 autograd 伴随在
+  strict deterministic 模式下会因 `reflection_pad2d_backward` 无确定性 CUDA 实现而抛错，
+  现按仓库 blur/SR 伴随的 warn_only 惯例加守卫并在调用后恢复原模式。
+  验证：py_compile ✓；守卫恢复 strict 模式 ✓；伴随恒等式 <Ax,r>=<x,ATr>（atol 1e-5）✓。
+  不影响已发布的实验数字（该路径仅在 strict-det 环境下才触发差异）。

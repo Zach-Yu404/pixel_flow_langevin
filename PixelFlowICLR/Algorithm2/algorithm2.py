@@ -92,11 +92,21 @@ def make_exact_AT(A_fn, x_shape):
     adjoint ignores that reflection-padding's adjoint is not reflection-padding
     (boundary error ~1e-3 at 32x32)."""
     def AT(r):
-        with torch.enable_grad():
-            xp = torch.zeros(x_shape, device=r.device, dtype=r.dtype,
-                             requires_grad=True)
-            Ax = A_fn(xp)
-            (grad,) = torch.autograd.grad(Ax, xp, grad_outputs=r.detach())
+        # reflection_pad2d_backward has no deterministic CUDA impl; the repo's
+        # standing convention for blur/SR adjoints is warn_only (see DESIGN §10).
+        det = torch.are_deterministic_algorithms_enabled()
+        wo = torch.is_deterministic_algorithms_warn_only_enabled()
+        if det and not wo:
+            torch.use_deterministic_algorithms(True, warn_only=True)
+        try:
+            with torch.enable_grad():
+                xp = torch.zeros(x_shape, device=r.device, dtype=r.dtype,
+                                 requires_grad=True)
+                Ax = A_fn(xp)
+                (grad,) = torch.autograd.grad(Ax, xp, grad_outputs=r.detach())
+        finally:
+            if det and not wo:
+                torch.use_deterministic_algorithms(True, warn_only=False)
         return grad.detach()
     return AT
 
