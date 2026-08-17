@@ -1,6 +1,6 @@
 # 当前状态（人类可读，保持 ≤1 页）
 
-更新时间：2026-08-16
+更新时间：2026-08-17
 
 ## 正在进行
 
@@ -18,6 +18,12 @@
 - research-init 三个修复已推上游（含 doctor 的 BSD stat bug）
 
 ## 最近完成
+
+- 2026-08-17：**debug-box-alg2-hole 闭环**——box 洞区不填充的根因锁定为论文 Algorithm 2
+  的结构性缺陷（Block 1 条件分布在 ker(A) 无 x₁ 先验，洞区链无收缩随机游走；h₀ 证伪 +
+  oracle 仿真 + Prop.4 排除实现偏差三重证据）。Tweedie 锚定变体（λ=25，零额外 NFE，
+  默认关闭）7/7 图修复：洞区 MSE 池化 1.097→0.178（6.2×），obs 无回退，洞区出现语义填充。
+  是否写进论文 Alg2 待用户裁决。详见 tasks/debug-box-alg2-hole.md 与同日 handoff
 
 - 2026-08-16：**Issue #2 re-review 通过**：Algorithm 2 one-step 估计器实验的 3 处证据口径
   已修正；Codex 增量复审确认 10.94%/19.60% 可复算，结论 approve。
