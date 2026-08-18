@@ -526,16 +526,21 @@ def run_debug_box(args):
     pyr = base.gt_stage_pyramid(gt, num_stages)
     hole = (1.0 - mask).to(device)          # [1,1,256,256]; 1 inside the box
 
-    if args.x0_steps is not None:
-        variants = [(f"K={k},g2x{gs:g}", 0.1, 0.0, k, gs)
+    trw_task = float(TASKS_SETUP[task]["terminal_replace_weight"])
+    if args.trw_values is not None:
+        variants = [(f"trw={w:g}", ALG["h0"], 0.0, ALG["x0_langevin_steps"],
+                     ALG["gamma2_scale"], float(w)) for w in args.trw_values]
+    elif args.x0_steps is not None:
+        variants = [(f"K={k},g2x{gs:g}", 0.1, 0.0, k, gs, trw_task)
                     for k in args.x0_steps for gs in args.gamma2_scales]
     elif args.anchors is not None:
-        variants = [(f"anchor={a}", 0.1, a, 1, 1.0) for a in args.anchors]
+        variants = [(f"anchor={a}", 0.1, a, 1, 1.0, trw_task) for a in args.anchors]
     else:
-        variants = [(f"h0={h}", h, 0.0, 1, 1.0) for h in args.h0]
+        variants = [(f"h0={h}", h, 0.0, 1, 1.0, trw_task) for h in args.h0]
     all_rows = []
     finals = {}
-    for label, h0, anchor_val, x0_steps, g2_scale in variants:
+    final_rows = []
+    for label, h0, anchor_val, x0_steps, g2_scale, trw in variants:
         x1, rows, traj = run_posterior_sampling_alg2(
             model, config, gt, y, op, sigma_n, device,
             gamma2_tab=gamma2_tab, make_Ak_fns_fn=make_Ak_fns_fn,
@@ -543,7 +548,7 @@ def run_debug_box(args):
             x0_langevin_steps=x0_steps, gamma2_scale=g2_scale,
             sigma_min=ALG["sigma_min"], ridge_rel=ALG["ridge_rel"],
             cg_max_iter_l14=ALG["cg_max_iter_l14"],
-            terminal_replace_weight=TASKS_SETUP[task]["terminal_replace_weight"],
+            terminal_replace_weight=trw,
             **{k: v for k, v in kw.items() if k not in ("class_label", "seed")},
             class_label=int(demo["class_idx"]))
         # traj entries follow the same (stage, step) order as rows
@@ -560,19 +565,32 @@ def run_debug_box(args):
             r2["anchor"] = anchor_val
             r2["x0_steps"] = x0_steps
             r2["gamma2_scale"] = g2_scale
+            r2["trw"] = trw
             r2["mse_hole"] = float((err * m_k).sum() / (m_k.sum() * 3))
             r2["mse_obs"] = float((err * (1 - m_k)).sum() / ((1 - m_k).sum() * 3))
             all_rows.append(r2)
         finals[label] = x1.detach().cpu()
         hm = [r for r in all_rows if r["variant"] == label]
+        # returned x1 is post-projection; rows above are pre-projection
+        err_f = (x1 - gt) ** 2
+        post_hole = float((err_f * hole).sum() / (hole.sum() * 3))
+        post_obs = float((err_f * (1 - hole)).sum() / ((1 - hole).sum() * 3))
+        final_rows.append(dict(variant=label, trw=trw,
+                               pre_hole=hm[-1]["mse_hole"], pre_obs=hm[-1]["mse_obs"],
+                               post_hole=post_hole, post_obs=post_obs))
         print(f"[{label}] final-stage last-step hole MSE = {hm[-1]['mse_hole']:.4f} "
               f"obs = {hm[-1]['mse_obs']:.4f}", flush=True)
+        print(f"[{label}] post-projection final hole MSE = {post_hole:.4f} "
+              f"obs = {post_obs:.4f}", flush=True)
 
     # ── raw CSV ──
     import csv
     with open(os.path.join(out, "h0_sweep.csv"), "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(all_rows[0].keys()))
         w.writeheader(); w.writerows(all_rows)
+    with open(os.path.join(out, "final_metrics.csv"), "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(final_rows[0].keys()))
+        w.writeheader(); w.writerows(final_rows)
 
     # ── hole/obs MSE curves (global step axis, one line per variant) ──
     fig, axes = plt.subplots(1, 2, figsize=(11, 3.6))
@@ -592,14 +610,17 @@ def run_debug_box(args):
 
     # ── final x1 comparison panel ──
     n = len(variants)
-    fig, axes = plt.subplots(1, n + 1, figsize=(3.2 * (n + 1), 3.4))
+    fig, axes = plt.subplots(1, n + 2, figsize=(3.2 * (n + 2), 3.4))
     axes[0].imshow(((gt[0].cpu().permute(1, 2, 0) + 1) / 2).clamp(0, 1))
     axes[0].set_title("GT"); axes[0].axis("off")
+    axes[1].imshow(((y[0].cpu().permute(1, 2, 0) + 1) / 2).clamp(0, 1))
+    axes[1].set_title("y (observed)"); axes[1].axis("off")
     for i, (label, *_) in enumerate(variants):
-        axes[i + 1].imshow(((finals[label][0].permute(1, 2, 0) + 1) / 2).clamp(0, 1))
-        last = [r for r in all_rows if r["variant"] == label][-1]
-        axes[i + 1].set_title(f"{label}\nhole MSE {last['mse_hole']:.3f}", fontsize=9)
-        axes[i + 1].axis("off")
+        axes[i + 2].imshow(((finals[label][0].permute(1, 2, 0) + 1) / 2).clamp(0, 1))
+        fr = final_rows[i]
+        axes[i + 2].set_title(f"{label}\npost hole {fr['post_hole']:.3f} "
+                              f"obs {fr['post_obs']:.4f}", fontsize=9)
+        axes[i + 2].axis("off")
     fig.suptitle(f"Alg2 final x1 — box_inpainting · {args.image} · sweep", fontsize=11)
     fig.tight_layout()
     fig.savefig(os.path.join(out, "h0_sweep_final_x1.png"), dpi=150)

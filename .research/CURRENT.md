@@ -1,10 +1,23 @@
 # 当前状态（人类可读，保持 ≤1 页）
 
-更新时间：2026-08-19
+更新时间：2026-08-18（晚）
 
 ## 正在进行
 
-- 当前无待 review 的任务。
+- Issue #3 review 等待 Codex（首次派发静默失败，orchestrator 修复中，见"阻塞"）。
+
+## 2026-08-18（晚）：GPU 终验闭环 + trw 实验 + 协作层二次修复
+
+- **cg_max_iter_l14 回归**：终验 18650178 得 hole 0.9704≠0.9691 → 根因=参数内联把 τ=0 的
+  l.14 CG 上限从硬编码 200 写成 config 里的 50（纯重构引入语义漂移）；修复后 job 18651717
+  复现 **0.9691/0.0018 bit-exact，终验通过**。同批修回 box/random trw=1.0。
+- **terminal_replace_weight 0 vs 1.0 实测**（用户指令，job 18651908）：两档采样轨迹逐位一致
+  （投影是循环后操作）；trw=1 洞区不变 0.9691、观测区 post obs=**0.0**。顺带发现 demo 管线
+  inpainting 的 y **无加性噪声**（η-模型失配）。详见 tasks/test-terminal-replace-weight.md
+- **协作层二次修复**：Issue #3 首次 codex 派发静默失败（exit 0 无评论）+ 标签被误置
+  状态:done——三个缺陷：①错误评论原文引用 marker 导致后续子串校验误判 ②疑似双 watcher
+  竞态 ③watcher 在 login node 反复被清（846355 已死，日志无痕）。修复=orchestrator 补
+  输出留痕/行首 marker 校验/单实例锁 + **watcher 迁移 scrontab**（计算节点已验证 gh/codex 可用）。
 
 ## 2026-08-16 协作层修复记录
 

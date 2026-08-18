@@ -13,7 +13,7 @@
   "anchor": 0.0,
   "seed": 42,
   "ridge_rel": 1e-06,
-  "cg_max_iter_l14": 50
+  "cg_max_iter_l14": 200
  },
  "sampler_kw": {
   "num_langevin": 10,
@@ -33,7 +33,7 @@
      129
     ]
    },
-   "terminal_replace_weight": 0.0
+   "terminal_replace_weight": 1.0
   },
   "random_inpainting": {
    "sigma_n": 0.05,
@@ -43,7 +43,7 @@
    "kw": {
     "num_langevin": 15
    },
-   "terminal_replace_weight": 0.0
+   "terminal_replace_weight": 1.0
   },
   "gaussian_blur": {
    "sigma_n": 0.05,
@@ -98,7 +98,7 @@
   "smoke": false
  },
  "debug_box": {
-  "out": "results/debug_box",
+  "out": "results/debug_box_trw",
   "image": "junco",
   "h0": [
    0.1,
@@ -106,10 +106,12 @@
    1.0
   ],
   "anchors": null,
-  "x0_steps": [
-   1
-  ],
+  "x0_steps": null,
   "gamma2_scales": [
+   1.0
+  ],
+  "trw_values": [
+   0.0,
    1.0
   ]
  },
