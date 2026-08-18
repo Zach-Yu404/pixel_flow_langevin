@@ -43,3 +43,12 @@ state: done（GPU 终验被集群维护窗口挂起，CPU 证据已闭环） · 
 ## 备注
 - final_denoise（box/gaussian/motion=true）为 Alg1 末端 WLS 去噪，按"只要 algorithm2"未纳入。
 - 本文件为补记：目录重组后的四轮改动当时未按纪律同步 .research，由用户指出后补齐。
+
+## 【协作层修复】（2026-08-19，用户指出"Codex 讨论没进行"后）
+- 事实确认：Issue #2（8-16）之后 Codex 零参与——watcher 已死 + 我未创建 Issue（入口动作缺失）。
+- 已补：Issue #3（review 区间 b0c9351..f49870c，label 状态:review）；watcher 重启
+  （pid 见 ~/.cache/research-watch/）。
+- 防遗忘机制（用户："怎么样可以不会忘记"）：新增项目级 Stop hook
+  `.claude/hooks/research-sync-check.sh` + `.claude/settings.json`——会话结束时检测
+  未同步 commit / 无 open review issue，命中则 block 一次强制补齐（三态管道测试通过）；
+  CLAUDE.md 增补硬性纪律条目。hook 自下个会话生效（settings watcher 限制）。

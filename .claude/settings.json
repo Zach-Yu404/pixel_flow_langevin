@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/research-sync-check.sh",
+            "timeout": 20,
+            "statusMessage": "research-sync 检查中"
+          }
+        ]
+      }
+    ]
+  }
+}

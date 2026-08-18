@@ -27,3 +27,11 @@
 ## 记忆纪律
 - 项目知识只写 `.research/`，不写 global memory。
 - 结束 meaningful phase 必写 handoff；更新 STATE.yaml 时 memory_version +1，发布前查 stale。
+
+## 硬性纪律（2026-08-19 起，用户指令）
+- **每个产生 commit 的工作段，结束前必须**：① 用户原始要求逐字入 `.research/tasks/`；
+  ② 更新 CURRENT/STATE；③ 实质性代码改动开 `状态:review` Issue 走 Codex 回路（入口动作
+  是"创建 Issue"，watcher 只认 label）。
+- 机制兜底：`.claude/hooks/research-sync-check.sh`（Stop hook）会在会话结束时检测
+  "代码 commit 晚于最近一次 .research 同步 / 无 open review issue"并拦截一次。
+  绕过该拦截视为违规。watcher 死了要重启：`research-watch start`。
