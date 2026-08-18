@@ -134,3 +134,13 @@ x₁ 无收缩机制不变）。
 **最终结论**：论文机制内三旋钮（h₀↑、x₀-Langevin K↑、γ²）对 box 洞区全部无效或有害；
 唯一有效干预仍是 Tweedie anchor（7/7 图 6.2×，当前被用户停用）。结构性诊断
 （Block-1 条件分布在 ker(A) 无 x₁ 先验）三重确认。算法层修改待用户裁决。
+
+## 【目录重组】（2026-08-18，用户指令）
+
+Algorithm2/ 收敛为 utils.py + main.py + 5 个 JSON（4 模式配置 + gamma2_meas 数据表）+ results/。
+代码体逐行搬运（非重写）：数学件+采样器 → utils.py；四个入口 → main.py 模式函数
+（onestep/full_ip/debug_box/verify，`python main.py --config <mode>.json`）；15 个旧文件
+git rm（历史保留）；sbatch 改用 `sbatch --wrap` 一行式（见 main.py docstring，含
+PYTHONHASHSEED=0）。SUMMARY.md 的论文映射浓缩进 utils.py docstring。
+等价性证据：CPU verify ALL PASS；onestep self-test S1 1.08e-07 / S2 0.0110（=历史记录）；
+GPU job 18643397 box K=1 洞区 MSE 0.9691 / obs 0.0018（=重组前逐位）。
