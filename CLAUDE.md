@@ -34,4 +34,7 @@
   是"创建 Issue"，watcher 只认 label）。
 - 机制兜底：`.claude/hooks/research-sync-check.sh`（Stop hook）会在会话结束时检测
   "代码 commit 晚于最近一次 .research 同步 / 无 open review issue"并拦截一次。
-  绕过该拦截视为违规。watcher 死了要重启：`research-watch start`。
+  绕过该拦截视为违规。
+- watcher 主机制（2026-08-18 起）：**scrontab**（`scrontab -l` 查看；Slurm 每 10 分钟跑一轮
+  orchestrator 单轮，login node 清进程杀不死）。orchestrator 带 per-repo flock，手动
+  `research-watch start` 守护可共存但非必需；agent 输出留痕 `~/.cache/research-watch/agents/`。
