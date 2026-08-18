@@ -4,15 +4,27 @@
 
 ## 正在进行
 
-- Issue #3 review 等待 Codex（首次派发静默失败，orchestrator 修复中，见"阻塞"）。
+- Issue #3 Codex review 已完成，结论 **request changes**：等待 Claude 修正后增量复审。
+
+## 2026-08-18（Codex review Issue #3）
+
+- 审查区间 `b0c9351..6a5a927`。CPU V1–V8 与 one-step self-test 可运行并通过，但未覆盖
+  τ=0 抽样协方差、config 值迁移、post-projection 落盘和 fixed-score K 扩展等关键风险。
+- 必改主项：τ=0 ridge 随机 RHS 漏 `sqrt(epsilon)` 噪声；K>1 复用冻结 score；active anchor
+  配置是 silent no-op；full_ip 丢弃 post-projection x1；相对 out 会写到调用者 CWD；缺严格
+  config/seed 契约测试；oracle/anchor/K 结论需补可复算与公平对照或降级口径。
+- 已提交 CSV 反证“bit-exact/逐位一致”：trw 两次独立运行最大轨迹指标差约 `1.05e-5`；
+  f9299d7 与 6a5a927 末端 hole/obs 也仅四位小数一致。详见
+  `tasks/review-alg2-debug-directory.md` 与同日 handoff。
 
 ## 2026-08-18（晚）：GPU 终验闭环 + trw 实验 + 协作层二次修复
 
 - **cg_max_iter_l14 回归**：终验 18650178 得 hole 0.9704≠0.9691 → 根因=参数内联把 τ=0 的
-  l.14 CG 上限从硬编码 200 写成 config 里的 50（纯重构引入语义漂移）；修复后 job 18651717
-  复现 **0.9691/0.0018 bit-exact，终验通过**。同批修回 box/random trw=1.0。
-- **terminal_replace_weight 0 vs 1.0 实测**（用户指令，job 18651908）：两档采样轨迹逐位一致
-  （投影是循环后操作）；trw=1 洞区不变 0.9691、观测区 post obs=**0.0**。顺带发现 demo 管线
+  l.14 CG 上限从硬编码 200 写成 config 里的 50；修复后 job 18651717 复现到四位小数
+  0.9691/0.0018（非 bit-exact），终验数值判据通过。同批修回 box/random trw=1.0。
+- **terminal_replace_weight 0 vs 1.0 实测**（用户指令，job 18651908）：两次独立运行的
+  pre-projection 轨迹数值接近但非逐位一致；trw=1 洞区不变 0.9691、观测区 post obs=**0.0**。
+  顺带发现 demo 管线
   inpainting 的 y **无加性噪声**（η-模型失配）。详见 tasks/test-terminal-replace-weight.md
 - **协作层二次修复**：Issue #3 首次 codex 派发静默失败（exit 0 无评论）+ 标签被误置
   状态:done——三个缺陷：①错误评论原文引用 marker 导致后续子串校验误判 ②疑似双 watcher
@@ -32,18 +44,18 @@
 
 ## 最近完成
 
-- 2026-08-18~19：**Algorithm2 目录治理四连**（用户逐轮指令）——results 170M→18M 只留关键证据；
+- 2026-08-18~19：**Algorithm2 目录治理四连（原执行记录；Issue #3 复审待修）**——results 170M→18M 只留关键证据；
   main 剥离 WLS/Model（纯 Alg2）；config.json 成为唯一配置源（4 模式 JSON 合一 → 全参数内联，
   路径指针废除）；用户抓出 projection（terminal_replace_weight box/random=1.0）遗漏已补；
-  S2 stage-1 漂移判决=hash 种子调用失误（契约 PYTHONHASHSEED=0）。commits f9299d7/e3f23b9。
+  S2 stage-1 漂移判决=hash 种子调用失误（契约 PYTHONHASHSEED=0）。GPU 指标仅四位小数一致，
+  并非 bit-exact；其余必改项见本页顶部。commits f9299d7/e3f23b9。
   GPU 终验 job 18650178 被 A100 维护窗口挂起（判据 hole 0.9691）。
   详见 tasks/cleanup-algorithm2-directory.md（含补记说明）
 
-- 2026-08-17：**debug-box-alg2-hole 闭环**——box 洞区不填充的根因锁定为论文 Algorithm 2
-  的结构性缺陷（Block 1 条件分布在 ker(A) 无 x₁ 先验，洞区链无收缩随机游走；h₀ 证伪 +
-  oracle 仿真 + Prop.4 排除实现偏差三重证据）。Tweedie 锚定变体（λ=25，零额外 NFE，
-  默认关闭）7/7 图修复：洞区 MSE 池化 1.097→0.178（6.2×），obs 无回退，洞区出现语义填充。
-  是否写进论文 Alg2 待用户裁决。详见 tasks/debug-box-alg2-hole.md 与同日 handoff
+- 2026-08-17：**debug-box-alg2-hole 原调试阶段结论（Issue #3 复审待修）**——固定 demo/seed 下
+  Tweedie anchor 的已存 CSV 显示洞区 MSE 池化 1.097→0.178（6.2×），但 oracle 目标、K>1
+  实现、RNG 配对和多 seed 证据均不足，暂不能据此确认“结构性缺陷/唯一有效干预”。详见
+  tasks/debug-box-alg2-hole.md 与 review-alg2-debug-directory.md。
 
 - 2026-08-16：**Issue #2 re-review 通过**：Algorithm 2 one-step 估计器实验的 3 处证据口径
   已修正；Codex 增量复审确认 10.94%/19.60% 可复算，结论 approve。
@@ -68,6 +80,7 @@
 
 ## 下一步
 
+- 修复 Issue #3 的必须修改项后请求 Codex 只复审增量。
 - （待用户确认研究方向：例如跑 `--full` 复现、补 baseline 表格、写 paper draft、或继续某个任务的调参）
 - 处理外层 repo 未提交状态（见"阻塞"第 2 条）
 

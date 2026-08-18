@@ -1,6 +1,6 @@
 # cleanup-algorithm2-directory
 
-state: done（GPU 终验被集群维护窗口挂起，CPU 证据已闭环） · owner: claude · type: implementation
+state: working（Issue #3 request changes） · owner: claude · type: implementation
 
 ## 【用户原始要求】（2026-08-18~19，逐字，按时间序）
 
@@ -58,3 +58,10 @@ state: done（GPU 终验被集群维护窗口挂起，CPU 证据已闭环） · 
   `.claude/hooks/research-sync-check.sh` + `.claude/settings.json`——会话结束时检测
   未同步 commit / 无 open review issue，命中则 block 一次强制补齐（三态管道测试通过）；
   CLAUDE.md 增补硬性纪律条目。hook 自下个会话生效（settings watcher 限制）。
+
+## 【Codex｜Review】（2026-08-18，Issue #3）
+
+结论 request changes。最终 config 值静态对照正确，但“bit-exact”不成立：f9299d7 与 6a5a927
+的末端 hole 为 `0.9691237807273865` vs `0.9691236615180969`。此外，相对 out 会从仓库根写到
+根 `results/`，显式 config 缺失会 silent fallback，未知/漏键会被默认值与 `**unused_kw` 吞掉；
+必须补严格 config contract 与 τ=0/CG 旧默认值回归。完整清单见 `review-alg2-debug-directory.md`。

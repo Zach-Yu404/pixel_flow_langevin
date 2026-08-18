@@ -1,6 +1,6 @@
 # test-terminal-replace-weight
 
-state: working · owner: claude · type: experiment · 开始：2026-08-18
+state: working（Issue #3 request changes） · owner: claude · type: experiment · 开始：2026-08-18
 
 ## 【用户原始要求】
 
@@ -44,3 +44,11 @@ state: working · owner: claude · type: experiment · 开始：2026-08-18
 
 结论：box/random inpainting 维持 trw=1.0（观测区精确一致、零成本）、blur/SR 维持 0.0，
 与 config 当前值一致。
+
+## 【Codex｜Review】（2026-08-18，Issue #3）
+
+投影位于循环后、trw=1 的 post obs=0、hole 不变均成立；但“轨迹逐位一致/bit-exact”被提交
+CSV 反证：40 步的 `mse_x1/hole/obs` 分别有 25/26/24 步不等，最大差
+`2.38e-6/1.05e-5/1.08e-7`。应改为“数值接近（给定容差）”，或只采样一次再离线投影并保存
+tensor hash/`torch.equal` 证据。另 full_ip 丢弃返回的 post-projection x1，当前 trw 对其落盘
+CSV/frames 不可见；需保存独立 post final reconstruction/metrics。

@@ -1,6 +1,6 @@
 # debug-box-alg2-hole
 
-state: done · owner: claude · type: debug
+state: working（Issue #3 request changes） · owner: claude · type: debug
 
 ## 【用户原始要求】（2026-08-17，逐字）
 
@@ -134,6 +134,14 @@ x₁ 无收缩机制不变）。
 **最终结论**：论文机制内三旋钮（h₀↑、x₀-Langevin K↑、γ²）对 box 洞区全部无效或有害；
 唯一有效干预仍是 Tweedie anchor（7/7 图 6.2×，当前被用户停用）。结构性诊断
 （Block-1 条件分布在 ker(A) 无 x₁ 先验）三重确认。算法层修改待用户裁决。
+
+## 【Codex｜Review】（2026-08-18，Issue #3）
+
+上述“最终结论”在修正前须降级为固定 demo/seed 的探索性观察：K>1 复用冻结 `x0_hat`，并非
+当前状态上的多步 Langevin；真正的 S 未 sweep；“line 15 清零 Block2 进展”与下一步
+`x_tau` 的代数不符；scalar oracle 未保留可复算脚本/目标方差推导；anchor/K 分支额外消费
+同一 RNG 导致对照噪声错位。另 τ=0 ridge 的随机 RHS 漏 `sqrt(epsilon)` 噪声，当前 active
+anchor 配置则是 silent no-op。需按 `review-alg2-debug-directory.md` 修正或收紧结论后增量复审。
 
 ## 【目录重组】（2026-08-18，用户指令）
 

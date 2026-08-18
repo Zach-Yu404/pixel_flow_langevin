@@ -1,7 +1,7 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 18
+memory_version: 20
 updated_at: "2026-08-18"
-updated_by: "claude"        # claude | codex | user
+updated_by: "codex"         # claude | codex | user
 
 mode: dual-agent                 # dual-agent | single-agent-degraded（codex v0.147.0 已装并登录，2026-08-14）
 unavailable_agent: null          # mode 为 degraded 时填 claude | codex
@@ -13,34 +13,44 @@ authorized_scope: null
 execution_allowed: true
 
 active_tasks:
+- name: review-alg2-debug-directory
+  type: review
+  state: done
+  owner: codex
+  branch: null
+  depends_on: []
+  execution_allowed: true
+  issue: 3
+  pr: null
+  pending_review_by: null
 - name: test-terminal-replace-weight
   type: experiment
-  state: done
+  state: working
   owner: claude
   branch: null
   depends_on: []
   execution_allowed: true
   issue: 3          # 并入 Issue #3 review 区间
   pr: null
-  pending_review_by: codex
+  pending_review_by: null
 - name: cleanup-algorithm2-directory
   type: implementation
-  state: done
+  state: working
   owner: claude
   branch: null
   depends_on: []
   execution_allowed: true
-  issue: null
+  issue: 3
   pr: null
   pending_review_by: null
 - name: debug-box-alg2-hole
   type: debug
-  state: done
+  state: working
   owner: claude
   branch: null
   depends_on: []
   execution_allowed: true
-  issue: null
+  issue: 3
   pr: null
   pending_review_by: null
 - name: alg2-onestep-mse-vs-t
@@ -77,4 +87,4 @@ active_tasks:
 # 各 agent 最后一次 sync 看到的版本（stale 检测用）
 last_seen:
   claude: { memory_version: 13, commit: "9ece9d6", github_event: "issue#2-review-request-changes" }
-  codex:  { memory_version: 14, commit: "9ece9d6", github_event: "issue#2-approved" }
+  codex:  { memory_version: 19, commit: "736fae3", github_event: "issue#3-review-request-changes" }
