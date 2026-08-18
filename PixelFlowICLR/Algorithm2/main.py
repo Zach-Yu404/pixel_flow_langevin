@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 """Algorithm 2 experiments — single entry point.
 
-    python main.py --config <mode>.json
+    python main.py [--config config.json] [--mode <mode>]
 
-Modes (JSON "mode" field; remaining keys override the mode's defaults below):
-  onestep   : experiment 2 — one-step Alg2/WLS/Model x1-hat MSE vs t
-              (5 tasks x 7 images x 4 stages; sanity S1/S2 + adjoint tests first;
-              {"self_test": true} runs only the CPU sanity block)
-  full_ip   : experiment 3 — full inverse-problem sampling, 3 methods
-              (Alg1-WLS / Alg1-Model / Alg2), metrics + loss curves + frames
+ONE config file (config.json) is the ONLY source of configuration: paths
+(model/demo/gamma2 table), "algorithm" constants (sigma_min, h0, ridge_rel,
+seed, ...), "sampler_kw" (shared grid/velocity/CG params), "tasks_setup"
+(per-task operator + sigma_n + kw overrides — INLINED from the former
+LPIPS_king / configs_best_out files, values verified identical), shared
+tasks/images, and one section per mode. Nothing is defaulted in code and no
+external task-config files are read. Everything is Algorithm 2 only. Modes:
+  onestep   : one-step Alg2 x1-hat MSE vs t (5 tasks x 7 images x 4 stages;
+              sanity S1/S2 + adjoint tests first; "self_test": true = CPU sanity only)
+  full_ip   : full Algorithm-2 sampling per task/image — metrics + loss curves + frames
   debug_box : box-hole sweep harness (h0 / anchors / x0_steps x gamma2_scales;
               obs/hole split MSE) — task debug-box-alg2-hole
   verify    : CPU component audit V1-V8 (dense float64): self-adjointness of
@@ -19,7 +23,7 @@ Modes (JSON "mode" field; remaining keys override the mode's defaults below):
 GPU submission (no sbatch file needed):
   sbatch -A cbig-ece -p gpu --gres=gpu:a100:1 -c 8 --mem=64G -t 3:00:00 \\
     -o ../logs/%x-%j.out --export=ALL,PYTHONHASHSEED=0 \\
-    --wrap "python main.py --config full_ip.json"
+    --wrap "python main.py --mode full_ip"
   (PYTHONHASHSEED=0 is required: demo_runner mask seeds still use hash().)
 
 All math lives in utils.py; results land under results/.
@@ -36,9 +40,9 @@ import math       # noqa: E402
 import time       # noqa: E402
 
 from utils import (  # noqa: E402  (import first: sets IP_package sys.path + chdir)
-    HERE, SIGMA_MIN, TASKS, TRAJ_IMAGE, METHODS, NFE, count_nfe_hook,
+    HERE, TRAJ_IMAGE, NFE, count_nfe_hook,
     apply_B, apply_N, power_iter_norm, make_exact_AT, adjoint_test, mse_masked,
-    score_solve, clean_image_solve, build_task_setups, best_cfg,
+    score_solve, clean_image_solve, build_task_setups,
     run_posterior_sampling_alg2,
 )
 import onestep_mse_vs_t as base  # noqa: E402
@@ -51,10 +55,9 @@ import matplotlib                                              # noqa: E402
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt                                # noqa: E402
 
-from ms_posterior_sampling_article_version_final import run_posterior_sampling  # noqa: E402
 from ms_posterior_sampling_article_version_final_utils import (  # noqa: E402
     apply_G, apply_H_tau, compute_sigma_tau,
-    direct_estimate_x1, wls_estimate_x1, make_velocity_fn, make_Ak_fns,
+    direct_estimate_x1, make_velocity_fn, make_Ak_fns,
 )
 from ms_posterior_sampling_utils import class_guidance_scale   # noqa: E402
 from pixelflow.scheduling_pixelflow import PixelFlowScheduler  # noqa: E402
@@ -62,16 +65,15 @@ from pixelflow.utils import config as config_utils             # noqa: E402
 from demo_runner import build_setup_and_measurement, load_demo_images  # noqa: E402
 from onestep_visual import to_img                              # noqa: E402
 
-MODE_DEFAULTS = {
-    "onestep": dict(out="results/onestep", tasks=TASKS,
-                    images=base.PLAYGROUND_IMAGES, chunk=4, self_test=False),
-    "full_ip": dict(out="results/full_ip", tasks=TASKS,
-                    images=base.PLAYGROUND_IMAGES, smoke=False),
-    "debug_box": dict(out="results/debug_box", image="junco",
-                      h0=[0.1, 0.5, 1.0], anchors=None, x0_steps=None,
-                      gamma2_scales=[1.0]),
-    "verify": dict(),
-}
+# Populated from config.json by main() before dispatch — no defaults in code.
+PATHS = {}         # resolved "paths" section ({IP_PACKAGE}/{HERE} substituted)
+ALG = {}           # "algorithm" section
+SAMPLER_KW = {}    # shared "sampler_kw" section
+TASKS_SETUP = {}   # per-task {"sigma_n", "operator", optional "kw" overrides}
+
+
+def task_kw(task):
+    return {**SAMPLER_KW, **TASKS_SETUP[task].get("kw", {})}
 
 
 def _resolve_out(out):
@@ -79,8 +81,8 @@ def _resolve_out(out):
 
 
 def _load_model(config, device):
-    model_dir = os.path.join(base.IP_PACKAGE, "pretrained_models", "c2img")
     model = config_utils.instantiate_from_config(config.model).to(device)
+    model_dir = PATHS["model_dir"]
     ckpt = torch.load(os.path.join(model_dir, "model.pt"), map_location="cpu",
                       weights_only=False)
     model.load_state_dict(ckpt, strict=True)
@@ -94,7 +96,7 @@ def run_onestep(args):
     os.makedirs(out, exist_ok=True)
     device = "cuda:0" if (torch.cuda.is_available() and not args.self_test) else "cpu"
 
-    demos_all = load_demo_images(resolution=256, demo_dir=os.path.join(base.IP_PACKAGE, "demo"))
+    demos_all = load_demo_images(resolution=256, demo_dir=PATHS["demo_dir"])
     by_short = {d["short_name"]: d for d in demos_all}
     demos = [by_short[s] for s in args.images]
     shorts = [d["short_name"] for d in demos]
@@ -102,16 +104,15 @@ def run_onestep(args):
     gt = torch.stack([d["gt"] for d in demos], dim=0).to(device)
     B = gt.shape[0]
 
-    model_dir = os.path.join(base.IP_PACKAGE, "pretrained_models", "c2img")
-    config = OmegaConf.load(os.path.join(model_dir, "config.yaml"))
+    config = OmegaConf.load(os.path.join(PATHS["model_dir"], "config.yaml"))
     num_stages = int(config.scheduler.num_stages)
     scheduler = PixelFlowScheduler(config.scheduler.num_train_timesteps,
                                    num_stages=num_stages, gamma=-1 / 3)
     pyr = base.gt_stage_pyramid(gt, num_stages)
 
     # kw consumed for the shared grid/velocity (identical across the 5 tasks —
-    # verified bitwise in experiment 1); per-task kw re-read for WLS params anyway.
-    kw0 = json.load(open(base.find_lpips_king_config("box_inpainting")))["kw"]
+    # verified bitwise in experiment 1); per-task eta/operator re-read anyway.
+    kw0 = dict(SAMPLER_KW)          # shared grid/velocity/cg params (config.json)
     shift = float(kw0.get("shift", 1.0))
     guidance_scale = float(kw0.get("guidance_scale", 0.0))
     do_cfg = guidance_scale > 0
@@ -122,15 +123,16 @@ def run_onestep(args):
     # ── per-task measurement setups (playground-identical) ──
     task_setups = {}
     for task in args.tasks:
-        kw_t, sigma_n_t, setups = build_task_setups(task, demos, device)
-        task_setups[task] = (kw_t, sigma_n_t, setups)
+        sigma_n_t, setups = build_task_setups(task, demos, device,
+                                              TASKS_SETUP[task])
+        task_setups[task] = (sigma_n_t, setups)
         print(f"[setup] {task}: eta={sigma_n_t}  y[0] shape={tuple(setups[0]['y'].shape)}",
               flush=True)
 
     # ── sanity + adjoint tests ──────────────────────────────────────────────
     sanity = {"adjoint": {}, "S1": {}, "S2": {}}
     for task in args.tasks:
-        _, _, setups = task_setups[task]
+        _, setups = task_setups[task]
         for si in range(num_stages):
             x1s = pyr[si][:1]
             A_fn, AT_fn = setups[0]["mkA"](setups[0]["op"], setups[0]["y"],
@@ -152,7 +154,7 @@ def run_onestep(args):
         x0 = base.eps_for(shorts[:2], si, x1_gt.shape).to(device)
         tau = float(sc.t[len(sc.t) // 2])
         sig = compute_sigma_tau(tau, sk, ek)
-        if sig < SIGMA_MIN:
+        if sig < ALG["sigma_min"]:
             continue
         x_tau = apply_H_tau(x1_gt, tau, sk, ek, eff_si) + sig * x0
         d_exact = apply_B(x1_gt, sk, ek, eff_si) - (ek - sk) * x0
@@ -170,7 +172,7 @@ def run_onestep(args):
     # stage-1 numbers are logged as informational only (verified: stage-3
     # random obsRMSE 0.011 vs eta 0.05; stage-1 ~0.09-0.11 with obs ~= miss).
     for task in [t for t in args.tasks if "inpainting" in t]:
-        _, sigma_n_t, setups = task_setups[task]
+        sigma_n_t, setups = task_setups[task]
         st = setups[0]
         for si in [1, 3]:
             sc = copy.deepcopy(scheduler)
@@ -182,13 +184,15 @@ def run_onestep(args):
             x0 = base.eps_for(shorts[:1], si, x1_gt.shape).to(device)
             tau = float(sc.t[len(sc.t) // 2])
             sig = compute_sigma_tau(tau, sk, ek)
-            if sig < SIGMA_MIN:
+            if sig < ALG["sigma_min"]:
                 tau = float(sc.t[2]); sig = compute_sigma_tau(tau, sk, ek)
             x_tau = apply_H_tau(x1_gt, tau, sk, ek, eff_si) + sig * x0
             y_clean = st["op"](gt[:1]).detach()          # xi = 0
             A_fn, AT_fn = st["mkA"](st["op"], st["y"], x1_gt.shape, device)
             x1_hat = clean_image_solve(x_tau, A_fn, AT_fn, y_clean, sigma_n_t, sig,
-                                       tau, sk, ek, eff_si, x1_gt.clone(), cg_tol)
+                                       tau, sk, ek, eff_si, x1_gt.clone(), cg_tol,
+                                       ridge_rel=ALG["ridge_rel"],
+                                       max_iter=ALG["cg_max_iter_l14"])
             m_st = F.interpolate(st["mask"], size=x1_gt.shape[-2:], mode="nearest")
             obs_rmse = math.sqrt(mse_masked(x1_hat, x1_gt, m_st))
             sanity["S2"][f"{task}/stage{si}"] = obs_rmse
@@ -224,9 +228,9 @@ def run_onestep(args):
 
         # per-(task,image) stage-shape A/A^T closures
         stage_A = {t: [s["mkA"](s["op"], s["y"], x1_gt[:1].shape, device)
-                       for s in task_setups[t][2]] for t in args.tasks}
+                       for s in task_setups[t][1]] for t in args.tasks}
         stage_mask = {t: [F.interpolate(s["mask"], size=(h, w), mode="nearest")
-                          for s in task_setups[t][2]] for t in args.tasks}
+                          for s in task_setups[t][1]] for t in args.tasks}
 
         for step_idx in range(len(sc.Timesteps)):
             T = sc.Timesteps[step_idx]
@@ -256,7 +260,7 @@ def run_onestep(args):
             g2_meas = float(g2_per_img.mean())
             gamma2_tab.setdefault(si, {})[round(tau, 6)] = g2_meas
 
-            skip_alg2 = sigma_tau < SIGMA_MIN
+            skip_alg2 = sigma_tau < ALG["sigma_min"]
             if not skip_alg2:
                 x0_hat = score_solve(x_tau, v, sk, ek, tau, 0.0, eff_si, cg_tol, cg_max_iter)
                 x0_hat_g2 = score_solve(x_tau, v, sk, ek, tau, g2_meas, eff_si,
@@ -265,12 +269,7 @@ def run_onestep(args):
                 sc_err_g2 = ((x0_hat_g2 - x0) ** 2).mean(dim=(1, 2, 3))
 
             for task in args.tasks:
-                kw_t, eta, setups = task_setups[task]
-                rho_s = float(base.per_stage(kw_t.get("rho_s", 1.0), si, num_stages))
-                rho_e = float(base.per_stage(kw_t.get("rho_e", 1.0), si, num_stages))
-                lambda_x = float(kw_t.get("lambda_x", 0.01))
-                x1_wls = wls_estimate_x1(xs_hat, xe_hat, sk, ek, rho_s, rho_e,
-                                         lambda_x, cg_tol, cg_max_iter, stage_idx=eff_si)
+                eta, setups = task_setups[task]
                 inp = "inpainting" in task
                 for bi, name in enumerate(shorts):
                     sl = slice(bi, bi + 1)
@@ -280,14 +279,14 @@ def run_onestep(args):
                         A_fn, AT_fn = stage_A[task][bi]
                         x1_a2 = clean_image_solve(x_tau[sl], A_fn, AT_fn,
                                                   setups[bi]["y"], eta, sigma_tau, tau,
-                                                  sk, ek, eff_si, x1_model[sl].clone(), cg_tol)
+                                                  sk, ek, eff_si, x1_model[sl].clone(), cg_tol,
+                                                  ridge_rel=ALG["ridge_rel"],
+                                                  max_iter=ALG["cg_max_iter_l14"])
                     row = dict(task=task, image=name, stage=si, step=step_idx,
                                tau=tau, T=float(T), sigma_tau=float(sigma_tau),
                                s_k=sk, e_k=ek, resolution=h,
                                mse_alg2=float(((x1_a2 - x1_gt[sl]) ** 2).mean())
                                if x1_a2 is not None else float("nan"),
-                               mse_wls=float(((x1_wls[sl] - x1_gt[sl]) ** 2).mean()),
-                               mse_model=float(((x1_model[sl] - x1_gt[sl]) ** 2).mean()),
                                score_err=float(sc_err[bi]) if not skip_alg2 else float("nan"),
                                score_err_g2=float(sc_err_g2[bi]) if not skip_alg2 else float("nan"),
                                gamma2_meas=g2_meas)
@@ -296,8 +295,6 @@ def run_onestep(args):
                         for tag, mm in (("obs", m), ("miss", 1.0 - m)):
                             row[f"mse_alg2_{tag}"] = (mse_masked(x1_a2, x1_gt[sl], mm)
                                                       if x1_a2 is not None else float("nan"))
-                            row[f"mse_wls_{tag}"] = mse_masked(x1_wls[sl], x1_gt[sl], mm)
-                            row[f"mse_model_{tag}"] = mse_masked(x1_model[sl], x1_gt[sl], mm)
                     rows.append(row)
         print(f"[stage {si}] done ({h}px, {steps_si} steps) [{time.time()-t0:.0f}s]",
               flush=True)
@@ -326,7 +323,7 @@ def run_onestep(args):
         nrow = 2 if inp else 1
         fig, axes = plt.subplots(nrow, 1, figsize=(10, 3.6 * nrow), squeeze=False)
         ax = axes[0][0]
-        for est, col in (("alg2", "tab:green"), ("wls", "tab:blue"), ("model", "tab:orange")):
+        for est, col in (("alg2", "tab:green"),):
             for name in shorts:
                 rr = sorted((r for r in tr if r["image"] == name), key=gx)
                 ax.semilogy([gx(r) for r in rr], [r[f"mse_{est}"] for r in rr],
@@ -334,9 +331,7 @@ def run_onestep(args):
             xs = sorted({round(gx(r), 6) for r in tr})
             mean = [np.nanmean([r[f"mse_{est}"] for r in tr if round(gx(r), 6) == x])
                     for x in xs]
-            ax.semilogy(xs, mean, "-", color=col, lw=2,
-                        label={"alg2": r"Alg2 $\hat{x}_1$", "wls": r"WLS $\hat{x}_1$",
-                               "model": r"Model $\hat{x}_1$"}[est])
+            ax.semilogy(xs, mean, "-", color=col, lw=2, label=r"Alg2 $\hat{x}_1$")
         for bdy in (1, 2, 3):
             ax.axvline(bdy, color="k", lw=0.8, ls="--", alpha=0.5)
         ax.set_xlabel("global $t$ (stage + within-stage $t$)")
@@ -345,7 +340,7 @@ def run_onestep(args):
         ax.grid(alpha=0.3); ax.legend(fontsize=9)
         if inp:
             ax2 = axes[1][0]
-            for est, col in (("alg2", "tab:green"), ("wls", "tab:blue"), ("model", "tab:orange")):
+            for est, col in (("alg2", "tab:green"),):
                 xs = sorted({round(gx(r), 6) for r in tr})
                 for tag, ls in (("obs", "-"), ("miss", ":")):
                     mean = [np.nanmean([r[f"mse_{est}_{tag}"] for r in tr
@@ -390,34 +385,31 @@ def run_full_ip(args):
     os.makedirs(frames_dir, exist_ok=True)
     device = "cuda:0"
 
-    demos_all = load_demo_images(resolution=256,
-                                 demo_dir=os.path.join(base.IP_PACKAGE, "demo"))
+    demos_all = load_demo_images(resolution=256, demo_dir=PATHS["demo_dir"])
     by_short = {d["short_name"]: d for d in demos_all}
     demos = [by_short[s] for s in args.images]
     tasks = list(args.tasks)
     if args.smoke:
         tasks, demos = tasks[:1], [by_short[TRAJ_IMAGE]]
 
-    model_dir = os.path.join(base.IP_PACKAGE, "pretrained_models", "c2img")
-    config = OmegaConf.load(os.path.join(model_dir, "config.yaml"))
+    config = OmegaConf.load(os.path.join(PATHS["model_dir"], "config.yaml"))
     model = _load_model(config, device)
     model.register_forward_pre_hook(count_nfe_hook)
     print("[setup] model loaded", flush=True)
 
-    gamma2_tab = json.load(open(os.path.join(HERE, "gamma2_meas.json")))["table"]
-    num_stages = int(config.scheduler.num_stages)
+    gamma2_tab = json.load(open(PATHS["gamma2_table"]))["table"]
 
     all_rows, nfe_stats, trajs = [], {}, {}
     t0 = time.time()
     for task in tasks:
-        cfg, op_cfg = best_cfg(task)
-        kw = dict(cfg["kw"])
+        op_cfg = TASKS_SETUP[task]["operator"]
+        kw = task_kw(task)
         if args.smoke:
             kw["num_langevin"] = 2
-        sigma_n = float(cfg.get("sigma_n", 0.05))
+        sigma_n = float(TASKS_SETUP[task]["sigma_n"])
         for d in demos:
             name = d["short_name"]
-            op, mask, y, _, _, make_Ak_fns_fn, term_fn = build_setup_and_measurement(
+            op, mask, y, _, _, make_Ak_fns_fn, _ = build_setup_and_measurement(
                 task, op_cfg, d, sigma_n, 256, device)
             if task in ("gaussian_blur", "motion_blur"):
                 inner = make_Ak_fns_fn
@@ -426,63 +418,30 @@ def run_full_ip(args):
                     Af, _ = _inner(operator, y_, ss, dev)
                     return Af, make_exact_AT(Af, tuple(ss))
             gt = d["gt"].unsqueeze(0).to(device)
-            pyr = base.gt_stage_pyramid(gt, num_stages)
             record = (name == TRAJ_IMAGE)
 
-            for method in METHODS:
-                NFE["n"] = 0
-                ts = time.time()
-                if method == "alg2":
-                    _, rows, traj = run_posterior_sampling_alg2(
-                        model, config, gt, y, op, sigma_n, device,
-                        gamma2_tab=gamma2_tab, make_Ak_fns_fn=make_Ak_fns_fn,
-                        seed=int(kw.get("seed", 42)), record_trajectory=record,
-                        **{k_: v for k_, v in kw.items()
-                           if k_ not in ("class_label", "seed")},
-                        class_label=int(d["class_idx"]))
-                else:
-                    kw_run = {k_: v for k_, v in kw.items()}
-                    kw_run["x1_init_mode"] = method          # 'wls' | 'model'
-                    _, tj = run_posterior_sampling(
-                        model, config, gt, y, op, sigma_n, device,
-                        record_trajectory=True,
-                        terminal_replacement_fn=term_fn, make_Ak_fns_fn=make_Ak_fns_fn,
-                        **{k_: v for k_, v in kw_run.items()
-                           if k_ not in ("class_label",)},
-                        class_label=int(d["class_idx"]))
-                    # per ODE step: x_tau, x1(after), x0(=eps)
-                    traj = [(a[0].cpu(), b_[0].cpu(), c[0].cpu()) for a, b_, c in
-                            zip(tj["xts_traj"], tj["x1_traj_after"], tj["eps_traj"])] \
-                        if record else []
-                    # Stage is derived from each trajectory tensor's OWN resolution
-                    # (self-aligning; step-counting misreads the recording convention).
-                    sch = PixelFlowScheduler(config.scheduler.num_train_timesteps,
-                                             num_stages=num_stages, gamma=-1 / 3)
-                    taus_k = {}
-                    for k in range(num_stages):
-                        scc = copy.deepcopy(sch)
-                        scc.set_timesteps(int(float(kw.get("ode_steps_per_stage", 10))),
-                                          k, device=device, shift=float(kw.get("shift", 1.0)))
-                        taus_k[k] = [float(t) for t in scc.t]
-                    base_res = pyr[0].shape[-1]
-                    rows, seen = [], {}
-                    for x1s_cpu in tj["x1_traj_after"]:
-                        k = int(round(math.log2(x1s_cpu.shape[-1] / base_res)))
-                        i = seen.get(k, 0); seen[k] = i + 1
-                        tau = taus_k[k][min(i, len(taus_k[k]) - 1)]
-                        x1s = x1s_cpu.to(device)
-                        rows.append(dict(stage=k, step=i, tau=tau,
-                                         sigma_tau=float("nan"),
-                                         mse_x1=float(((x1s - pyr[k]) ** 2).mean())))
-                    del tj
-                for r in rows:
-                    r.update(task=task, image=name, method=method)
-                all_rows += rows
-                nfe_stats[f"{task}/{name}/{method}"] = NFE["n"]
-                if record:
-                    trajs[(task, method)] = traj
-                print(f"[{task}/{name}/{method}] NFE={NFE['n']} "
-                      f"[{time.time()-ts:.0f}s tot {time.time()-t0:.0f}s]", flush=True)
+            NFE["n"] = 0
+            ts = time.time()
+            _, rows, traj = run_posterior_sampling_alg2(
+                model, config, gt, y, op, sigma_n, device,
+                gamma2_tab=gamma2_tab, make_Ak_fns_fn=make_Ak_fns_fn,
+                seed=int(kw.get("seed", ALG["seed"])), record_trajectory=record,
+                h0=ALG["h0"], x0_langevin_steps=ALG["x0_langevin_steps"],
+                gamma2_scale=ALG["gamma2_scale"], anchor=ALG["anchor"],
+                sigma_min=ALG["sigma_min"], ridge_rel=ALG["ridge_rel"],
+                cg_max_iter_l14=ALG["cg_max_iter_l14"],
+                terminal_replace_weight=TASKS_SETUP[task]["terminal_replace_weight"],
+                **{k_: v for k_, v in kw.items()
+                   if k_ not in ("class_label", "seed")},
+                class_label=int(d["class_idx"]))
+            for r in rows:
+                r.update(task=task, image=name)
+            all_rows += rows
+            nfe_stats[f"{task}/{name}"] = NFE["n"]
+            if record:
+                trajs[task] = traj
+            print(f"[{task}/{name}] NFE={NFE['n']} "
+                  f"[{time.time()-ts:.0f}s tot {time.time()-t0:.0f}s]", flush=True)
 
     json.dump(nfe_stats, open(os.path.join(out, "nfe.json"), "w"), indent=1)
     import csv
@@ -498,16 +457,12 @@ def run_full_ip(args):
         axes = np.atleast_1d(axes)
         for ti, task in enumerate(tasks):
             ax = axes[ti]
-            for method, col in zip(METHODS, ("tab:blue", "tab:orange", "tab:green")):
-                rs = [r for r in all_rows if r["task"] == task and r["method"] == method]
-                if not rs:
-                    continue
+            rs = [r for r in all_rows if r["task"] == task]
+            if rs:
                 xs = sorted({r["stage"] + r["tau"] for r in rs})
                 mean = [np.mean([r["mse_x1"] for r in rs
                                  if r["stage"] + r["tau"] == x]) for x in xs]
-                ax.semilogy(xs, mean, "-", color=col, lw=1.8,
-                            label={"wls": "Alg1-WLS", "model": "Alg1-Model",
-                                   "alg2": "Alg2"}[method])
+                ax.semilogy(xs, mean, "-", color="tab:green", lw=1.8, label="Alg2")
             for bdy in (1, 2, 3):
                 ax.axvline(bdy, color="k", lw=0.7, ls="--", alpha=0.5)
             ax.set_title(task, fontsize=10)
@@ -516,36 +471,29 @@ def run_full_ip(args):
             if ti == 0:
                 ax.set_ylabel(r"MSE$(\hat{x}_1^k, x_1^k)$")
                 ax.legend(fontsize=8)
-        fig.suptitle("Full inverse-problem sampling — loss vs time "
-                     "(best configs; Alg2 per PDF, $h_0$=0.1, measured $\\gamma^2$)",
+        fig.suptitle("Algorithm 2 full sampling — loss vs time "
+                     "(best configs; per PDF, $h_0$=0.1, measured $\\gamma^2$)",
                      fontsize=11)
         fig.tight_layout(rect=[0, 0, 1, 0.94])
         fig.savefig(os.path.join(out, "loss_curves.png"), dpi=160)
         plt.close(fig)
 
-    # ── ONE mp4: task segments x steps; rows=methods, cols=x_tau|x1|x0 ──
+    # ── frames: per task x step, one Alg2 row, cols = x_tau | x1 | x0_hat ──
     col_labels = [r"$x_\tau^k$", r"$\hat{x}_1^k$", r"$\hat{x}_0^k$"]
     frame_idx = 0
     for task in tasks:
-        if (task, "alg2") not in trajs:
+        if task not in trajs:
             continue
-        n_steps = min(len(trajs[(task, m)]) for m in METHODS if (task, m) in trajs)
-        for stp in range(n_steps):
-            fig, axes = plt.subplots(3, 3, figsize=(3 * 2.2, 3 * 2.2 + 0.5))
-            for mi, method in enumerate(METHODS):
-                tr = trajs[(task, method)][stp]
-                for ci in range(3):
-                    ax = axes[mi, ci]
-                    ax.imshow(to_img(tr[ci].to(device)))
-                    ax.set_xticks([]); ax.set_yticks([])
-                    if mi == 0:
-                        ax.set_title(col_labels[ci], fontsize=10)
-                    if ci == 0:
-                        ax.set_ylabel({"wls": "Alg1-WLS", "model": "Alg1-Model",
-                                       "alg2": "Alg2"}[method], fontsize=9)
-            fig.suptitle(f"{task} · {TRAJ_IMAGE} · outer step {stp + 1}/{n_steps}",
+        for stp, tr in enumerate(trajs[task]):
+            fig, axes = plt.subplots(1, 3, figsize=(3 * 2.2, 2.7))
+            for ci in range(3):
+                ax = axes[ci]
+                ax.imshow(to_img(tr[ci].to(device)))
+                ax.set_xticks([]); ax.set_yticks([])
+                ax.set_title(col_labels[ci], fontsize=10)
+            fig.suptitle(f"Alg2 · {task} · {TRAJ_IMAGE} · step {stp + 1}/{len(trajs[task])}",
                          fontsize=11)
-            fig.tight_layout(rect=[0, 0, 1, 0.95])
+            fig.tight_layout(rect=[0, 0, 1, 0.93])
             fig.savefig(os.path.join(frames_dir, f"frame_{frame_idx:04d}.png"), dpi=110)
             plt.close(fig)
             frame_idx += 1
@@ -559,23 +507,21 @@ def run_debug_box(args):
     device = "cuda:0"
     task = "box_inpainting"
 
-    demos_all = load_demo_images(resolution=256,
-                                 demo_dir=os.path.join(base.IP_PACKAGE, "demo"))
+    demos_all = load_demo_images(resolution=256, demo_dir=PATHS["demo_dir"])
     demo = {d["short_name"]: d for d in demos_all}[args.image]
     gt = demo["gt"].unsqueeze(0).to(device)
 
-    model_dir = os.path.join(base.IP_PACKAGE, "pretrained_models", "c2img")
-    config = OmegaConf.load(os.path.join(model_dir, "config.yaml"))
+    config = OmegaConf.load(os.path.join(PATHS["model_dir"], "config.yaml"))
     model = _load_model(config, device)
     print("[setup] model loaded", flush=True)
 
-    cfg, op_cfg = best_cfg(task)
-    kw = dict(cfg["kw"])
+    op_cfg = TASKS_SETUP[task]["operator"]
+    kw = task_kw(task)
     kw["class_label"] = int(demo["class_idx"])
-    sigma_n = float(cfg.get("sigma_n", 0.05))
+    sigma_n = float(TASKS_SETUP[task]["sigma_n"])
     op, mask, y, _, _, make_Ak_fns_fn, _ = build_setup_and_measurement(
         task, op_cfg, demo, sigma_n, 256, device)
-    gamma2_tab = json.load(open(os.path.join(HERE, "gamma2_meas.json")))["table"]
+    gamma2_tab = json.load(open(PATHS["gamma2_table"]))["table"]
     num_stages = int(config.scheduler.num_stages)
     pyr = base.gt_stage_pyramid(gt, num_stages)
     hole = (1.0 - mask).to(device)          # [1,1,256,256]; 1 inside the box
@@ -593,8 +539,11 @@ def run_debug_box(args):
         x1, rows, traj = run_posterior_sampling_alg2(
             model, config, gt, y, op, sigma_n, device,
             gamma2_tab=gamma2_tab, make_Ak_fns_fn=make_Ak_fns_fn,
-            seed=42, record_trajectory=True, h0=h0, anchor=anchor_val,
+            seed=ALG["seed"], record_trajectory=True, h0=h0, anchor=anchor_val,
             x0_langevin_steps=x0_steps, gamma2_scale=g2_scale,
+            sigma_min=ALG["sigma_min"], ridge_rel=ALG["ridge_rel"],
+            cg_max_iter_l14=ALG["cg_max_iter_l14"],
+            terminal_replace_weight=TASKS_SETUP[task]["terminal_replace_weight"],
             **{k: v for k, v in kw.items() if k not in ("class_label", "seed")},
             class_label=int(demo["class_idx"]))
         # traj entries follow the same (stage, step) order as rows
@@ -662,7 +611,7 @@ def run_debug_box(args):
 def run_verify(args):
     """CPU component audit V1-V8 (see module docstring). Dense float64."""
     torch.set_default_dtype(torch.float64)
-    RES = 16
+    RES = int(args.res)
     N_PIX = RES * RES
     STAGES = [(0, 0.0, 0.25), (1, 0.142857, 0.5), (2, 0.333333, 0.75), (3, 0.6, 1.0)]
 
@@ -803,16 +752,33 @@ RUNNERS = {"onestep": run_onestep, "full_ip": run_full_ip,
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--config", required=True, help="mode JSON (see MODE_DEFAULTS)")
+    ap.add_argument("--config", default="config.json",
+                    help='single config: {"mode": ..., "<mode>": {overrides}}')
+    ap.add_argument("--mode", default=None, help="override the config's mode")
     cli = ap.parse_args()
     cfg_path = cli.config if os.path.isabs(cli.config) else os.path.join(ORIG_CWD, cli.config)
     if not os.path.isfile(cfg_path):
         cfg_path = os.path.join(HERE, os.path.basename(cli.config))
     cfg = json.load(open(cfg_path))
-    mode = cfg.pop("mode")
-    params = dict(MODE_DEFAULTS[mode])
-    params.update(cfg)
-    print(f"[main] mode={mode}  config={cfg_path}  params={params}", flush=True)
+    mode = cli.mode or cfg["mode"]
+
+    global PATHS, ALG, SAMPLER_KW, TASKS_SETUP
+    subst = {"{IP_PACKAGE}": base.IP_PACKAGE, "{HERE}": HERE}
+    PATHS = {k: v for k, v in cfg["paths"].items()}
+    for k, v in PATHS.items():
+        for token, real in subst.items():
+            v = v.replace(token, real)
+        PATHS[k] = v
+    ALG = dict(cfg["algorithm"])
+    SAMPLER_KW = dict(cfg["sampler_kw"])
+    TASKS_SETUP = dict(cfg["tasks_setup"])
+
+    params = dict(cfg[mode])                       # strict: no code defaults
+    if mode in ("onestep", "full_ip"):
+        params.setdefault("tasks", cfg["tasks"])
+        params.setdefault("images", cfg["images"])
+    print(f"[main] mode={mode}  config={cfg_path}\n[main] paths={PATHS}\n"
+          f"[main] algorithm={ALG}\n[main] params={params}", flush=True)
     return RUNNERS[mode](argparse.Namespace(**params))
 
 

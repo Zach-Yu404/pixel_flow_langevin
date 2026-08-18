@@ -1,0 +1,36 @@
+{
+ "adjoint": {
+  "box_inpainting/stage0": 1.5133991837501526e-09,
+  "box_inpainting/stage1": 1.1932570487260818e-09,
+  "box_inpainting/stage2": 9.313225746154785e-10,
+  "box_inpainting/stage3": 0.0,
+  "random_inpainting/stage0": 9.313225746154785e-10,
+  "random_inpainting/stage1": 6.984919309616089e-10,
+  "random_inpainting/stage2": 2.6193447411060333e-10,
+  "random_inpainting/stage3": 0.0,
+  "gaussian_blur/stage0": 1.862645149230957e-09,
+  "gaussian_blur/stage1": 3.841705620288849e-09,
+  "gaussian_blur/stage2": 1.1641532182693481e-10,
+  "gaussian_blur/stage3": 8.731149137020111e-11,
+  "motion_blur/stage0": 5.587935447692871e-09,
+  "motion_blur/stage1": 1.3969838619232178e-09,
+  "motion_blur/stage2": 3.4924596548080444e-10,
+  "motion_blur/stage3": 0.0,
+  "superresolution/stage0": 1.862645149230957e-09,
+  "superresolution/stage1": 4.656612873077393e-10,
+  "superresolution/stage2": 1.1641532182693481e-10,
+  "superresolution/stage3": 4.3655745685100555e-11
+ },
+ "S1": {
+  "stage0(tau=0.555)": 4.013995891227751e-08,
+  "stage1(tau=0.555)": 1.0796784266631221e-07,
+  "stage2(tau=0.555)": 9.818978696785052e-08,
+  "stage3(tau=0.555)": 1.0005405925994637e-07
+ },
+ "S2": {
+  "box_inpainting/stage1": 0.06158728541140745,
+  "box_inpainting/stage3": 0.010964421113560305,
+  "random_inpainting/stage1": 0.1115500513579149,
+  "random_inpainting/stage3": 0.010967129582231132
+ }
+}

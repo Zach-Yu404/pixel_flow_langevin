@@ -24,7 +24,6 @@ verify_components.py (git history keeps the originals; see
 .research/tasks/debug-box-alg2-hole.md for the box-hole debugging record).
 """
 
-import json
 import math
 import os
 import sys
@@ -57,8 +56,6 @@ SIGMA_MIN = 0.01          # skip Alg2 below this (matches sampler's Langevin ski
 TASKS = base.TASKS
 H0 = 0.1                  # Block-2 step (paper SS7); h0/K sweeps: both hurt the box hole
 TRAJ_IMAGE = "junco"      # trajectory/mp4 image (full_ip mode)
-METHODS = ["wls", "model", "alg2"]
-BEST_DIR = os.path.join(base.IP_PACKAGE, "rerun_imageNet", "configs_best_out")
 
 NFE = {"n": 0}
 
@@ -149,8 +146,9 @@ def score_solve(x_tau, v, s_k, e_k, tau, gamma2, eff_si, cg_tol, L):
 
 
 def clean_image_solve(x_tau, A_fn, AT_fn, y, eta, sigma_tau, tau, s_k, e_k, eff_si,
-                      x1_warm, cg_tol):
-    """line 14 (one-step, deterministic b): M x = b, warm-started CG, max_iter=200."""
+                      x1_warm, cg_tol, ridge_rel=1e-6, max_iter=200):
+    """line 14 (one-step, deterministic b): M x = b, warm-started CG.
+    ridge_rel / max_iter come from config.json "algorithm"."""
     inv_e2, inv_s2 = 1.0 / eta ** 2, 1.0 / float(sigma_tau) ** 2
 
     def M0(x):
@@ -159,20 +157,22 @@ def clean_image_solve(x_tau, A_fn, AT_fn, y, eta, sigma_tau, tau, s_k, e_k, eff_
 
     ridge = 0.0
     if tau == 0.0:
-        ridge = 1e-6 * power_iter_norm(M0, x_tau.shape, x_tau.device)
+        ridge = ridge_rel * power_iter_norm(M0, x_tau.shape, x_tau.device)
     M_fn = (lambda x: M0(x) + ridge * x) if ridge else M0
     b = inv_e2 * AT_fn(y) + inv_s2 * apply_H_tau(x_tau, tau, s_k, e_k, eff_si)
-    return cg_solve(M_fn, b, x0=x1_warm, tol=cg_tol, max_iter=200)
+    return cg_solve(M_fn, b, x0=x1_warm, tol=cg_tol, max_iter=max_iter)
 
 
 # ── measurement setup per (task, image): playground-identical code path ──────
-def build_task_setups(task, demos, device):
-    cfg = json.load(open(base.find_lpips_king_config(task)))
-    sigma_n = float(cfg["sigma_n"])
+def build_task_setups(task, demos, device, task_cfg):
+    """task_cfg = config.json "tasks_setup"[task]: {"sigma_n", "operator"}.
+    All operator/sigma_n values are inlined in config.json (provenance:
+    IP_package LPIPS_king / configs_best_out, values verified identical)."""
+    sigma_n = float(task_cfg["sigma_n"])
     setups = []
     for d in demos:
         op, mask, y, _, _, mkA, _ = build_setup_and_measurement(
-            task, cfg["operator"], d, sigma_n, 256, device)
+            task, task_cfg["operator"], d, sigma_n, 256, device)
         if task in ("gaussian_blur", "motion_blur"):
             # replace the analytic flip(K) adjoint with the exact autograd one
             inner = mkA
@@ -181,16 +181,7 @@ def build_task_setups(task, demos, device):
                 A_fn, _ = _inner(operator, y_, stage_shape, device_)
                 return A_fn, make_exact_AT(A_fn, tuple(stage_shape))
         setups.append(dict(op=op, mask=mask.to(device).float(), y=y, mkA=mkA))
-    return cfg["kw"], sigma_n, setups
-
-
-def best_cfg(task):
-    c = json.load(open(os.path.join(BEST_DIR, f"{task}_best.json")))
-    op = dict(c["operator"])
-    if task == "box_inpainting" and "box_len" in op:      # demo_runner key mapping
-        bl = int(op.pop("box_len"))
-        op["mask_len_range"] = [bl, bl + 1]
-    return c, op
+    return sigma_n, setups
 
 
 def run_posterior_sampling_alg2(
@@ -213,6 +204,12 @@ def run_posterior_sampling_alg2(
     x0_langevin_steps=1,             # K Langevin steps of l.16-17 per inner iter
                                      # (l.15 once; paper = 1)
     gamma2_scale=1.0,                # multiplies the measured gamma2 table (0 => gamma2=0)
+    sigma_min=SIGMA_MIN,             # skip threshold (config.json "algorithm")
+    ridge_rel=1e-6,                  # Prop.-4 ridge = ridge_rel * ||M|| at tau=0
+    cg_max_iter_l14=200,             # line-14 CG cap at tau=0 (config "algorithm")
+    terminal_replace_weight=0.0,     # POST-sampling projection (pipeline convention,
+                                     # NOT a paper line): x1 <- w*(m*y+(1-m)*x1)+(1-w)*x1;
+                                     # inpainting tasks use 1.0, blur/SR 0.0 (config)
     anchor=0.0,                      # EXPERIMENTAL Tweedie anchor, see below
     **unused_kw,                     # PRINCIPLE-only kw (h_x, lambda_reg, ...) ignored
 ):
@@ -300,7 +297,7 @@ def run_posterior_sampling_alg2(
             gamma2 = float(gamma2_scale) * float(gamma2_stage.get(
                 f"{round(tau, 6)}", list(gamma2_stage.values())[step_idx]))
             x0_hat = None
-            if sigma_tau >= SIGMA_MIN:
+            if sigma_tau >= sigma_min:
                 inv_e2, inv_s2 = 1.0 / eta ** 2, 1.0 / float(sigma_tau) ** 2
 
                 def M0(x):                                           # l.7 (pre-ridge)
@@ -308,7 +305,7 @@ def run_posterior_sampling_alg2(
                         apply_H_tau(x, tau, s_k, e_k, eff_si), tau, s_k, e_k, eff_si)
                 epsilon = 0.0
                 if tau == 0.0:                                       # Prop. 4
-                    epsilon = power_iter_norm(M0, x1.shape, device) * 1e-6
+                    epsilon = power_iter_norm(M0, x1.shape, device) * ridge_rel
                 # anchor path disabled by user (see commented block below);
                 # keep M consistent with b_tilde: ridge only.
                 M_tau = (lambda x: M0(x) + epsilon * x) if epsilon else M0
@@ -331,7 +328,7 @@ def run_posterior_sampling_alg2(
                     #     b_tilde = b_tilde + anchor * x1_model + \
                     #         math.sqrt(anchor) * randn_like_cpu(x1)
                     x1 = cg_solve(M_tau, b_tilde, x0=x1.clone(), tol=cg_tol,
-                                  max_iter=200 if tau == 0.0 else L)  # l.14
+                                  max_iter=cg_max_iter_l14 if tau == 0.0 else L)  # l.14
                     x0 = (x_tau - apply_H_tau(x1, tau, s_k, e_k, eff_si)) / float(sigma_tau)  # l.15
                     for _ in range(int(x0_langevin_steps)):          # user: try K in {1,3,5}
                         xi_0 = randn_like_cpu(x0)                    # l.16
@@ -344,4 +341,12 @@ def run_posterior_sampling_alg2(
                 x_tau_rec = apply_H_tau(x1, tau, s_k, e_k, eff_si) + float(sigma_tau) * x0
                 traj.append((x_tau_rec[0].cpu(), x1[0].cpu(),
                              (x0_hat if x0_hat is not None else x0)[0].cpu()))
+
+    # POST-sampling terminal projection (inpainting: snap observed pixels to y).
+    # Pipeline convention (CONSTRAINTS: inpainting tr=1, blur/SR tr=0); applied
+    # AFTER the loop, so per-step rows/traj metrics above are unaffected.
+    if terminal_replace_weight > 0:
+        m = operator.get_mask(x=y).float().to(x1.device)
+        x1 = terminal_replace_weight * (m * y + (1.0 - m) * x1) + \
+            (1.0 - terminal_replace_weight) * x1
     return x1, rows, traj
