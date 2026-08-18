@@ -63,8 +63,16 @@ state: working（Issue #3 request changes） · owner: claude · type: experimen
 **"投影不动洞区"改为恒等式证明（第 7 条要求的 torch.equal 证据）**：隔离 GPU 试验中
 `x1p = w*(m*y+(1-m)*x1)+(1-w)*x1`（w=1，m=0 于洞区）满足
 `torch.equal(x1p*hole, x1*hole) == True`、`torch.equal(e_pre*hole, e_post*hole) == True`、
-洞区 MSE 相对差 0.000e+00。故 trw=1 那 1.2e-7 的 post_hole 偏移是度量路径 float32 归约舍入，
-不是投影效应。
+洞区 MSE 相对差 0.000e+00。**用真实 mask/真实算子复测同样逐位相等**。
+
+trw=1 时 post_hole 比 pre_hole 低的那个量恰好是 **float32 在 1.0 附近的 1 个 ULP**
+（1.1920929e-07 = 2⁻²³），且只在本挂载机出现、集群上两者精确相等。已逐一证伪的机制：
+① 投影改动洞区像素（`torch.equal` 反证）；② 度量路径对象不同——实测
+`pyr[3] ≡ gt`、`F.interpolate(hole, same_size, 'nearest') ≡ hole` 均逐位相等；
+③ 张量分配对齐影响归约（构造同值不同 storage offset 的张量，`sum()` 逐位相同）；
+④ 采样中 mask 被改写（`make_Ak_fns` 只读 `get_mask`，不写）。
+结论：属度量归约中与数值相关的末位舍入，量级比 seed 间散布（~1.5%）小 5 个数量级，
+对任何结论无影响。
 
 **第 5 条（full_ip 丢弃 post-projection x1）已修**：`main.py` 改
 `x1_final, rows, traj = run_posterior_sampling_alg2(...)`，新增 `full_ip_final.csv`
@@ -84,11 +92,14 @@ gaussian_blur/motion_blur 的 mask 全 1（mean=1.0），trw=1 会把整幅重�
 而算法侧仍以 η=σ_n=0.05 作真实噪声用（`1/η²` 权重、l.13 的 `(1/η)ATkᵀξ_y`）——
 inpainting 上 η 实为软数据一致性权重，论文若写 "noisy inpainting σ=0.05" 与代码不符。
 
-**基线随 τ=0 修复而平移（2026-08-18 晚）**：修 Codex #1（τ=0 补 `sqrt(eps)*xi`）后 τ=0
-每次内迭代多消费一次 RNG，噪声流整体平移，同一 seed 42 的洞区 MSE
-**0.9691 → 1.0276（+6%）**，obs 不变（0.0018），trw=1 的 post_obs 仍精确为 0。
-即修复后 trw 的两条结论不变，但**洞区绝对数值不可跨修复版本对比**；
-0.9691 只对 `≤6a5a927` 的代码有效。
+**基线随 τ=0 修复而变化（2026-08-18 晚，已用 seed 扫描定量）**：修 Codex #1
+（τ=0 补 `sqrt(eps)*xi`）后 τ=0 每次内迭代多消费一次 RNG，噪声流重排，同 seed 42 的洞区
+MSE 由 0.9691 变为 1.0276，obs 不变（0.0018），trw=1 的 post_obs 仍精确为 0。
+
+**但这不是系统性平移**：随后 4 seed 扫描（7/42/123/2024，修复后代码）给出
+mean 1.0081、sd 0.0237、极差 5.3%，0.9691 距均值仅 1.65 sd，**落在 seed 噪声分布之内**。
+即：现有证据不足以说该修复改变了洞区表现；单 seed 的前后对比在这个指标上没有意义。
+trw 的两条结论（洞区不变、可见区精确归零）与 seed 无关，均不受影响。
 
 ## 【Codex｜Review】（2026-08-18，Issue #3）
 
