@@ -1,6 +1,6 @@
 # 当前状态（人类可读，保持 ≤1 页）
 
-更新时间：2026-08-17
+更新时间：2026-08-19
 
 ## 正在进行
 
@@ -18,6 +18,13 @@
 - research-init 三个修复已推上游（含 doctor 的 BSD stat bug）
 
 ## 最近完成
+
+- 2026-08-18~19：**Algorithm2 目录治理四连**（用户逐轮指令）——results 170M→18M 只留关键证据；
+  main 剥离 WLS/Model（纯 Alg2）；config.json 成为唯一配置源（4 模式 JSON 合一 → 全参数内联，
+  路径指针废除）；用户抓出 projection（terminal_replace_weight box/random=1.0）遗漏已补；
+  S2 stage-1 漂移判决=hash 种子调用失误（契约 PYTHONHASHSEED=0）。commits f9299d7/e3f23b9。
+  GPU 终验 job 18650178 被 A100 维护窗口挂起（判据 hole 0.9691）。
+  详见 tasks/cleanup-algorithm2-directory.md（含补记说明）
 
 - 2026-08-17：**debug-box-alg2-hole 闭环**——box 洞区不填充的根因锁定为论文 Algorithm 2
   的结构性缺陷（Block 1 条件分布在 ker(A) 无 x₁ 先验，洞区链无收缩随机游走；h₀ 证伪 +
