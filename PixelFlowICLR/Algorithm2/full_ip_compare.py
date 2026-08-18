@@ -73,7 +73,8 @@ def run_posterior_sampling_alg2(
     model, config, gt, y, operator, eta, device,
     *,
     # Per-stage schedules — same names/positions as run_posterior_sampling
-    num_langevin=10,                 # paper: inner iterations S
+    num_langevin=10,                 # feeds S = paper's INNER iterations (l.8);
+                                     # NOT the x0-Langevin count (see x0_langevin_steps)
     ode_steps_per_stage=10, shift=1.0,
     # Structural / physical
     guidance_scale=0.0, class_label=10,
@@ -85,6 +86,9 @@ def run_posterior_sampling_alg2(
     # Algorithm-2 specific
     gamma2_tab=None,                 # measured gamma^2(k, tau) table (Cor. 8)
     h0=H0,                           # paper: Block-2 step size h_0
+    x0_langevin_steps=1,             # K Langevin steps of l.16-17 per inner iter
+                                     # (l.15 once; paper = 1)
+    gamma2_scale=1.0,                # multiplies the measured gamma2 table (0 => gamma2=0)
     anchor=0.0,                      # EXPERIMENTAL Tweedie anchor, see below
     **unused_kw,                     # PRINCIPLE-only kw (h_x, lambda_reg, ...) ignored
 ):
@@ -172,8 +176,8 @@ def run_posterior_sampling_alg2(
                 model, T, prompt_embeds, size_tensor, rope_pos,
                 do_cfg, guidance_scale, si,
             )
-            gamma2 = float(gamma2_stage.get(f"{round(tau, 6)}",
-                                            list(gamma2_stage.values())[step_idx]))
+            gamma2 = float(gamma2_scale) * float(gamma2_stage.get(
+                f"{round(tau, 6)}", list(gamma2_stage.values())[step_idx]))
             x0_hat = None
             if sigma_tau >= alg.SIGMA_MIN:
                 inv_e2, inv_s2 = 1.0 / eta ** 2, 1.0 / float(sigma_tau) ** 2
@@ -181,10 +185,12 @@ def run_posterior_sampling_alg2(
                 def M0(x):                                           # l.7 (pre-ridge)
                     return inv_e2 * ATk(Ak(x)) + inv_s2 * apply_H_tau(
                         apply_H_tau(x, tau, s_k, e_k, eff_si), tau, s_k, e_k, eff_si)
-                epsilon = alg.power_iter_norm(M0, x1.shape, device) * 1e-6 \
-                    if tau == 0.0 else 0.0                           # Prop. 4
-                diag = epsilon + anchor
-                M_tau = (lambda x: M0(x) + diag * x) if diag else M0
+                epsilon = 0.0
+                if tau == 0.0:                                       # Prop. 4
+                    epsilon = alg.power_iter_norm(M0, x1.shape, device) * 1e-6
+                # anchor path disabled by user (see commented block below);
+                # keep M consistent with b_tilde: ridge only.
+                M_tau = (lambda x: M0(x) + epsilon * x) if epsilon else M0
 
                 for s in range(S):                                   # l.8
                     x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + sigma_tau * x0  # l.9
@@ -198,16 +204,17 @@ def run_posterior_sampling_alg2(
                         inv_s2 * apply_H_tau(x_tau, tau, s_k, e_k, eff_si) + \
                         (1.0 / eta) * ATk(xi_y) + \
                         (1.0 / float(sigma_tau)) * apply_H_tau(xi_h, tau, s_k, e_k, eff_si)  # l.13
-                    if anchor > 0:                                   # EXPERIMENTAL anchor
-                        x1_model = alg.direct_estimate_x1(
-                            x_tau - tau * v, x_tau + (1.0 - tau) * v, s_k, e_k)
-                        b_tilde = b_tilde + anchor * x1_model + \
-                            math.sqrt(anchor) * randn_like_cpu(x1)
+                    # if anchor > 0:                                   # EXPERIMENTAL anchor
+                    #     x1_model = alg.direct_estimate_x1(
+                    #         x_tau - tau * v, x_tau + (1.0 - tau) * v, s_k, e_k)
+                    #     b_tilde = b_tilde + anchor * x1_model + \
+                    #         math.sqrt(anchor) * randn_like_cpu(x1)
                     x1 = cg_solve(M_tau, b_tilde, x0=x1.clone(), tol=cg_tol,
                                   max_iter=200 if tau == 0.0 else L)  # l.14
                     x0 = (x_tau - apply_H_tau(x1, tau, s_k, e_k, eff_si)) / float(sigma_tau)  # l.15
-                    xi_0 = randn_like_cpu(x0)                        # l.16
-                    x0 = x0 - (h0 / 2.0) * (x0 + x0_hat) + math.sqrt(h0) * xi_0  # l.17
+                    for _ in range(int(x0_langevin_steps)):          # user: try K in {1,3,5}
+                        xi_0 = randn_like_cpu(x0)                    # l.16
+                        x0 = x0 - (h0 / 2.0) * (x0 + x0_hat) + math.sqrt(h0) * xi_0  # l.17
 
             rows.append(dict(stage=si, step=step_idx, tau=tau,
                              sigma_tau=float(sigma_tau),
