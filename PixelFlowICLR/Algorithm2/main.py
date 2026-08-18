@@ -40,7 +40,7 @@ import math       # noqa: E402
 import time       # noqa: E402
 
 from utils import (  # noqa: E402  (import first: sets IP_package sys.path + chdir)
-    HERE, TRAJ_IMAGE, NFE, count_nfe_hook,
+    HERE, NFE, count_nfe_hook,
     apply_B, apply_N, power_iter_norm, make_exact_AT, adjoint_test, mse_masked,
     score_solve, clean_image_solve, build_task_setups,
     run_posterior_sampling_alg2,
@@ -70,6 +70,7 @@ PATHS = {}         # resolved "paths" section ({IP_PACKAGE}/{HERE} substituted)
 ALG = {}           # "algorithm" section
 SAMPLER_KW = {}    # shared "sampler_kw" section
 TASKS_SETUP = {}   # per-task {"sigma_n", "operator", optional "kw" overrides}
+TRAJ_IMAGE = None  # "traj_image": which image gets trajectory frames (full_ip)
 
 # The same ceph share is mounted at different roots depending on the machine
 # (cluster login/compute nodes vs the mounted GPU box). Placeholder paths
@@ -106,7 +107,9 @@ def task_kw(task):
 
 
 def _resolve_out(out):
-    return out if os.path.isabs(out) else os.path.join(ORIG_CWD, out)
+    # Anchored to this file's directory, not the caller's CWD: running from the
+    # repo root used to scatter a top-level results/ tree.
+    return out if os.path.isabs(out) else os.path.join(HERE, out)
 
 
 def _load_model(config, device):
@@ -218,8 +221,11 @@ def run_onestep(args):
             x_tau = apply_H_tau(x1_gt, tau, sk, ek, eff_si) + sig * x0
             y_clean = st["op"](gt[:1]).detach()          # xi = 0
             A_fn, AT_fn = st["mkA"](st["op"], st["y"], x1_gt.shape, device)
+            # warm start from ZERO, not the GT: warm-starting at the answer
+            # would let a solver that returns its input unchanged pass S2.
             x1_hat = clean_image_solve(x_tau, A_fn, AT_fn, y_clean, sigma_n_t, sig,
-                                       tau, sk, ek, eff_si, x1_gt.clone(), cg_tol,
+                                       tau, sk, ek, eff_si,
+                                       torch.zeros_like(x1_gt), cg_tol,
                                        ridge_rel=ALG["ridge_rel"],
                                        max_iter=ALG["cg_max_iter_l14"])
             m_st = F.interpolate(st["mask"], size=x1_gt.shape[-2:], mode="nearest")
@@ -456,6 +462,7 @@ def run_full_ip(args):
                 gamma2_tab=gamma2_tab, make_Ak_fns_fn=make_Ak_fns_fn,
                 seed=int(kw.get("seed", ALG["seed"])), record_trajectory=record,
                 h0=ALG["h0"], x0_langevin_steps=ALG["x0_langevin_steps"],
+                x0_langevin_recompute=ALG["x0_langevin_recompute"],
                 gamma2_scale=ALG["gamma2_scale"], anchor=ALG["anchor"],
                 sigma_min=ALG["sigma_min"], ridge_rel=ALG["ridge_rel"],
                 cg_max_iter_l14=ALG["cg_max_iter_l14"],
@@ -593,6 +600,7 @@ def run_debug_box(args):
             gamma2_tab=gamma2_tab, make_Ak_fns_fn=make_Ak_fns_fn,
             seed=ALG["seed"], record_trajectory=True, h0=h0, anchor=anchor_val,
             x0_langevin_steps=x0_steps, gamma2_scale=g2_scale,
+            x0_langevin_recompute=ALG["x0_langevin_recompute"],
             sigma_min=ALG["sigma_min"], ridge_rel=ALG["ridge_rel"],
             cg_max_iter_l14=ALG["cg_max_iter_l14"],
             terminal_replace_weight=trw,
@@ -795,6 +803,56 @@ def run_verify(args):
     report("S1 identity: x0_hat == x0 (v=d_exact, g2=0)",
            float((x0_s1 - x0_true).abs().max()), 1e-6)
 
+    print("== V9: tau=0 exact-draw covariance (Prop. 4 ridge) ==")
+    # The l.12-14 draw solves M x = b_tilde with M = M0 + eps*I. It is exact
+    # only if cov(b_tilde) = M, i.e. the xi_y/xi_h pair (which gives M0) is
+    # joined by sqrt(eps)*xi_eps. ridge_rel is amplified here so the defect is
+    # far larger than the Monte-Carlo error; at the production 1e-6 the two
+    # variants agree to ~1e-6 and no sampling test could separate them.
+    si, s_k, e_k = STAGES[3]
+    tau = 0.0
+    sig = float(compute_sigma_tau(tau, s_k, e_k))
+    eta_v, ridge_rel_v, n_draw = 0.05, 0.5, 40000
+    mask_v = torch.ones(1, 1, RES, RES)
+    mask_v[..., RES // 2:, :] = 0.0                      # inpainting-style A
+
+    def A_v(x):
+        return mask_v * x
+
+    def H_v(x):
+        return apply_H_tau(x, tau, s_k, e_k, si)
+
+    A_d = dense(A_v); H_d = dense(H_v)
+    M0_d = (A_d.T @ A_d) / eta_v ** 2 + (H_d.T @ H_d) / sig ** 2
+    eps_v = ridge_rel_v * np.linalg.norm(M0_d, 2)
+    M_d = M0_d + eps_v * np.eye(N_PIX)
+    Minv = np.linalg.inv(M_d)
+    # Sample covariance in spectral norm carries O(sqrt(d/n)) error, so each
+    # variant is compared against ITS OWN predicted covariance (fixed: M^-1,
+    # old: M^-1 M0 M^-1); the test then asserts those predictions are further
+    # apart than that Monte-Carlo floor.
+    rng = np.random.default_rng(7)
+    cov_pred = {True: Minv, False: Minv @ M0_d @ Minv}
+    mc_tol = 3.0 * (math.sqrt(N_PIX / n_draw) + N_PIX / n_draw)
+    got = {}
+    for with_eps in (False, True):
+        xi_y = rng.standard_normal((n_draw, N_PIX))
+        xi_h = rng.standard_normal((n_draw, N_PIX))
+        Bmat = xi_y @ A_d.T / eta_v + xi_h @ H_d.T / sig
+        if with_eps:
+            Bmat = Bmat + math.sqrt(eps_v) * rng.standard_normal((n_draw, N_PIX))
+        xs = Bmat @ Minv.T
+        cov = np.cov(xs, rowvar=False)
+        pred = cov_pred[with_eps]
+        got[with_eps] = np.linalg.norm(cov - pred, 2) / np.linalg.norm(pred, 2)
+    report("cov(x) == M^-1 with sqrt(eps)*xi (implemented)",
+           got[True], mc_tol, unit="rel ||·||_2")
+    report("cov(x) == M^-1 M0 M^-1 without it (old behaviour)",
+           got[False], mc_tol, unit="rel ||·||_2")
+    gap = (np.linalg.norm(Minv - cov_pred[False], 2) / np.linalg.norm(Minv, 2))
+    report("the two predictions differ by more than the MC floor",
+           mc_tol / gap, 1.0, unit="mc_tol/gap")
+
     print("== V8: gamma2 probe (white noise on v; real v-error is structured) ==")
     for gamma_true in (0.05, 0.15):
         noise = torch.randn(1, 1, RES, RES, generator=g)
@@ -816,6 +874,64 @@ def run_verify(args):
 RUNNERS = {"onestep": run_onestep, "full_ip": run_full_ip,
            "debug_box": run_debug_box, "verify": run_verify}
 
+# Exact key contract for config.json. Everything main() consumes must be listed
+# here, so a typo or a dropped key fails loudly instead of being swallowed by a
+# .get() default or by the sampler's **unused_kw.
+CONFIG_SCHEMA = {
+    "mode": None,
+    "paths": {"model_dir", "demo_dir", "gamma2_table"},
+    "algorithm": {"sigma_min", "h0", "x0_langevin_steps", "x0_langevin_recompute",
+                  "gamma2_scale", "anchor", "seed", "ridge_rel", "cg_max_iter_l14"},
+    "sampler_kw": {"num_langevin", "ode_steps_per_stage", "shift", "guidance_scale",
+                   "g_bypass_stage3", "cg_tol", "cg_max_iter"},
+    "tasks_setup": None, "tasks": None, "images": None, "traj_image": None,
+    "onestep": {"out", "chunk", "self_test"},
+    "full_ip": {"out", "smoke"},
+    "debug_box": {"out", "image", "h0", "anchors", "x0_steps", "gamma2_scales",
+                  "trw_values"},
+    "verify": {"res"},
+}
+TASK_KEYS = {"sigma_n", "operator", "terminal_replace_weight", "kw"}
+
+
+def _check_config_keys(cfg):
+    missing = set(CONFIG_SCHEMA) - set(cfg)
+    extra = set(cfg) - set(CONFIG_SCHEMA)
+    if missing or extra:
+        raise KeyError(f"config.json top level: missing={sorted(missing)} "
+                       f"unknown={sorted(extra)}")
+    for sect, allowed in CONFIG_SCHEMA.items():
+        if allowed is None:
+            continue
+        got = set(cfg[sect])
+        if got != allowed:
+            raise KeyError(f'config.json "{sect}": missing={sorted(allowed - got)} '
+                           f"unknown={sorted(got - allowed)}")
+    for task, spec in cfg["tasks_setup"].items():
+        got = set(spec)
+        if not got <= TASK_KEYS or not {"sigma_n", "operator",
+                                        "terminal_replace_weight"} <= got:
+            raise KeyError(f'config.json "tasks_setup"."{task}": '
+                           f"missing={sorted(TASK_KEYS - got - {'kw'})} "
+                           f"unknown={sorted(got - TASK_KEYS)}")
+    for name in cfg["tasks"]:
+        if name not in cfg["tasks_setup"]:
+            raise KeyError(f'config.json "tasks": {name!r} has no tasks_setup entry')
+    if cfg["traj_image"] not in cfg["images"]:
+        raise KeyError(f'config.json "traj_image" {cfg["traj_image"]!r} '
+                       "is not in images")
+
+
+def _check_hash_seed(mode):
+    """demo_runner's mask seeds go through Python's hash(), so the masks are
+    only reproducible under PYTHONHASHSEED=0 (the documented contract). verify
+    builds no masks and is exempt."""
+    if mode != "verify" and os.environ.get("PYTHONHASHSEED") != "0":
+        raise RuntimeError(
+            "PYTHONHASHSEED=0 is required: demo_runner derives mask seeds from "
+            f"hash(), so mode {mode!r} would draw a different mask per process. "
+            "Re-run as: PYTHONHASHSEED=0 python main.py ...")
+
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
@@ -824,13 +940,27 @@ def main():
                     help='single config: {"mode": ..., "<mode>": {overrides}}')
     ap.add_argument("--mode", default=None, help="override the config's mode")
     cli = ap.parse_args()
-    cfg_path = cli.config if os.path.isabs(cli.config) else os.path.join(ORIG_CWD, cli.config)
+    # An explicitly given --config must exist as given (relative to the caller's
+    # CWD): silently falling back to HERE/<basename> used to run a different
+    # config than the one named. The default name alone still resolves to HERE.
+    if os.path.isabs(cli.config):
+        cfg_path = cli.config
+    elif cli.config == ap.get_default("config"):
+        cfg_path = os.path.join(HERE, cli.config)
+    else:
+        cfg_path = os.path.join(ORIG_CWD, cli.config)
     if not os.path.isfile(cfg_path):
-        cfg_path = os.path.join(HERE, os.path.basename(cli.config))
+        raise FileNotFoundError(f"--config {cli.config!r} -> {cfg_path} not found")
     cfg = json.load(open(cfg_path))
+    _check_config_keys(cfg)
     mode = cli.mode or cfg["mode"]
 
-    global PATHS, ALG, SAMPLER_KW, TASKS_SETUP
+    if mode not in RUNNERS:
+        raise KeyError(f"mode {mode!r} not in {sorted(RUNNERS)}")
+    _check_hash_seed(mode)
+
+    global PATHS, ALG, SAMPLER_KW, TASKS_SETUP, TRAJ_IMAGE
+    TRAJ_IMAGE = cfg["traj_image"]
     subst = {"{IP_PACKAGE}": base.IP_PACKAGE, "{HERE}": HERE}
     PATHS = {k: v for k, v in cfg["paths"].items()}
     for k, v in PATHS.items():

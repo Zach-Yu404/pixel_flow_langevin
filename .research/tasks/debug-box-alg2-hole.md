@@ -131,9 +131,23 @@ K=1/γ²=0 0.9782（γ² 影响 ~1%，与 V8 白噪声探针一致）；
 K=3 2.13/2.24；K=5 2.49/2.54——**K↑ 单调恶化**（与 h₀ 扫描同签名：Block-2 churn 增多、
 x₁ 无收缩机制不变）。
 
-**最终结论**：论文机制内三旋钮（h₀↑、x₀-Langevin K↑、γ²）对 box 洞区全部无效或有害；
-唯一有效干预仍是 Tweedie anchor（7/7 图 6.2×，当前被用户停用）。结构性诊断
-（Block-1 条件分布在 ker(A) 无 x₁ 先验）三重确认。算法层修改待用户裁决。
+**结论（已按 Codex review 降级，2026-08-18）**：以下均为 **junco 单图 / seed 42 的探索性
+观察**，不是已验证的一般性结论：
+
+- h₀↑、γ² 缩放对 box 洞区无效或有害（h₀ 0.97→3.29；γ² 影响 ~1%）。
+- "K↑ 恶化"（2.13/2.49）测的是 **frozen-score 消融**——旧实现在 K 个子步里复用第一子步的
+  `x0_hat`，并非对当前 x₀ 的多步 Langevin。代码已加 `x0_langevin_recompute`（默认 False
+  保持旧语义；True 才是每子步重算 v/score 的真多步版本，每多一步多一次 NFE）。
+  **真正的多步 Langevin 与 S sweep 尚未跑**，"论文机制内三旋钮全部无效"因此不成立，
+  改为"已测的三种设置下均未改善"。
+- 结构性诊断（Block-1 条件分布在 ker(A) 无 x₁ 先验）仍是最有解释力的假设，但
+  scalar oracle 缺可复算脚本、"line 15 清零 Block-2 进展"的代数表述与
+  `x_tau_next = x_tau + sigma*Δx0` 不符，需重做后才能作为论文论据。
+- 历史 anchor/K 分支会额外消费同一 RNG 流，各 variant 的噪声并非对齐对照。
+- Tweedie anchor 的 7/7 图改善是同一 seed 下的观察；当前 anchor 已停用，且传非零值
+  现在会 **fail fast**（曾是 silent no-op）。
+
+算法层是否采纳 anchor 仍待用户裁决。
 
 ## 【Codex｜Review】（2026-08-18，Issue #3）
 

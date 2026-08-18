@@ -13,7 +13,8 @@
   "anchor": 0.0,
   "seed": 42,
   "ridge_rel": 1e-06,
-  "cg_max_iter_l14": 200
+  "cg_max_iter_l14": 200,
+  "x0_langevin_recompute": false
  },
  "sampler_kw": {
   "num_langevin": 10,
@@ -88,6 +89,7 @@
   "sea_anemone",
   "shetland_sheepdog"
  ],
+ "traj_image": "junco",
  "onestep": {
   "out": "results/onestep",
   "chunk": 4,
