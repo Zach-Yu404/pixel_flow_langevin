@@ -809,9 +809,11 @@ def run_verify(args):
     # joined by sqrt(eps)*xi_eps. ridge_rel is amplified here so the defect is
     # far larger than the Monte-Carlo error; at the production 1e-6 the two
     # variants agree to ~1e-6 and no sampling test could separate them.
-    si, s_k, e_k = STAGES[3]
-    tau = 0.0
-    sig = float(compute_sigma_tau(tau, s_k, e_k))
+    # V9 keeps its own names: V8 below still uses V7's x_tau/d_exact/x0_true and
+    # would silently probe the wrong operator if si/s_k/e_k/tau were rebound.
+    si_v, s_kv, e_kv = STAGES[3]
+    tau_v = 0.0
+    sig = float(compute_sigma_tau(tau_v, s_kv, e_kv))
     eta_v, ridge_rel_v, n_draw = 0.05, 0.5, 40000
     mask_v = torch.ones(1, 1, RES, RES)
     mask_v[..., RES // 2:, :] = 0.0                      # inpainting-style A
@@ -820,7 +822,7 @@ def run_verify(args):
         return mask_v * x
 
     def H_v(x):
-        return apply_H_tau(x, tau, s_k, e_k, si)
+        return apply_H_tau(x, tau_v, s_kv, e_kv, si_v)
 
     A_d = dense(A_v); H_d = dense(H_v)
     M0_d = (A_d.T @ A_d) / eta_v ** 2 + (H_d.T @ H_d) / sig ** 2
@@ -854,6 +856,13 @@ def run_verify(args):
            mc_tol / gap, 1.0, unit="mc_tol/gap")
 
     print("== V8: gamma2 probe (white noise on v; real v-error is structured) ==")
+    # V8 reuses V7's x_tau/d_exact/x0_true, so its numbers are meaningless if
+    # s_k/e_k/tau no longer match the data they were built from. This is
+    # report()ed rather than printed: the probe itself is diagnostic, but a
+    # parameter mismatch must fail the suite instead of printing wrong numbers.
+    report("V8 operates on V7's data (S1 identity still holds)",
+           float((score_solve(x_tau, d_exact, s_k, e_k, tau, 0.0, 1, 1e-12, 4000)
+                  - x0_true).abs().max()), 1e-6)
     for gamma_true in (0.05, 0.15):
         noise = torch.randn(1, 1, RES, RES, generator=g)
         v_noisy = d_exact + gamma_true * noise
@@ -892,6 +901,17 @@ CONFIG_SCHEMA = {
     "verify": {"res"},
 }
 TASK_KEYS = {"sigma_n", "operator", "terminal_replace_weight", "kw"}
+# Operator kwargs are consumed by build_setup_and_measurement per task, which
+# reads them with .get() — an unchecked typo there silently reverts to that
+# function's own default, which is exactly what the config contract must stop.
+TASK_OPERATOR_KEYS = {
+    "box_inpainting": {"mask_len_range"},
+    "random_inpainting": {"mask_prob"},
+    "gaussian_blur": {"kernel_size", "kernel_std"},
+    "motion_blur": {"kernel_size", "kernel_intensity", "kernel_seed",
+                    "use_daps_kernel"},
+    "superresolution": {"scale_factor", "antialias"},
+}
 
 
 def _check_config_keys(cfg):
@@ -914,6 +934,19 @@ def _check_config_keys(cfg):
             raise KeyError(f'config.json "tasks_setup"."{task}": '
                            f"missing={sorted(TASK_KEYS - got - {'kw'})} "
                            f"unknown={sorted(got - TASK_KEYS)}")
+        if task not in TASK_OPERATOR_KEYS:
+            raise KeyError(f'config.json "tasks_setup": unknown task {task!r} '
+                           f"(known: {sorted(TASK_OPERATOR_KEYS)})")
+        op_got = set(spec["operator"])
+        if op_got != TASK_OPERATOR_KEYS[task]:
+            raise KeyError(
+                f'config.json "tasks_setup"."{task}"."operator": '
+                f"missing={sorted(TASK_OPERATOR_KEYS[task] - op_got)} "
+                f"unknown={sorted(op_got - TASK_OPERATOR_KEYS[task])}")
+        kw_got = set(spec.get("kw", {}))          # merged over sampler_kw
+        if not kw_got <= CONFIG_SCHEMA["sampler_kw"]:
+            raise KeyError(f'config.json "tasks_setup"."{task}"."kw": '
+                           f"unknown={sorted(kw_got - CONFIG_SCHEMA['sampler_kw'])}")
     for name in cfg["tasks"]:
         if name not in cfg["tasks_setup"]:
             raise KeyError(f'config.json "tasks": {name!r} has no tasks_setup entry')
@@ -936,17 +969,19 @@ def _check_hash_seed(mode):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--config", default="config.json",
-                    help='single config: {"mode": ..., "<mode>": {overrides}}')
+    ap.add_argument("--config", default=None,
+                    help='single config: {"mode": ..., "<mode>": {overrides}} '
+                         '(default: <Algorithm2>/config.json)')
     ap.add_argument("--mode", default=None, help="override the config's mode")
     cli = ap.parse_args()
-    # An explicitly given --config must exist as given (relative to the caller's
-    # CWD): silently falling back to HERE/<basename> used to run a different
-    # config than the one named. The default name alone still resolves to HERE.
-    if os.path.isabs(cli.config):
+    # Omitting --config uses this directory's config.json; ANY value passed on
+    # the command line resolves against the caller's CWD and must exist there.
+    # (Comparing the value to the default cannot tell "--config config.json"
+    # apart from the default, so such a run silently loaded HERE/config.json.)
+    if cli.config is None:
+        cfg_path = os.path.join(HERE, "config.json")
+    elif os.path.isabs(cli.config):
         cfg_path = cli.config
-    elif cli.config == ap.get_default("config"):
-        cfg_path = os.path.join(HERE, cli.config)
     else:
         cfg_path = os.path.join(ORIG_CWD, cli.config)
     if not os.path.isfile(cfg_path):
