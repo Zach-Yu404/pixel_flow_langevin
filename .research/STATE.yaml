@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 21
+memory_version: 22
 updated_at: "2026-08-18"
 updated_by: "claude"         # claude | codex | user
 
@@ -35,7 +35,7 @@ active_tasks:
   pending_review_by: null
 - name: test-terminal-replace-weight
   type: experiment
-  state: working
+  state: review
   owner: claude
   branch: null
   depends_on: []

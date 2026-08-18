@@ -4,10 +4,15 @@
 
 ## 正在进行
 
-- Issue #3 Codex review 结论 **request changes**（8 条）。已修 #5（full_ip 落盘 post-projection
-  metrics，smoke 实跑验证）与 #7 前半（删除 bit-exact 口径，补 `torch.equal` 恒等式证据）；
-  其余 6 条（τ=0 漏 `sqrt(eps)` 噪声、frozen-score K、结论降级、anchor silent no-op、
-  config/out 契约、hash() 种子）待处理后请 Codex 增量复审。
+- Issue #3 Codex review（8 条 request changes）**已全部处理**：5 修 + 2 降级 + 1 条按
+  scope 约束在 Algorithm2 内解决（hash 种子改入口 fail-fast，不动 IP_package）。
+  随后自跑三路对抗审计，发现并修掉修正本身引入的 3 个缺陷（V9 静默破坏 V8 的 γ² 探针、
+  `--config config.json` 仍走默认分支、operator/kw 子字典未校验）。
+  commits `fd57a2a` / `24907e6` / `ffe344f` / `a8ac308`。
+  **待办：本机无 GitHub 凭证，需在集群侧发
+  `.research/handoffs/2026-08-18-issue3-fix-response.md` 到 Issue #3 并切回 `状态:review`。**
+- **新证据：洞区 MSE 的 seed 地板 = 5.3%**（n=4，sd 0.0237）。所有 <5% 的洞区差异结论作废
+  （含"γ² 影响 ~1%"）；h₀/K/anchor 的 2–6 倍效应仍有效。
 
 ## 2026-08-18（晚）：新挂载机路径兼容（用户指令）
 
