@@ -71,6 +71,35 @@ ALG = {}           # "algorithm" section
 SAMPLER_KW = {}    # shared "sampler_kw" section
 TASKS_SETUP = {}   # per-task {"sigma_n", "operator", optional "kw" overrides}
 
+# The same ceph share is mounted at different roots depending on the machine
+# (cluster login/compute nodes vs the mounted GPU box). Placeholder paths
+# ({IP_PACKAGE}/{HERE}) are machine-independent; an absolute path written into
+# config.json on one machine is re-rooted here so the config runs everywhere.
+SHARE_ROOTS = [
+    "/sfs/ceph/standard/CBIG-Standard-ECE",
+    "/standard/CBIG-Standard-ECE",
+    "/CBIG-Standard-ECE",
+]
+
+
+def resolve_path(p):
+    """Return an existing form of p, retrying it under every known share
+    root; raise with the full candidate list if none is accessible."""
+    if os.path.exists(p):
+        return p
+    tried = [p]
+    for old in SHARE_ROOTS:
+        if p.startswith(old + "/"):
+            for new in SHARE_ROOTS:
+                cand = new + p[len(old):]
+                if cand == p:
+                    continue
+                if os.path.exists(cand):
+                    return cand
+                tried.append(cand)
+    raise FileNotFoundError(
+        "config path not found on this machine; tried: " + ", ".join(tried))
+
 
 def task_kw(task):
     return {**SAMPLER_KW, **TASKS_SETUP[task].get("kw", {})}
@@ -399,7 +428,7 @@ def run_full_ip(args):
 
     gamma2_tab = json.load(open(PATHS["gamma2_table"]))["table"]
 
-    all_rows, nfe_stats, trajs = [], {}, {}
+    all_rows, final_rows, nfe_stats, trajs = [], [], {}, {}
     t0 = time.time()
     for task in tasks:
         op_cfg = TASKS_SETUP[task]["operator"]
@@ -422,7 +451,7 @@ def run_full_ip(args):
 
             NFE["n"] = 0
             ts = time.time()
-            _, rows, traj = run_posterior_sampling_alg2(
+            x1_final, rows, traj = run_posterior_sampling_alg2(
                 model, config, gt, y, op, sigma_n, device,
                 gamma2_tab=gamma2_tab, make_Ak_fns_fn=make_Ak_fns_fn,
                 seed=int(kw.get("seed", ALG["seed"])), record_trajectory=record,
@@ -437,6 +466,19 @@ def run_full_ip(args):
             for r in rows:
                 r.update(task=task, image=name)
             all_rows += rows
+            # rows/traj are recorded pre-projection inside the sampler, so the
+            # terminal projection is invisible there; record the returned
+            # (post-projection) reconstruction separately.
+            trw = float(TASKS_SETUP[task]["terminal_replace_weight"])
+            err_f = (x1_final - gt) ** 2
+            fin = dict(task=task, image=name, trw=trw,
+                       pre_mse=rows[-1]["mse_x1"], post_mse=float(err_f.mean()))
+            if trw > 0:                       # inpainting: split by the mask
+                hole = (1.0 - mask).to(device)
+                fin["post_hole"] = float((err_f * hole).sum() / (hole.sum() * 3))
+                fin["post_obs"] = float((err_f * (1 - hole)).sum()
+                                        / (((1 - hole)).sum() * 3))
+            final_rows.append(fin)
             nfe_stats[f"{task}/{name}"] = NFE["n"]
             if record:
                 trajs[task] = traj
@@ -449,7 +491,12 @@ def run_full_ip(args):
         with open(os.path.join(out, "full_ip_metrics.csv"), "w", newline="") as f:
             wcsv = csv.DictWriter(f, fieldnames=list(all_rows[0].keys()))
             wcsv.writeheader(); wcsv.writerows(all_rows)
-    print(f"[done-sampling] rows={len(all_rows)}", flush=True)
+    if final_rows:
+        keys = sorted({k for r in final_rows for k in r})
+        with open(os.path.join(out, "full_ip_final.csv"), "w", newline="") as f:
+            wcsv = csv.DictWriter(f, fieldnames=keys, restval="")
+            wcsv.writeheader(); wcsv.writerows(final_rows)
+    print(f"[done-sampling] rows={len(all_rows)} final={len(final_rows)}", flush=True)
 
     # ── loss curves: per task panel, mean over images with traj rows ──
     if all_rows and not args.smoke:
@@ -789,7 +836,7 @@ def main():
     for k, v in PATHS.items():
         for token, real in subst.items():
             v = v.replace(token, real)
-        PATHS[k] = v
+        PATHS[k] = resolve_path(v)
     ALG = dict(cfg["algorithm"])
     SAMPLER_KW = dict(cfg["sampler_kw"])
     TASKS_SETUP = dict(cfg["tasks_setup"])
