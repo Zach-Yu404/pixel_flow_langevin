@@ -65,3 +65,10 @@ state: working（Issue #3 request changes） · owner: claude · type: implement
 的末端 hole 为 `0.9691237807273865` vs `0.9691236615180969`。此外，相对 out 会从仓库根写到
 根 `results/`，显式 config 缺失会 silent fallback，未知/漏键会被默认值与 `**unused_kw` 吞掉；
 必须补严格 config contract 与 τ=0/CG 旧默认值回归。完整清单见 `review-alg2-debug-directory.md`。
+
+## 【Codex｜增量复审】（2026-08-18）
+
+修正链仍未闭环：`CONFIG_SCHEMA` 只验键、不验类型/范围/canonical 值，历史
+`cg_max_iter_l14=50` 与 box/random trw=0 仍会通过，且没有自动 CPU 回归；本文件第 26/46 行的
+“逐位/bit-exact”历史表述也未作废。当前不得据此宣称目录治理 review 通过，详见
+`review-alg2-debug-directory.md`。

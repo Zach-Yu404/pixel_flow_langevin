@@ -1,6 +1,6 @@
 # review-alg2-debug-directory
 
-state: done（request changes，等待修正后增量复审） · owner: codex · type: review · issue: 3 · pr: null · created: 2026-08-18
+state: done（增量复审仍 request changes，等待下一轮修正） · owner: codex · type: review · issue: 3 · pr: null · created: 2026-08-18
 
 ## 【用户原始要求】
 
@@ -83,3 +83,27 @@ state: done（request changes，等待修正后增量复审） · owner: codex �
 
 已确认：`apply_B/apply_N/compute_sigma_tau/score_solve` 的符号与系数、当前 G 的自伴性、
 class label 修复、terminal replacement 代数、最终 config 的静态值均正确。修正后只复审增量。
+
+## 【Codex｜增量复审】（2026-08-18）
+
+- 对象：无 PR；只复审修正链 `6a5a927..a8ac308`，后续无关提交与工作区未提交改动不纳入。
+- 结论：**request changes**；评论：
+  `https://github.com/Zach-Yu404/pixel_flow_langevin/issues/3#issuecomment-5337002138`；
+  已添加并回读确认 `触发:needs-fix`。
+- 已确认正确：生产 τ=0 RHS 已加 `sqrt(epsilon)*xi`；`_resolve_out`/显式 config 路径正确；
+  full_ip 已保存 post 指标；V8 变量污染已被独立命名与 S1 guard 阻断；py_compile/JSON 通过。
+- 仍阻塞：
+  1. V9 在 NumPy 中复制公式、不调用生产 RHS，mutation 后仍可 PASS；默认 res=16/n=40000
+     在本审查环境于 V9 OOM（exit 137），需共用 helper/生产路径并降低峰值内存。
+  2. K 轴共用单 RNG，额外 `xi_0` 平移后续 Block-1 随机流；h0=0 的 K=1/K=3 toy
+     仍输出不同。debug_box 还未安装/reset/保存 NFE，需拆流并补 invariance/call-count tests，
+     或移除未验证的真多步轴。
+  3. config 仅验键：字符串 false、负 trw、历史 CG/trw 值漂移均可通过；默认 debug_box
+     会把非零 `algorithm.anchor` 硬改 0，绕过 sampler guard。缺类型/范围/canonical-value test；
+     hash guard 正确，但 mask checksum/bbox 与 subprocess seed test 仍缺。
+  4. S2 只改零 warm start、断言 observed RMSE，未测线性残差/稠密参考/τ=0 ridge/CG cap。
+  5. V8 stdout 未标 diagnostic/non-gating，末尾仍笼统打印 `ALL CHECKS PASSED`。
+  6. n=4 单图统计不能外推 5% 噪声地板或“确证/方向成立”；跨机最差只同到 6 位有效数字，
+     `1.1920929e-7` 在 0.969 附近是 2 ULP；相关 task 仍保留未作废 bit-exact 旧结论。
+
+修正后仍只看本轮增量；证据项若统一降级措辞，无需为本 review 重跑 GPU。

@@ -201,3 +201,11 @@ git rm（历史保留）；sbatch 改用 `sbatch --wrap` 一行式（见 main.py
 PYTHONHASHSEED=0）。SUMMARY.md 的论文映射浓缩进 utils.py docstring。
 等价性证据：CPU verify ALL PASS；onestep self-test S1 1.08e-07 / S2 0.0110（=历史记录）；
 GPU job 18643397 box K=1 洞区 MSE 0.9691 / obs 0.0018（=重组前逐位）。
+
+## 【Codex｜增量复审】（2026-08-18）
+
+四 seed 的 mean/sd/range/CI 算术可复算，但它只覆盖 junco、h₀=.1、K=1、γ²=1、anchor=0；
+n=4 样本极差 5.3% 不是通用噪声地板，均值 CI 也不是 paired effect 阈值。历史 K/anchor variant
+RNG 不配对，因此“方向性结论仍成立”“唯一确证有效”与本文件自己的探索性降级矛盾。
+在补各 intervention 的 paired multi-seed 前，只能保留固定 seed 的描述性观察；第 101/129/195
+行的逐位口径亦视为待修正。完整依据见 `review-alg2-debug-directory.md`。

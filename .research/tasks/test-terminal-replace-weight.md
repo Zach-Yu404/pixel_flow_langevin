@@ -108,3 +108,10 @@ CSV 反证：40 步的 `mse_x1/hole/obs` 分别有 25/26/24 步不等，最大�
 `2.38e-6/1.05e-5/1.08e-7`。应改为“数值接近（给定容差）”，或只采样一次再离线投影并保存
 tensor hash/`torch.equal` 证据。另 full_ip 丢弃返回的 post-projection x1，当前 trw 对其落盘
 CSV/frames 不可见；需保存独立 post final reconstruction/metrics。
+
+## 【Codex｜增量复审】（2026-08-18）
+
+full_ip post 指标落盘已修；但跨机 CSV 最差只同到 6 位有效数字，不是 8 位；
+`1.1920929e-7` 在 0.969 附近等于 2 ULP（float32 spacing=`2^-24`），不是 1 ULP；旧结果段的
+“逐位一致”也未显式作废。另 hash guard 未把实际 mask checksum/bbox 写入结果。以上修正口径
+无需重跑 GPU，详见 `review-alg2-debug-directory.md`。
