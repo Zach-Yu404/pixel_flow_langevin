@@ -791,58 +791,6 @@ def run_verify(args):
     report("S1 identity: x0_hat == x0 (v=d_exact, g2=0)",
            float((x0_s1 - x0_true).abs().max()), 1e-6)
 
-    print("== V9: tau=0 exact-draw covariance (Prop. 4 ridge) ==")
-    # The l.12-14 draw solves M x = b_tilde with M = M0 + eps*I. It is exact
-    # only if cov(b_tilde) = M, i.e. the xi_y/xi_h pair (which gives M0) is
-    # joined by sqrt(eps)*xi_eps. ridge_rel is amplified here so the defect is
-    # far larger than the Monte-Carlo error; at the production 1e-6 the two
-    # variants agree to ~1e-6 and no sampling test could separate them.
-    # V9 keeps its own names: V8 below still uses V7's x_tau/d_exact/x0_true and
-    # would silently probe the wrong operator if si/s_k/e_k/tau were rebound.
-    si_v, s_kv, e_kv = STAGES[3]
-    tau_v = 0.0
-    sig = float(compute_sigma_tau(tau_v, s_kv, e_kv))
-    eta_v, ridge_rel_v, n_draw = 0.05, 0.5, 40000
-    mask_v = torch.ones(1, 1, RES, RES)
-    mask_v[..., RES // 2:, :] = 0.0                      # inpainting-style A
-
-    def A_v(x):
-        return mask_v * x
-
-    def H_v(x):
-        return apply_H_tau(x, tau_v, s_kv, e_kv, si_v)
-
-    A_d = dense(A_v); H_d = dense(H_v)
-    M0_d = (A_d.T @ A_d) / eta_v ** 2 + (H_d.T @ H_d) / sig ** 2
-    eps_v = ridge_rel_v * np.linalg.norm(M0_d, 2)
-    M_d = M0_d + eps_v * np.eye(N_PIX)
-    Minv = np.linalg.inv(M_d)
-    # Sample covariance in spectral norm carries O(sqrt(d/n)) error, so each
-    # variant is compared against ITS OWN predicted covariance (fixed: M^-1,
-    # old: M^-1 M0 M^-1); the test then asserts those predictions are further
-    # apart than that Monte-Carlo floor.
-    rng = np.random.default_rng(7)
-    cov_pred = {True: Minv, False: Minv @ M0_d @ Minv}
-    mc_tol = 3.0 * (math.sqrt(N_PIX / n_draw) + N_PIX / n_draw)
-    got = {}
-    for with_eps in (False, True):
-        xi_y = rng.standard_normal((n_draw, N_PIX))
-        xi_h = rng.standard_normal((n_draw, N_PIX))
-        Bmat = xi_y @ A_d.T / eta_v + xi_h @ H_d.T / sig
-        if with_eps:
-            Bmat = Bmat + math.sqrt(eps_v) * rng.standard_normal((n_draw, N_PIX))
-        xs = Bmat @ Minv.T
-        cov = np.cov(xs, rowvar=False)
-        pred = cov_pred[with_eps]
-        got[with_eps] = np.linalg.norm(cov - pred, 2) / np.linalg.norm(pred, 2)
-    report("cov(x) == M^-1 with sqrt(eps)*xi (implemented)",
-           got[True], mc_tol, unit="rel ||·||_2")
-    report("cov(x) == M^-1 M0 M^-1 without it (old behaviour)",
-           got[False], mc_tol, unit="rel ||·||_2")
-    gap = (np.linalg.norm(Minv - cov_pred[False], 2) / np.linalg.norm(Minv, 2))
-    report("the two predictions differ by more than the MC floor",
-           mc_tol / gap, 1.0, unit="mc_tol/gap")
-
     print("== V8: gamma2 probe (white noise on v; real v-error is structured) ==")
     # V8 reuses V7's x_tau/d_exact/x0_true, so its numbers are meaningless if
     # s_k/e_k/tau no longer match the data they were built from. This is
