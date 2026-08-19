@@ -14,10 +14,10 @@ external task-config files are read. Everything is Algorithm 2 only. Modes:
               sanity S1/S2 + adjoint tests first; "self_test": true = CPU sanity only)
   full_ip   : full Algorithm-2 sampling per task/image — metrics + loss curves + frames
   debug_box : box-hole harness (h0 or trw variants; obs/hole split MSE)
-  verify    : CPU component audit V1-V8 (dense float64): self-adjointness of
+  verify    : CPU component audit V1-V7 (dense float64): self-adjointness of
               G/H/B/N (transpose equivalence), sigma_tau, CFG semantics,
               Ak/ATk adjoints, M0 vs dense, power_iter_norm, score_solve vs
-              explicit N^T N, gamma2 sensitivity probe
+              explicit N^T N
 
 GPU submission (no sbatch file needed):
   sbatch -A cbig-ece -p gpu --gres=gpu:a100:1 -c 8 --mem=64G -t 3:00:00 \\
@@ -673,7 +673,7 @@ def run_debug_box(args):
 
 # ═════════════════════════════ mode: verify ════════════════════════════════
 def run_verify(args):
-    """CPU component audit V1-V8 (see module docstring). Dense float64."""
+    """CPU component audit V1-V7 (see module docstring). Dense float64."""
     torch.set_default_dtype(torch.float64)
     RES = int(args.res)
     N_PIX = RES * RES
@@ -790,26 +790,6 @@ def run_verify(args):
     x0_s1 = score_solve(x_tau, d_exact, s_k, e_k, tau, 0.0, 1, 1e-12, 4000)
     report("S1 identity: x0_hat == x0 (v=d_exact, g2=0)",
            float((x0_s1 - x0_true).abs().max()), 1e-6)
-
-    print("== V8: gamma2 probe (white noise on v; real v-error is structured) ==")
-    # V8 reuses V7's x_tau/d_exact/x0_true, so its numbers are meaningless if
-    # s_k/e_k/tau no longer match the data they were built from. This is
-    # report()ed rather than printed: the probe itself is diagnostic, but a
-    # parameter mismatch must fail the suite instead of printing wrong numbers.
-    report("V8 operates on V7's data (S1 identity still holds)",
-           float((score_solve(x_tau, d_exact, s_k, e_k, tau, 0.0, 1, 1e-12, 4000)
-                  - x0_true).abs().max()), 1e-6)
-    for gamma_true in (0.05, 0.15):
-        noise = torch.randn(1, 1, RES, RES, generator=g)
-        v_noisy = d_exact + gamma_true * noise
-        errs = {}
-        for g2 in (0.0, 1e-4, 1e-3, 1e-2, gamma_true ** 2, 4 * gamma_true ** 2, 1.0):
-            x0_hat = score_solve(x_tau, v_noisy, s_k, e_k, tau, g2, 1, 1e-12, 4000)
-            errs[g2] = float(((x0_hat - x0_true) ** 2).mean())
-        best = min(errs, key=errs.get)
-        line = "  ".join(f"g2={kk:.1e}:{vv:.4f}" for kk, vv in errs.items())
-        print(f"  gamma_true={gamma_true}: {line}")
-        print(f"    best gamma2 = {best:.1e}")
 
     print("\n" + ("ALL CHECKS PASSED" if checks["ok"] else "** SOME CHECKS FAILED **"))
     return 0 if checks["ok"] else 1
