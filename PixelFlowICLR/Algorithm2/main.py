@@ -13,8 +13,7 @@ external task-config files are read. Everything is Algorithm 2 only. Modes:
   onestep   : one-step Alg2 x1-hat MSE vs t (5 tasks x 7 images x 4 stages;
               sanity S1/S2 + adjoint tests first; "self_test": true = CPU sanity only)
   full_ip   : full Algorithm-2 sampling per task/image — metrics + loss curves + frames
-  debug_box : box-hole sweep harness (h0 / anchors / x0_steps x gamma2_scales;
-              obs/hole split MSE) — task debug-box-alg2-hole
+  debug_box : box-hole harness (h0 or trw variants; obs/hole split MSE)
   verify    : CPU component audit V1-V8 (dense float64): self-adjointness of
               G/H/B/N (transpose equivalence), sigma_tau, CFG semantics,
               Ak/ATk adjoints, M0 vs dense, power_iter_norm, score_solve vs
@@ -463,9 +462,7 @@ def run_full_ip(args):
                 model, config, gt, y, op, sigma_n, device,
                 gamma2_tab=gamma2_tab, make_Ak_fns_fn=make_Ak_fns_fn,
                 seed=int(kw.get("seed", ALG["seed"])), record_trajectory=record,
-                h0=ALG["h0"], x0_langevin_steps=ALG["x0_langevin_steps"],
-                x0_langevin_recompute=ALG["x0_langevin_recompute"],
-                gamma2_scale=ALG["gamma2_scale"], anchor=ALG["anchor"],
+                h0=ALG["h0"],
                 sigma_min=ALG["sigma_min"], ridge_rel=ALG["ridge_rel"],
                 cg_max_iter_l14=ALG["cg_max_iter_l14"],
                 terminal_replace_weight=TASKS_SETUP[task]["terminal_replace_weight"],
@@ -584,25 +581,17 @@ def run_debug_box(args):
 
     trw_task = float(TASKS_SETUP[task]["terminal_replace_weight"])
     if args.trw_values is not None:
-        variants = [(f"trw={w:g}", ALG["h0"], 0.0, ALG["x0_langevin_steps"],
-                     ALG["gamma2_scale"], float(w)) for w in args.trw_values]
-    elif args.x0_steps is not None:
-        variants = [(f"K={k},g2x{gs:g}", 0.1, 0.0, k, gs, trw_task)
-                    for k in args.x0_steps for gs in args.gamma2_scales]
-    elif args.anchors is not None:
-        variants = [(f"anchor={a}", 0.1, a, 1, 1.0, trw_task) for a in args.anchors]
+        variants = [(f"trw={w:g}", ALG["h0"], float(w)) for w in args.trw_values]
     else:
-        variants = [(f"h0={h}", h, 0.0, 1, 1.0, trw_task) for h in args.h0]
+        variants = [(f"h0={h}", h, trw_task) for h in args.h0]
     all_rows = []
     finals = {}
     final_rows = []
-    for label, h0, anchor_val, x0_steps, g2_scale, trw in variants:
+    for label, h0, trw in variants:
         x1, rows, traj = run_posterior_sampling_alg2(
             model, config, gt, y, op, sigma_n, device,
             gamma2_tab=gamma2_tab, make_Ak_fns_fn=make_Ak_fns_fn,
-            seed=ALG["seed"], record_trajectory=True, h0=h0, anchor=anchor_val,
-            x0_langevin_steps=x0_steps, gamma2_scale=g2_scale,
-            x0_langevin_recompute=ALG["x0_langevin_recompute"],
+            seed=ALG["seed"], record_trajectory=True, h0=h0,
             sigma_min=ALG["sigma_min"], ridge_rel=ALG["ridge_rel"],
             cg_max_iter_l14=ALG["cg_max_iter_l14"],
             terminal_replace_weight=trw,
@@ -619,9 +608,6 @@ def run_debug_box(args):
             r2 = dict(r)
             r2["variant"] = label
             r2["h0"] = h0
-            r2["anchor"] = anchor_val
-            r2["x0_steps"] = x0_steps
-            r2["gamma2_scale"] = g2_scale
             r2["trw"] = trw
             r2["mse_hole"] = float((err * m_k).sum() / (m_k.sum() * 3))
             r2["mse_obs"] = float((err * (1 - m_k)).sum() / ((1 - m_k).sum() * 3))
@@ -891,16 +877,14 @@ RUNNERS = {"onestep": run_onestep, "full_ip": run_full_ip,
 CONFIG_SCHEMA = {
     "mode": None,
     "paths": {"model_dir", "demo_dir", "gamma2_table"},
-    "algorithm": {"sigma_min", "h0", "x0_langevin_steps", "x0_langevin_recompute",
-                  "gamma2_scale", "anchor", "seed", "measurement_seed",
+    "algorithm": {"sigma_min", "h0", "seed", "measurement_seed",
                   "ridge_rel", "cg_max_iter_l14"},
     "sampler_kw": {"num_langevin", "ode_steps_per_stage", "shift", "guidance_scale",
                    "g_bypass_stage3", "cg_tol", "cg_max_iter"},
     "tasks_setup": None, "tasks": None, "images": None, "traj_image": None,
     "onestep": {"out", "chunk", "self_test"},
     "full_ip": {"out", "smoke"},
-    "debug_box": {"out", "image", "h0", "anchors", "x0_steps", "gamma2_scales",
-                  "trw_values"},
+    "debug_box": {"out", "image", "h0", "trw_values"},
     "verify": {"res"},
 }
 TASK_KEYS = {"sigma_n", "operator", "terminal_replace_weight", "measurement_mode",

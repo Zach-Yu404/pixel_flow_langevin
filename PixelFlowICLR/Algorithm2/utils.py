@@ -203,8 +203,8 @@ def run_posterior_sampling_alg2(
     model, config, gt, y, operator, eta, device,
     *,
     # Per-stage schedules — same names/positions as run_posterior_sampling
-    num_langevin=10,                 # feeds S = paper's INNER iterations (l.8);
-                                     # NOT the x0-Langevin count (see x0_langevin_steps)
+    num_langevin=10,                 # feeds S = paper's INNER iterations (l.8),
+                                     # not a count of Langevin steps
     ode_steps_per_stage=10, shift=1.0,
     # Structural / physical
     guidance_scale=0.0, class_label=10,
@@ -216,20 +216,12 @@ def run_posterior_sampling_alg2(
     # Algorithm-2 specific
     gamma2_tab=None,                 # measured gamma^2(k, tau) table (Cor. 8)
     h0=H0,                           # paper: Block-2 step size h_0
-    x0_langevin_steps=1,             # K Langevin steps of l.16-17 per inner iter
-                                     # (l.15 once; paper = 1)
-    x0_langevin_recompute=False,     # K>1 semantics: False = frozen-score ablation
-                                     # (x0_hat from the first substep is reused);
-                                     # True = true multi-step Langevin, one extra
-                                     # velocity call (NFE) per extra substep
-    gamma2_scale=1.0,                # multiplies the measured gamma2 table (0 => gamma2=0)
     sigma_min=SIGMA_MIN,             # skip threshold (config.json "algorithm")
     ridge_rel=1e-6,                  # Prop.-4 ridge = ridge_rel * ||M|| at tau=0
     cg_max_iter_l14=200,             # line-14 CG cap at tau=0 (config "algorithm")
     terminal_replace_weight=0.0,     # POST-sampling projection (pipeline convention,
                                      # NOT a paper line): x1 <- w*(m*y+(1-m)*x1)+(1-w)*x1;
                                      # inpainting tasks use 1.0, blur/SR 0.0 (config)
-    anchor=0.0,                      # EXPERIMENTAL Tweedie anchor, see below
     **unused_kw,                     # PRINCIPLE-only kw (h_x, lambda_reg, ...) ignored
 ):
     """Algorithm 2 (draft p.13) with the SAME section layout as
@@ -239,24 +231,12 @@ def run_posterior_sampling_alg2(
     h1), x0 recompute (l.15), Block-2 x0 Langevin (l.16-17), and the ancestral
     transition U^(1) + fresh x0 (l.20) instead of the renoise transition.
 
-    anchor (EXPERIMENTAL, task debug-box-alg2-hole): Tweedie-anchored Block 1 —
-    CURRENTLY DISABLED by user edit (the b_tilde block below is commented out
-    and M carries no anchor term). Only 0.0 is accepted while it is disabled;
-    a nonzero value raises instead of silently doing nothing. Fixed the box
-    hole 7/7 (pooled 6.2x) when it was live; kept for the adoption decision.
-
     Returns (x1, rows, traj): rows = per-(stage, step) MSE vs the GT stage
     pyramid (instrumentation only), traj = (x_tau, x1, x0_hat) per step when
     ``record_trajectory``.
     """
     if make_Ak_fns_fn is None:
         make_Ak_fns_fn = make_Ak_fns
-    if float(anchor) != 0.0:
-        raise ValueError(
-            f"anchor={anchor} but the Tweedie-anchor block is disabled in this "
-            "file (both the b_tilde term and M's anchor term are commented "
-            "out), so a nonzero value would be a silent no-op. Re-enable the "
-            "block before passing one.")
 
     B = gt.shape[0]
     S = int(float(num_langevin))         # paper symbol
@@ -320,7 +300,7 @@ def run_posterior_sampling_alg2(
                 model, T, prompt_embeds, size_tensor, rope_pos,
                 do_cfg, guidance_scale, si,
             )
-            gamma2 = float(gamma2_scale) * float(gamma2_stage.get(
+            gamma2 = float(gamma2_stage.get(
                 f"{round(tau, 6)}", list(gamma2_stage.values())[step_idx]))
             x0_hat = None
             if sigma_tau >= sigma_min:
@@ -347,26 +327,11 @@ def run_posterior_sampling_alg2(
                         # (Prop. 4) solves against M0 + epsilon*I, so without this
                         # term the draw has covariance M^-1 M0 M^-1, not M^-1.
                         b_tilde = b_tilde + math.sqrt(epsilon) * randn_like_cpu(x1)
-                    # if anchor > 0:                                   # EXPERIMENTAL anchor
-                    #     x1_model = direct_estimate_x1(
-                    #         x_tau - tau * v, x_tau + (1.0 - tau) * v, s_k, e_k)
-                    #     b_tilde = b_tilde + anchor * x1_model + \
-                    #         math.sqrt(anchor) * randn_like_cpu(x1)
                     x1 = cg_solve(M_tau, b_tilde, x0=x1.clone(), tol=cg_tol,
                                   max_iter=cg_max_iter_l14 if tau == 0.0 else L)  # l.14
                     x0 = (x_tau - apply_H_tau(x1, tau, s_k, e_k, eff_si)) / float(sigma_tau)  # l.15
-                    for k_ in range(int(x0_langevin_steps)):         # l.16-17, K steps
-                        if k_ and x0_langevin_recompute:
-                            # true multi-step Langevin: x0 moved, so x_tau, v and
-                            # the score must be re-evaluated (costs one NFE each).
-                            x_tau_k = apply_H_tau(x1, tau, s_k, e_k, eff_si) \
-                                + sigma_tau * x0
-                            with torch.no_grad():
-                                v_k = velocity_fn(x_tau_k)
-                            x0_hat = score_solve(x_tau_k, v_k, s_k, e_k, tau,
-                                                 gamma2, eff_si, cg_tol, L)
-                        xi_0 = randn_like_cpu(x0)                    # l.16
-                        x0 = x0 - (h0 / 2.0) * (x0 + x0_hat) + math.sqrt(h0) * xi_0  # l.17
+                    xi_0 = randn_like_cpu(x0)                    # l.16
+                    x0 = x0 - (h0 / 2.0) * (x0 + x0_hat) + math.sqrt(h0) * xi_0  # l.17
 
             rows.append(dict(stage=si, step=step_idx, tau=tau,
                              sigma_tau=float(sigma_tau),
@@ -375,6 +340,7 @@ def run_posterior_sampling_alg2(
                 x_tau_rec = apply_H_tau(x1, tau, s_k, e_k, eff_si) + float(sigma_tau) * x0
                 traj.append((x_tau_rec[0].cpu(), x1[0].cpu(),
                              (x0_hat if x0_hat is not None else x0)[0].cpu()))
+
 
     # POST-sampling terminal projection (inpainting: snap observed pixels to y).
     # Pipeline convention (CONSTRAINTS: inpainting tr=1, blur/SR tr=0); applied

@@ -1,12 +1,12 @@
 {
  "adjoint": {
-  "box_inpainting/stage0": 1.5133991837501526e-09,
-  "box_inpainting/stage1": 1.1932570487260818e-09,
-  "box_inpainting/stage2": 9.313225746154785e-10,
+  "box_inpainting/stage0": 1.862645149230957e-09,
+  "box_inpainting/stage1": 1.862645149230957e-09,
+  "box_inpainting/stage2": 2.3283064365386963e-10,
   "box_inpainting/stage3": 0.0,
-  "random_inpainting/stage0": 9.313225746154785e-10,
-  "random_inpainting/stage1": 1.7462298274040222e-10,
-  "random_inpainting/stage2": 2.6193447411060333e-10,
+  "random_inpainting/stage0": 1.3969838619232178e-09,
+  "random_inpainting/stage1": 4.656612873077393e-10,
+  "random_inpainting/stage2": 0.0,
   "random_inpainting/stage3": 0.0,
   "gaussian_blur/stage0": 1.862645149230957e-09,
   "gaussian_blur/stage1": 3.841705620288849e-09,
@@ -22,15 +22,15 @@
   "superresolution/stage3": 1.4551915228366852e-11
  },
  "S1": {
-  "stage0(tau=0.555)": 4.013995535956383e-08,
-  "stage1(tau=0.555)": 1.0796784266631221e-07,
-  "stage2(tau=0.555)": 9.818978696785052e-08,
-  "stage3(tau=0.555)": 1.0005405925994637e-07
+  "stage0(tau=0.555)": 4.112398244160431e-08,
+  "stage1(tau=0.555)": 1.0525100435643253e-07,
+  "stage2(tau=0.555)": 1.0143762096959108e-07,
+  "stage3(tau=0.555)": 1.2081510192274436e-07
  },
  "S2": {
-  "box_inpainting/stage1": 0.06158682796938317,
-  "box_inpainting/stage3": 0.010964465906270352,
-  "random_inpainting/stage1": 0.11155048132652158,
-  "random_inpainting/stage3": 0.01096713389454593
+  "box_inpainting/stage1": 0.06526484648637705,
+  "box_inpainting/stage3": 0.010956044314129889,
+  "random_inpainting/stage1": 0.09483534180984939,
+  "random_inpainting/stage3": 0.010992602040411997
  }
 }
