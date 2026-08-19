@@ -16,15 +16,13 @@
   进行中：full_ip（5 任务 × 3 图）与 ridge sweep（4 ε × 4 seed）。
   详见 `tasks/measurement-alignment-inpainting.md`
 
-- Issue #3 Codex review（8 条 request changes）**已全部处理**：5 修 + 2 降级 + 1 条按
-  scope 约束在 Algorithm2 内解决（hash 种子改入口 fail-fast，不动 IP_package）。
-  随后自跑三路对抗审计，发现并修掉修正本身引入的 3 个缺陷（V9 静默破坏 V8 的 γ² 探针、
-  `--config config.json` 仍走默认分支、operator/kw 子字典未校验）。
-  commits `fd57a2a` / `24907e6` / `ffe344f` / `a8ac308`。
-  **待办：本机无 GitHub 凭证，需在集群侧发
-  `.research/handoffs/2026-08-18-issue3-fix-response.md` 到 Issue #3 并切回 `状态:review`。**
-- **新证据：洞区 MSE 的 seed 地板 = 5.3%**（n=4，sd 0.0237）。所有 <5% 的洞区差异结论作废
-  （含"γ² 影响 ~1%"）；h₀/K/anchor 的 2–6 倍效应仍有效。
+- **Issue #3 增量复审仍为 request changes**：复审 `6a5a927..a8ac308`；生产公式、full_ip
+  post 输出、显式 config/out 路径和 V8 变量隔离已修，但 V9 未测试生产抽样路径，K sweep
+  的 RNG/NFE 契约不闭环，config 只验键且 anchor 仍可 silent no-op，S2 未覆盖 τ=0/残差/稠密
+  参考，mask checksum/bbox 未落盘，V8 stdout 仍把 diagnostic 混入 `ALL CHECKS PASSED`。
+  证据侧 n=4 单图极差不能称通用 5% 地板，K/anchor/γ² 仍只能作描述性观察；多处
+  bit-exact/8 位有效数字/ULP 口径尚待修正。Review：Issue #3 comment `5337002138`，已加
+  `触发:needs-fix`。详见 `tasks/review-alg2-debug-directory.md` 与本轮 handoff。
 
 ## 2026-08-18（晚）：新挂载机路径兼容（用户指令）
 
@@ -34,7 +32,8 @@
   一次修改两机通用。致命项 `IP_package/pixelflow`（模型包本身）此前在新机是死链。
 - 代码侧加 `SHARE_ROOTS` + `resolve_path()`（存在即原样返回 → 旧机行为零变化；否则按候选根
   依次重试；全失败列出所有尝试过的路径）。
-- 端到端验证：新机 GPU 复现集群 trw 实验，同到 8 位有效数字（非逐位——两机 env 独立安装）。
+- 端到端验证：新机 GPU 复现集群 trw 实验，数值接近但非逐位；两机整条 CSV 最大绝对差
+  `mse_x1=3.10e-6`、`hole=1.43e-5`、`obs=8.92e-8`，不能表述为“同到 8 位有效数字”。
   详见 `tasks/path-compat-mounted-server.md`。
 
 ## 2026-08-18（Codex review Issue #3）

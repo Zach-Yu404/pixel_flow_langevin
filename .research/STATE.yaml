@@ -1,7 +1,7 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 23
+memory_version: 24
 updated_at: "2026-08-18"
-updated_by: "claude"         # claude | codex | user
+updated_by: "codex"          # claude | codex | user
 
 mode: dual-agent                 # dual-agent | single-agent-degraded（codex v0.147.0 已装并登录，2026-08-14）
 unavailable_agent: null          # mode 为 degraded 时填 claude | codex
@@ -107,4 +107,4 @@ active_tasks:
 # 各 agent 最后一次 sync 看到的版本（stale 检测用）
 last_seen:
   claude: { memory_version: 21, commit: "736fae3", github_event: "issue#3-review-request-changes" }
-  codex:  { memory_version: 19, commit: "736fae3", github_event: "issue#3-review-request-changes" }
+  codex:  { memory_version: 24, commit: "31ff0d4", github_event: "issue#3-rereview-request-changes" }
