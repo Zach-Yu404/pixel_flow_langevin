@@ -1,0 +1,3 @@
+# Derived configs are regenerated from config.json + ../config.json on every run.
+_derived/
+__pycache__/

@@ -1,0 +1,24 @@
+{
+ "_comment": "Test-only knobs. Everything the sampler itself consumes still comes from ../config.json; this file only says which measurement to build and which sweeps to run. Derived configs written to _derived/ match the existing schema exactly, so main.py's key contract validates them unchanged.",
+
+ "measurement": {
+  "inpaint_noise": true,
+  "box_center": true,
+  "noise_seed": 42
+ },
+
+ "images": [
+  "junco",
+  "shetland_sheepdog",
+  "ibex_horns"
+ ],
+ "traj_image": "junco",
+
+ "ridge_sweep": {
+  "image": "junco",
+  "ridge_rel": [1e-08, 1e-06, 0.0001, 0.01],
+  "seeds": [7, 42, 123, 2024]
+ },
+
+ "out_root": "test/results"
+}

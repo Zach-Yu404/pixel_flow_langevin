@@ -4,6 +4,18 @@
 
 ## 正在进行
 
+- **measurement-alignment-inpainting（2026-08-18 晚）**：查实我们的两个 inpainting 任务**观测无噪**
+  （`demo_runner` 走 `y=op(gt)`，算子前向就是 `mask*x`，`sigma` 存而不用；实测可见区
+  `max|y−GT|=0.0`），而 8 个 baseline 全部带噪（五个 σ=0.05、三个 σ=0.10）——
+  **我们的 inpainting 指标是在更容易的问题上取得的**，仓库自查报告早已标为
+  "CRITICAL — in our favor" 但修复只落地了 mask 那一半。
+  按用户裁决：只对齐我们这侧（σ=0.05 + box 居中 128×128），**全部代码新增在
+  `Algorithm2/test/`，既有文件零改动**（含 PixelFlow `set_timesteps`，用户明令不动）。
+  回归护栏通过：三个带噪任务逐位未变，random_inpainting 的 y 变化 std=0.0497(=σ)。
+  τ=0 的 ridge 问题改用扫描既有 `algorithm.ridge_rel` 来测——正是论文 §7.13 要求"报告"的量。
+  进行中：full_ip（5 任务 × 3 图）与 ridge sweep（4 ε × 4 seed）。
+  详见 `tasks/measurement-alignment-inpainting.md`
+
 - Issue #3 Codex review（8 条 request changes）**已全部处理**：5 修 + 2 降级 + 1 条按
   scope 约束在 Algorithm2 内解决（hash 种子改入口 fail-fast，不动 IP_package）。
   随后自跑三路对抗审计，发现并修掉修正本身引入的 3 个缺陷（V9 静默破坏 V8 的 γ² 探针、
