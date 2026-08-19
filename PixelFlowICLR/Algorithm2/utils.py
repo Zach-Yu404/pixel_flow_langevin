@@ -145,21 +145,36 @@ def score_solve(x_tau, v, s_k, e_k, tau, gamma2, eff_si, cg_tol, L):
     return cg_solve(op, rhs, tol=cg_tol, max_iter=L)
 
 
+def make_M_tau(A_fn, AT_fn, eta, sigma_tau, tau, s_k, e_k, eff_si, shape, device,
+               ridge_rel):
+    """line 7: M_tau = (1/eta^2) A^T A + (1/sigma_tau^2) H_tau^T H_tau, plus the
+    Prop.-4 ridge eps*I at tau=0 (where H_0 = s_k G is rank deficient).
+    Returns (M_fn, inv_e2, inv_s2, epsilon) — the scalars and epsilon are needed
+    by the callers to build their right-hand sides."""
+    inv_e2, inv_s2 = 1.0 / eta ** 2, 1.0 / float(sigma_tau) ** 2
+
+    def M0(x):
+        return inv_e2 * AT_fn(A_fn(x)) + inv_s2 * apply_H_tau(
+            apply_H_tau(x, tau, s_k, e_k, eff_si), tau, s_k, e_k, eff_si)
+
+    epsilon = power_iter_norm(M0, shape, device) * ridge_rel if tau == 0.0 else 0.0
+    M_fn = (lambda x: M0(x) + epsilon * x) if epsilon else M0
+    return M_fn, inv_e2, inv_s2, epsilon
+
+
+def data_rhs(AT_fn, y, x_tau, inv_e2, inv_s2, tau, s_k, e_k, eff_si):
+    """The deterministic part of b_tau (33): (1/eta^2) A^T y + (1/sigma^2) H^T x_tau.
+    Line 14's one-step solve uses it as is; the sampler adds Lemma 5's noise."""
+    return inv_e2 * AT_fn(y) + inv_s2 * apply_H_tau(x_tau, tau, s_k, e_k, eff_si)
+
+
 def clean_image_solve(x_tau, A_fn, AT_fn, y, eta, sigma_tau, tau, s_k, e_k, eff_si,
                       x1_warm, cg_tol, ridge_rel=1e-6, max_iter=200):
     """line 14 (one-step, deterministic b): M x = b, warm-started CG.
     ridge_rel / max_iter come from config.json "algorithm"."""
-    inv_e2, inv_s2 = 1.0 / eta ** 2, 1.0 / float(sigma_tau) ** 2
-
-    def M0(x):
-        return inv_e2 * AT_fn(A_fn(x)) + \
-            inv_s2 * apply_H_tau(apply_H_tau(x, tau, s_k, e_k, eff_si), tau, s_k, e_k, eff_si)
-
-    ridge = 0.0
-    if tau == 0.0:
-        ridge = ridge_rel * power_iter_norm(M0, x_tau.shape, x_tau.device)
-    M_fn = (lambda x: M0(x) + ridge * x) if ridge else M0
-    b = inv_e2 * AT_fn(y) + inv_s2 * apply_H_tau(x_tau, tau, s_k, e_k, eff_si)
+    M_fn, inv_e2, inv_s2, _ = make_M_tau(A_fn, AT_fn, eta, sigma_tau, tau, s_k, e_k,
+                                         eff_si, x_tau.shape, x_tau.device, ridge_rel)
+    b = data_rhs(AT_fn, y, x_tau, inv_e2, inv_s2, tau, s_k, e_k, eff_si)
     return cg_solve(M_fn, b, x0=x1_warm, tol=cg_tol, max_iter=max_iter)
 
 
@@ -309,17 +324,11 @@ def run_posterior_sampling_alg2(
                 f"{round(tau, 6)}", list(gamma2_stage.values())[step_idx]))
             x0_hat = None
             if sigma_tau >= sigma_min:
-                inv_e2, inv_s2 = 1.0 / eta ** 2, 1.0 / float(sigma_tau) ** 2
-
-                def M0(x):                                           # l.7 (pre-ridge)
-                    return inv_e2 * ATk(Ak(x)) + inv_s2 * apply_H_tau(
-                        apply_H_tau(x, tau, s_k, e_k, eff_si), tau, s_k, e_k, eff_si)
-                epsilon = 0.0
-                if tau == 0.0:                                       # Prop. 4
-                    epsilon = power_iter_norm(M0, x1.shape, device) * ridge_rel
-                # anchor path disabled by user (see commented block below);
-                # keep M consistent with b_tilde: ridge only.
-                M_tau = (lambda x: M0(x) + epsilon * x) if epsilon else M0
+                # l.7 (+ Prop.-4 ridge at tau=0); shared with line 14's one-step
+                # solve and the GT diagnostic, so the operator is defined once.
+                M_tau, inv_e2, inv_s2, epsilon = make_M_tau(
+                    Ak, ATk, eta, sigma_tau, tau, s_k, e_k, eff_si,
+                    x1.shape, device, ridge_rel)
 
                 for s in range(S):                                   # l.8
                     x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + sigma_tau * x0  # l.9
@@ -329,8 +338,8 @@ def run_posterior_sampling_alg2(
                                          eff_si, cg_tol, L)          # l.11
                     xi_y = randn_like_cpu(y)                         # l.12
                     xi_h = randn_like_cpu(x1)
-                    b_tilde = inv_e2 * ATk(y) + \
-                        inv_s2 * apply_H_tau(x_tau, tau, s_k, e_k, eff_si) + \
+                    b_tilde = data_rhs(ATk, y, x_tau, inv_e2, inv_s2,
+                                       tau, s_k, e_k, eff_si) + \
                         (1.0 / eta) * ATk(xi_y) + \
                         (1.0 / float(sigma_tau)) * apply_H_tau(xi_h, tau, s_k, e_k, eff_si)  # l.13
                     if epsilon:
