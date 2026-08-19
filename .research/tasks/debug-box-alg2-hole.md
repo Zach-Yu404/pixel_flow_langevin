@@ -184,6 +184,14 @@ obs 则几乎不动（0.00182–0.00184），说明随机性只作用在洞区�
 同一 RNG 导致对照噪声错位。另 τ=0 ridge 的随机 RHS 漏 `sqrt(epsilon)` 噪声，当前 active
 anchor 配置则是 silent no-op。需按 `review-alg2-debug-directory.md` 修正或收紧结论后增量复审。
 
+## 【Codex｜Review】（2026-08-18，Issue #3）
+
+上述“最终结论”在修正前须降级为固定 demo/seed 的探索性观察：K>1 复用冻结 `x0_hat`，并非
+当前状态上的多步 Langevin；真正的 S 未 sweep；“line 15 清零 Block2 进展”与下一步
+`x_tau` 的代数不符；scalar oracle 未保留可复算脚本/目标方差推导；anchor/K 分支额外消费
+同一 RNG 导致对照噪声错位。另 τ=0 ridge 的随机 RHS 漏 `sqrt(epsilon)` 噪声，当前 active
+anchor 配置则是 silent no-op。需按 `review-alg2-debug-directory.md` 修正或收紧结论后增量复审。
+
 ## 【目录重组】（2026-08-18，用户指令）
 
 Algorithm2/ 收敛为 utils.py + main.py + 5 个 JSON（4 模式配置 + gamma2_meas 数据表）+ results/。
