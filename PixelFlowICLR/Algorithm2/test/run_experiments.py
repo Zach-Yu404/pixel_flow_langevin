@@ -23,15 +23,49 @@ import json
 import os
 import subprocess
 import sys
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 A2 = os.path.dirname(HERE)
 if A2 not in sys.path:
     sys.path.insert(0, A2)
 
-import main as alg2                                            # noqa: E402
-import measurement                                             # noqa: E402
-import torch                                                   # noqa: E402
+
+def _retry_import(name, tries=40, delay=3):
+    """The ceph mount returns EIO in bursts while Python scans sys.path
+    directories, which is where every failure so far has landed (_fill_cache
+    inside find_spec). Retrying at import time is what makes a long run
+    survivable; a burst mid-run would otherwise throw away the whole job."""
+    last = None
+    for attempt in range(1, tries + 1):
+        try:
+            __import__(name)
+            return sys.modules[name]
+        except OSError as exc:
+            if getattr(exc, "errno", None) != 121:
+                raise
+            last = exc
+            print(f"[boot] ceph EIO importing {name} "
+                  f"(attempt {attempt}/{tries}); retrying", flush=True)
+            time.sleep(delay)
+    raise RuntimeError(f"ceph EIO persisted while importing {name}") from last
+
+
+alg2 = _retry_import("main")
+measurement = _retry_import("measurement")
+# main -> utils puts baselines/DAPS on sys.path; motion_blur otherwise imports
+# this lazily on first use, i.e. ~20 minutes into a full_ip run.
+_retry_import("forward_operator.motionblur.motionblur")
+torch = _retry_import("torch")
+_retry_import("csv")        # main.py imports it inside its runners, at the end
+
+# utils puts the mounted dirs at the FRONT of sys.path, so every later import —
+# including a stdlib one like csv — scans ceph first and can die on an EIO burst
+# after the run has already done its work. Everything needed is imported by now,
+# so push the mount (and cwd) behind the local interpreter paths.
+_local = [p for p in sys.path if p and not p.startswith("/CBIG-Standard-ECE")]
+_mounted = [p for p in sys.path if not p or p.startswith("/CBIG-Standard-ECE")]
+sys.path[:] = _local + _mounted
 
 TEST_CFG = os.path.join(HERE, "config.json")
 BASE_CFG = os.path.join(A2, "config.json")

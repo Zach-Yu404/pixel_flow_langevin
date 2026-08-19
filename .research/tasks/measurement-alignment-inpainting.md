@@ -78,7 +78,32 @@ work rather than conditioning work**, and that dependence **should be reported**
 → 裁决：**不动 `set_timesteps`**（用户指令），改为扫描既有 `algorithm.ridge_rel` 旋钮，
 直接测出 §7.13 要求报告的那个依赖量。
 
-## 实现（全部新增在 `Algorithm2/test/`，既有代码零改动）
+## 实现二次调整：参数统一进 `Algorithm2/config.json`（2026-08-18，用户指令）
+
+> 把operator的参数也在/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/config.json里统一
+
+裁决（AskUserQuestion）：**config 存参数 + main.py 真正消费它**——而非"参数放 config、机制留 test"，
+因为后者会让直接跑 `main.py` 的人拿到一份**静默失效**的配置（正是 Codex 抓过的 anchor no-op 那类问题）。
+
+落地方式（commit `3c66cc5`）：
+
+- 新增 `Algorithm2/measurement.py` 承载对齐逻辑；`main.py` 与 `utils.py` **只改 import 一行**
+  （`from demo_runner import …` → `from measurement import …`），**所有调用点不动**。
+- `config.json` 新增：每任务 `measurement_mode`、box 的 `operator.center`、
+  `algorithm.measurement_seed`；两个 inpainting 的 `terminal_replace_weight` 改为 0.0。
+- 契约同步扩展（`TASK_KEYS` / `TASK_OPERATOR_KEYS` / `CONFIG_SCHEMA["algorithm"]`），
+  实测三类错误均 fail-fast：漏 `measurement_mode`、`center` 拼成 `centre`、漏 `measurement_seed`。
+- blur/SR 若设 `measurement_mode="call"` 直接拒绝——它们的 y 本就带噪，
+  "honour" 它会静默改掉所有既有结果。
+- `test/overrides.py` 随之删除，test 层只剩"跑哪些图/哪些 sweep"的选择。
+
+**顺带修掉一个真 bug**：`utils.py` 只把 `PixelFlowICLR/` 加进 `sys.path`、未加自身所在的
+`Algorithm2/`，换上下文导入时 `measurement` 不可见；按该文件既有写法补 `sys.path.insert(0, HERE)`。
+
+回归护栏数值在逻辑上移前后**完全一致**（random 0.0497 / box 0.1243，blur/SR 逐位不变），
+证明只是搬家、未改行为；V1–V9 与 self-test 均通过。
+
+## 实现一（历史）：`Algorithm2/test/` 下的临时覆盖层
 
 复用现成物件，不重写任何数学：
 
@@ -120,12 +145,24 @@ work rather than conditioning work**, and that dependence **should be reported**
   判读须用多 seed 均值：旧测量下洞区 MSE 的 seed 地板实测 5.3%（n=4，sd 0.0237），
   本轮由 sweep 自身的组内 sd 重新给出。
 
-## 待用户裁决（跑完带数据再问）
+## 用户裁决
 
-1. 加噪后 `terminal_replace_weight=1.0` 会把噪声写进可见区（可见区 MSE 从精确 0 变成 ~σ²=0.0025），
-   inpainting 是否还用 trw=1。
-2. 若 ε 依赖显著超过 seed 地板：论文是如实报告该依赖，还是采纳 §7.13 建议改网格从 τ>0 起
-   （后者需改 PixelFlow 调度逻辑，本轮明确不做）。
+**`terminal_replace_weight = 0`**（2026-08-18，用户指令，逐字："terminal_replace_weight =0"）。
+
+理由：观测加噪后，投影 `x1 ← m·y + (1−m)·x1` 会把测量噪声**原样抄进可见区**，
+可见区误差从"精确 0"（无噪时代）变成 ~σ²=0.0025，即投影由"免费的数据一致性"变成"注入噪声"。
+落实位置：`test/config.json` 的 `terminal_replace_weight`，由驱动写进派生配置的全部
+`tasks_setup.*`——**不改 `Algorithm2/config.json`**（该文件里 inpainting 仍是 1.0，属既有代码）。
+
+注：本轮 full_ip 在该裁决之前启动，跑的是 trw=1，因此 `full_ip_final.csv` 同时给出
+`pre_mse`（投影前＝trw=0 的等价结果，投影是循环后一次性操作，轨迹完全相同）与
+`post_mse/post_obs`（投影后）——正好用同一次运行的数据佐证该裁决，无需补跑。
+其后所有运行（含 ridge sweep）均为 trw=0。
+
+## 待用户裁决
+
+- 若 ε 依赖显著超过 seed 地板：论文是如实报告该依赖，还是采纳 §7.13 建议改网格从 τ>0 起
+  （后者需改 PixelFlow 调度逻辑，本轮明确不做）。
 
 ## 遗留（已知不一致，本轮不动）
 
