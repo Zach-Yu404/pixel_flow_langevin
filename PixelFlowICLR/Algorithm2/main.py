@@ -62,7 +62,9 @@ from ms_posterior_sampling_article_version_final_utils import (  # noqa: E402
 from ms_posterior_sampling_utils import class_guidance_scale   # noqa: E402
 from pixelflow.scheduling_pixelflow import PixelFlowScheduler  # noqa: E402
 from pixelflow.utils import config as config_utils             # noqa: E402
-from demo_runner import build_setup_and_measurement, load_demo_images  # noqa: E402
+from demo_runner import load_demo_images                        # noqa: E402
+import measurement                                              # noqa: E402
+from measurement import build_setup_and_measurement             # noqa: E402
 from onestep_visual import to_img                              # noqa: E402
 
 # Populated from config.json by main() before dispatch — no defaults in code.
@@ -890,7 +892,8 @@ CONFIG_SCHEMA = {
     "mode": None,
     "paths": {"model_dir", "demo_dir", "gamma2_table"},
     "algorithm": {"sigma_min", "h0", "x0_langevin_steps", "x0_langevin_recompute",
-                  "gamma2_scale", "anchor", "seed", "ridge_rel", "cg_max_iter_l14"},
+                  "gamma2_scale", "anchor", "seed", "measurement_seed",
+                  "ridge_rel", "cg_max_iter_l14"},
     "sampler_kw": {"num_langevin", "ode_steps_per_stage", "shift", "guidance_scale",
                    "g_bypass_stage3", "cg_tol", "cg_max_iter"},
     "tasks_setup": None, "tasks": None, "images": None, "traj_image": None,
@@ -900,12 +903,13 @@ CONFIG_SCHEMA = {
                   "trw_values"},
     "verify": {"res"},
 }
-TASK_KEYS = {"sigma_n", "operator", "terminal_replace_weight", "kw"}
+TASK_KEYS = {"sigma_n", "operator", "terminal_replace_weight", "measurement_mode",
+             "kw"}
 # Operator kwargs are consumed by build_setup_and_measurement per task, which
 # reads them with .get() — an unchecked typo there silently reverts to that
 # function's own default, which is exactly what the config contract must stop.
 TASK_OPERATOR_KEYS = {
-    "box_inpainting": {"mask_len_range"},
+    "box_inpainting": {"mask_len_range", "center"},
     "random_inpainting": {"mask_prob"},
     "gaussian_blur": {"kernel_size", "kernel_std"},
     "motion_blur": {"kernel_size", "kernel_intensity", "kernel_seed",
@@ -927,10 +931,11 @@ def _check_config_keys(cfg):
         if got != allowed:
             raise KeyError(f'config.json "{sect}": missing={sorted(allowed - got)} '
                            f"unknown={sorted(got - allowed)}")
+    required = {"sigma_n", "operator", "terminal_replace_weight",
+                "measurement_mode"}
     for task, spec in cfg["tasks_setup"].items():
         got = set(spec)
-        if not got <= TASK_KEYS or not {"sigma_n", "operator",
-                                        "terminal_replace_weight"} <= got:
+        if not got <= TASK_KEYS or not required <= got:
             raise KeyError(f'config.json "tasks_setup"."{task}": '
                            f"missing={sorted(TASK_KEYS - got - {'kw'})} "
                            f"unknown={sorted(got - TASK_KEYS)}")
@@ -1005,6 +1010,7 @@ def main():
     ALG = dict(cfg["algorithm"])
     SAMPLER_KW = dict(cfg["sampler_kw"])
     TASKS_SETUP = dict(cfg["tasks_setup"])
+    measurement.configure(TASKS_SETUP, ALG["measurement_seed"])
 
     params = dict(cfg[mode])                       # strict: no code defaults
     if mode in ("onestep", "full_ip"):

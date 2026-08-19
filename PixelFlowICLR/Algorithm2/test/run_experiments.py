@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 """Driver for the Algorithm-2 measurement-alignment experiments.
 
-Nothing outside test/ is modified. The sampler, the metrics, the config key
-contract and the PixelFlow scheduler are all the existing ones; this driver
-only (a) swaps in the baseline-aligned measurement via overrides.apply() and
-(b) writes derived configs that satisfy main.py's exact-key schema.
+Every operator/measurement parameter lives in ../config.json and takes effect
+through measurement.py; this driver only selects which images and sweeps to
+run, and writes derived configs that keep main.py's exact-key schema.
 
     PYTHONHASHSEED=0 python run_experiments.py --mode regression   # CPU guard
     PYTHONHASHSEED=0 python run_experiments.py --mode verify       # CPU V1-V9
@@ -27,12 +26,11 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 A2 = os.path.dirname(HERE)
-ORIG_CWD = os.getcwd()
 if A2 not in sys.path:
     sys.path.insert(0, A2)
 
-import overrides                                               # noqa: E402
 import main as alg2                                            # noqa: E402
+import measurement                                             # noqa: E402
 import torch                                                   # noqa: E402
 
 TEST_CFG = os.path.join(HERE, "config.json")
@@ -50,9 +48,8 @@ def load_cfgs():
 
 def derive(base, test, mode, out, *, seed=None, ridge_rel=None, image=None,
            self_test=False):
-    """A config that main.py's contract accepts: same keys, different values."""
+    """A config main.py's contract accepts: same keys, different values."""
     cfg = copy.deepcopy(base)
-    cfg.pop("_comment", None)
     cfg["mode"] = mode
     cfg["images"] = list(test["images"])
     cfg["traj_image"] = test["traj_image"]
@@ -88,32 +85,32 @@ def run_main(cfg_path, mode):
 
 # ── regression guard ────────────────────────────────────────────────────────
 def mode_regression(test, base):
-    """With the overrides live, the three noisy tasks must be untouched and the
-    two inpainting tasks must change in exactly the documented way."""
+    """The configured measurement must leave blur/SR bitwise untouched and
+    change the two inpainting tasks in exactly the documented way."""
     from demo_runner import load_demo_images
-    orig = overrides._ORIG_BUILD
+    from demo_runner import build_setup_and_measurement as raw
     dev = "cpu"
+    measurement.configure(base["tasks_setup"], base["algorithm"]["measurement_seed"])
     demos = {d["short_name"]: d for d in
              load_demo_images(resolution=256, demo_dir=_demo_dir(base))}
     demo = demos[test["traj_image"]]
-    m = test["measurement"]
-    overrides.apply(m["inpaint_noise"], m["box_center"], m["noise_seed"])
 
     ok = True
     for task, spec in base["tasks_setup"].items():
         sn = float(spec["sigma_n"])
-        o_op, o_mask, o_y, *_ = orig(task, spec["operator"], demo, sn, 256, dev)
-        n_op, n_mask, n_y, *_ = overrides.patched_build_setup_and_measurement(
+        op_raw = dict(spec["operator"])
+        op_raw.pop("center", None)          # demo_runner does not know this key
+        o_op, o_mask, o_y, *_ = raw(task, op_raw, demo, sn, 256, dev)
+        n_op, n_mask, n_y, *_ = measurement.build_setup_and_measurement(
             task, spec["operator"], demo, sn, 256, dev)
         same_mask = torch.equal(o_mask, n_mask)
         same_y = o_y.shape == n_y.shape and torch.equal(o_y, n_y)
-        if task in overrides.INPAINT_TASKS:
-            want_mask_same = not (m["box_center"] and task == "box_inpainting")
+        if task in measurement.INPAINT_TASKS:
+            want_mask_same = not bool(spec["operator"].get("center", False))
             good = (same_mask == want_mask_same) and not same_y
-            delta = float((n_y - o_y).std())
             print(f"  {task:18s} mask_same={same_mask} (want {want_mask_same})  "
-                  f"y_changed={not same_y}  std(y_new-y_old)={delta:.4f} "
-                  f"(sigma_n={sn})  {'OK' if good else '** FAIL **'}")
+                  f"y_changed={not same_y}  std(y_new-y_old)={float((n_y - o_y).std()):.4f}"
+                  f"  sigma_n={sn}  {'OK' if good else '** FAIL **'}")
         else:
             good = same_mask and same_y
             print(f"  {task:18s} untouched: mask_same={same_mask} y_same={same_y}"
@@ -174,13 +171,13 @@ def _summarise_sweep(done, root):
           f"{'spread%':>8} {'obs mean':>9}")
     for ridge in sorted(by_ridge):
         hs = [h for _, h, _ in by_ridge[ridge]]
-        os_ = [o for _, _, o in by_ridge[ridge]]
+        obs = [o for _, _, o in by_ridge[ridge]]
         sd = st.stdev(hs) if len(hs) > 1 else 0.0
         spread = (max(hs) - min(hs)) / st.mean(hs) * 100 if len(hs) > 1 else 0.0
         print(f"{ridge:>10.0e} {len(hs):>2} {st.mean(hs):>10.4f} {sd:>8.4f} "
-              f"{spread:>8.1f} {st.mean(os_):>9.5f}")
+              f"{spread:>8.1f} {st.mean(obs):>9.5f}")
         lines.append(f"{ridge:g},{len(hs)},{st.mean(hs):.6f},{sd:.6f},"
-                     f"{spread:.2f},{st.mean(os_):.6f}")
+                     f"{spread:.2f},{st.mean(obs):.6f}")
     out = os.path.join(A2, root, "eps_dependence.csv")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w") as f:
@@ -199,18 +196,11 @@ def main():
                     help="internal: derived config for a single _one run")
     cli = ap.parse_args()
     test, base = load_cfgs()
-    m = test["measurement"]
 
     if cli.mode == "_one":                       # one child of the sweep
-        overrides.apply(m["inpaint_noise"], m["box_center"], m["noise_seed"])
         return run_main(cli.config_path, "debug_box")
-
     if cli.mode == "regression":
         return mode_regression(test, base)
-
-    eff = overrides.apply(m["inpaint_noise"], m["box_center"], m["noise_seed"])
-    print(f"[test] measurement override in effect: {eff}", flush=True)
-
     if cli.mode == "ridge_sweep":
         return mode_ridge_sweep(test, base)
     if cli.mode == "verify":

@@ -30,6 +30,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))          # PixelFlowICLR/ for base import
+sys.path.insert(0, HERE)                           # Algorithm2/ for measurement import
 ORIG_CWD = os.getcwd()
 
 import onestep_mse_vs_t as base  # noqa: E402  (sets IP_package sys.path, chdir)
@@ -50,7 +51,7 @@ from ms_posterior_sampling_article_version_final_utils import (  # noqa: E402
     make_velocity_fn, make_Ak_fns,
 )
 from pixelflow.scheduling_pixelflow import PixelFlowScheduler  # noqa: E402
-from demo_runner import build_setup_and_measurement            # noqa: E402
+from measurement import build_setup_and_measurement           # noqa: E402
 
 SIGMA_MIN = 0.01          # skip Alg2 below this (matches sampler's Langevin skip)
 TASKS = base.TASKS

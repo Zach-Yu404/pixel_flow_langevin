@@ -14,7 +14,8 @@
   "seed": 42,
   "ridge_rel": 1e-06,
   "cg_max_iter_l14": 200,
-  "x0_langevin_recompute": false
+  "x0_langevin_recompute": false,
+  "measurement_seed": 42
  },
  "sampler_kw": {
   "num_langevin": 10,
@@ -32,9 +33,11 @@
     "mask_len_range": [
      128,
      129
-    ]
+    ],
+    "center": true
    },
-   "terminal_replace_weight": 1.0
+   "terminal_replace_weight": 0.0,
+   "measurement_mode": "measure"
   },
   "random_inpainting": {
    "sigma_n": 0.05,
@@ -44,7 +47,8 @@
    "kw": {
     "num_langevin": 15
    },
-   "terminal_replace_weight": 1.0
+   "terminal_replace_weight": 0.0,
+   "measurement_mode": "measure"
   },
   "gaussian_blur": {
    "sigma_n": 0.05,
@@ -52,7 +56,8 @@
     "kernel_size": 61,
     "kernel_std": 3.0
    },
-   "terminal_replace_weight": 0.0
+   "terminal_replace_weight": 0.0,
+   "measurement_mode": "measure"
   },
   "motion_blur": {
    "sigma_n": 0.05,
@@ -62,7 +67,8 @@
     "kernel_seed": 42,
     "use_daps_kernel": true
    },
-   "terminal_replace_weight": 0.0
+   "terminal_replace_weight": 0.0,
+   "measurement_mode": "measure"
   },
   "superresolution": {
    "sigma_n": 0.05,
@@ -70,7 +76,8 @@
     "scale_factor": 4,
     "antialias": true
    },
-   "terminal_replace_weight": 0.0
+   "terminal_replace_weight": 0.0,
+   "measurement_mode": "measure"
   }
  },
  "tasks": [
