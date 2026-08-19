@@ -24,6 +24,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt                                # noqa: E402
 
 
+SK_EK = {0: (0.0, 0.25), 1: (0.142857, 0.5),
+         2: (0.333333, 0.75), 3: (0.6, 1.0)}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--image", default="junco")
@@ -45,17 +49,25 @@ def main():
     axes = [axes] if len(stages) == 1 else list(axes)
     for ax, si in zip(axes, stages):
         for key, lab, style in [
-                ("x_tau_mse", r"$\|x_\tau - x_1\|^2$  (state)", "o-"),
-                ("x0err_model", r"$\|\hat x_0 - x_0\|^2$  (score)", "s-"),
-                ("x1_model", r"$\|\hat x_1 - x_1\|^2$  (implied clean)", "^-"),
-                ("x1_exact", r"$\|\hat x_1 - x_1\|^2$  exact $d_\tau$", "--")]:
+                ("x0err_model", r"$\|\hat x_0^k - x_0^k\|^2$", "s-"),
+                ("x1_model", r"$\|\hat x_1^k - x_1^k\|^2$", "^-"),
+                ("xtau_model", r"$\|\hat x_\tau^k - x_\tau^k\|^2$", "o-"),
+                ("x1_exact", r"$\|\hat x_1^k - x_1^k\|^2$, exact $d_\tau$", "--")]:
             t, v = series(si, key)
-            ax.semilogy(t, v, style, ms=4, lw=1.4, label=lab)
+            ax.semilogy(t, [max(x, 1e-24) for x in v], style, ms=4, lw=1.4, label=lab)
+        # the x1 curve is not independent: x1_hat - x1 = -sigma_tau H_tau^-1 (x0_hat - x0)
+        t, v0 = series(si, "x0err_model")
+        _, sig = series(si, "sigma_tau")
+        s_k, e_k = SK_EK[si]
+        pred = [a * (sg / ((1 - tt) * s_k + tt * e_k)) ** 2
+                for a, sg, tt in zip(v0, sig, t)]
+        ax.semilogy(t, pred, "k:", lw=2.2, alpha=0.55,
+                    label=r"$(\sigma_\tau/H_\tau)^2\|\hat x_0^k - x_0^k\|^2$")
         ax.set_title(f"stage {si}")
         ax.set_xlabel(r"$\tau$")
         ax.grid(alpha=0.3, which="both")
     axes[0].set_ylabel("MSE (log)")
-    axes[-1].legend(fontsize=7.5, loc="lower left")
+    axes[-1].legend(fontsize=7, loc="lower left")
     fig.suptitle(f"7.2 one-step losses — {cli.image}", fontsize=12)
     fig.tight_layout()
     out1 = os.path.join(cli.dir, f"curves_{cli.image}.png")
