@@ -77,6 +77,11 @@ def main():
     ap.add_argument("--task", default="box_inpainting")
     ap.add_argument("--image", default="junco")
     ap.add_argument("--out", default="test/results/gt_diagnostic")
+    ap.add_argument("--source", default="gt", choices=["gt", "sampler"],
+                    help="gt: build x_tau from the ground truth (the best x_tau "
+                         "Block 2 could ever hand over). sampler: replay the "
+                         "x_tau the sampler actually produced, so the two "
+                         "columns bracket how far Block-2 mixing falls short.")
     cli = ap.parse_args()
 
     with open(os.path.join(A2, "config.json")) as f:
@@ -126,6 +131,32 @@ def main():
     def randn_like_cpu(x):
         return torch.randn(x.shape, generator=g).to(x.device)
 
+    # --source sampler: replay the x_tau the sampler itself reached. Block 1 is
+    # then handed exactly what the real run hands it, so the gap against the GT
+    # column is precisely what Block-2 mixing failed to deliver.
+    sampler_x_tau = {}
+    if cli.source == "sampler":
+        kw_task = {**cfg["sampler_kw"], **spec.get("kw", {})}
+        _, s_rows, s_traj = utils.run_posterior_sampling_alg2(
+            model, model_cfg, gt, y, op, sigma_n, device,
+            gamma2_tab=json.load(open(paths["gamma2_table"]))["table"],
+            make_Ak_fns_fn=make_Ak_fns_fn, seed=int(alg_cfg["seed"]),
+            record_trajectory=True,
+            h0=alg_cfg["h0"], x0_langevin_steps=alg_cfg["x0_langevin_steps"],
+            x0_langevin_recompute=alg_cfg["x0_langevin_recompute"],
+            block2_integrator=alg_cfg["block2_integrator"],
+            block1_final_draw=alg_cfg["block1_final_draw"],
+            gamma2_scale=alg_cfg["gamma2_scale"], anchor=alg_cfg["anchor"],
+            sigma_min=alg_cfg["sigma_min"], ridge_rel=alg_cfg["ridge_rel"],
+            cg_max_iter_l14=alg_cfg["cg_max_iter_l14"],
+            terminal_replace_weight=float(spec["terminal_replace_weight"]),
+            **{k: v for k, v in kw_task.items() if k not in ("class_label", "seed")},
+            class_label=int(demo["class_idx"]))
+        for r, (x_tau_rec, _, _) in zip(s_rows, s_traj):
+            sampler_x_tau[(int(r["stage"]), int(r["step"]))] = \
+                x_tau_rec.unsqueeze(0).to(device)
+        print(f"[sampler] captured {len(sampler_x_tau)} x_tau states", flush=True)
+
     rows = []
     for si in range(num_stages):
         sc = copy.deepcopy(scheduler)
@@ -146,7 +177,12 @@ def main():
             if sigma_tau < float(alg_cfg["sigma_min"]):
                 continue
             x0 = randn_like_cpu(x1_gt)
-            x_tau = apply_H_tau(x1_gt, tau, s_k, e_k, eff_si) + sigma_tau * x0
+            if cli.source == "sampler":
+                if (si, step_idx) not in sampler_x_tau:
+                    continue
+                x_tau = sampler_x_tau[(si, step_idx)]
+            else:
+                x_tau = apply_H_tau(x1_gt, tau, s_k, e_k, eff_si) + sigma_tau * x0
 
             # (1) Block-1 conditional mean: deterministic RHS
             m_hat = utils.clean_image_solve(
@@ -178,6 +214,9 @@ def main():
             x1_model = direct_estimate_x1(x_tau - tau * v, x_tau + (1.0 - tau) * v,
                                           s_k, e_k)
 
+            x_tau_gt = apply_H_tau(x1_gt, tau, s_k, e_k, eff_si) + sigma_tau * x0
+            x_tau_gap = float(((x_tau - x_tau_gt) ** 2).mean())
+
             def split(a):
                 return (utils.mse_masked(a, x1_gt, hole),
                         utils.mse_masked(a, x1_gt, obs))
@@ -188,6 +227,7 @@ def main():
             rows.append(dict(stage=si, step=step_idx, tau=round(tau, 6),
                              sigma_tau=float(sigma_tau),
                              predicted_amp=float(sigma_tau / (tau * e_k)) if tau > 0 else float("inf"),
+                             x_tau_gap=x_tau_gap,
                              mean_hole=mh, mean_obs=mo,
                              draw_hole=dh, draw_obs=do_,
                              model_hole=nh, model_obs=no))
@@ -197,7 +237,7 @@ def main():
 
     out = os.path.join(A2, cli.out)
     os.makedirs(out, exist_ok=True)
-    path = os.path.join(out, f"gt_diag_{cli.task}_{cli.image}.csv")
+    path = os.path.join(out, f"gt_diag_{cli.source}_{cli.task}_{cli.image}.csv")
     with open(path, "w", newline="") as f:
         wcsv = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         wcsv.writeheader(); wcsv.writerows(rows)
