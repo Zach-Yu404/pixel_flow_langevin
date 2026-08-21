@@ -1,6 +1,46 @@
 # 当前状态（人类可读，保持 ≤1 页）
 
-更新时间：2026-08-21
+更新时间：2026-08-21（晚）
+
+## 2026-08-21（晚）：Algorithm 4 实现完成并首次全量跑通
+
+用户指令："按照main.py调用utils.py的方式写main4.py并在utils.py补充posterior_sampling的
+算法，把page4的algorithm实现出来，结果放在results/alg4"。**这同时是执行授权**
+（上一轮 `read-algorithm4-draft` 记的是 `execution_allowed: false`）；本机 codex 不可用，
+已记 `single_agent_execution_authorized: true`。
+
+- **实现**：`Algorithm2/{main4.py, config_alg4.json}` + `utils.py` 纯新增五个函数。
+  既有 alg2/wv/reg 三个采样器一行未动。三处结构差异全部到位：l.8 移出内循环、
+  Block 1 中心是 x̂₁ 而非 x_τ、Block 2 是直接抽样 (23)（**无 h₀**）。
+  `h0`/`ridge_rel`/`cg_max_iter_l14` 被 config 契约与采样器双重拒绝；`S_prior` 无代码默认值。
+- **verify 17 项 dense float64 全过**：A2 把 Prop. 7 验到 `5e-15`；
+  A4 显示 τ=0 处 `λ_min(H₀ᵀH₀/σ²) = -4.6e-18`（逼 Alg 2 加 ridge 的奇异性）
+  而 `λ_min(M^den)` 恰等于 `1/s²`。
+- **实测 S_prior**（`--mode measure_s2`）= 0.200/0.211/0.220/0.228，**λ 等效仅 4.4–5.0**，
+  远弱于 anchor 扫描偏好的 λ=100–200。口径警告：在 demo/eval 图上测的，非训练集。
+- **主要发现：全部亏损集中在 stage 3，五个任务无一例外**（含无 null space 的 blur/SR）。
+  各 stage 末 mse_x1（7 图均值）：box 0.070/0.071/0.136/**0.922**、
+  random 0.012/0.022/0.077/**2.016**、gaussian 0.012/0.065/0.211/**2.295**、
+  motion 0.043/0.084/0.201/**2.341**、SR 0.013/0.032/0.193/**2.391**。
+  stage 2 全段是平的。
+- **起点不能用 σ_τ→0 或 γ² 变大解释**：stage 3 最大跳变在 step 0→1（box 3.5×、SR 5.0×），
+  而该步 σ_τ 只 0.400→0.356、γ² 只 0.0094→0.0109。延续段则与两者一致。**两句分开说。**
+- **同 λ 对照（`s² = 1/λ`，box/junco）**：stage 0–2 上 Alg 4 持平或略胜 anchored Alg 2
+  （λ_eq=400：0.064/0.052/0.088 vs 0.064/0.061/0.095），**stage 3 差 10–28 倍**。
+- **实现正确性的正面证据**：草稿 §7 诊断 `‖x₀‖²/n ≈ 1` 在 1365 个 step 上均值 **0.9991**。
+- **§8.6 的量已报告**：measurement residual 末步 box 0.910 / random 1.060 / gaussian 1.118 /
+  motion 1.291 / **SR 3.747（明显不满足"应稳定在 1 附近"）**。
+- 详见 `PixelFlowICLR/Algorithm2/results/alg4/report.md` 与 `tasks/implement-algorithm4.md`。
+
+### 本轮踩到的运行问题（已修，值得记住）
+
+- **第一次全量跑在 21/35 处崩溃并丢掉全部 21 格**——沿用了 `main.py`"最后统一写盘"的结构。
+  已改为每格立即落盘 + 跳过已完成格 + 单格重试，作图从磁盘回读。
+- **不要在这个 ceph 挂载上删目录**：删掉 `__pycache__` 后其**父目录** readdir 开始返回 EIO，
+  把后续所有 import 打挂。用 `PYTHONDONTWRITEBYTECODE=1` 即可。
+- **杀 wrapper 不会杀 python 子进程**：三个孤儿进程并发往同一 CSV 追加，把每格写了三遍。
+  已加 `flock` 单实例锁 + `trap` 连带杀子进程。附带收获：这三次并发同 seed 同 config 的
+  重复格，各指标最大相对差 **4.3e-4**，与本项目"GPU 非 bit-exact、四位小数一致"口径吻合。
 
 ## 2026-08-21：Research OS 核验 + Algorithm 4 草稿精读（本轮）
 
@@ -167,10 +207,14 @@
 
 ## 下一步
 
-- **（待用户决定）是否实现 Algorithm 4。** 现为 `execution_allowed: false`。
-  若要动，建议第一步**只做测量、不写采样器**：按 4 个 stage 各测一次训练图的
-  逐像素方差（或功率谱 (13)）得到 `S_prior`，把 `s² = 1/λ` 直接放到已有的 λ 曲线上看落点，
-  即可证伪"λ≈100 = 低估 S_prior"这条预测。
+- **（待用户裁决）是否允许为诊断关掉 `g_bypass_stage3` 跑一格。** stage 3 是唯一 `G = I`
+  的 stage，H_τ/N_k 退化为标量、interpolant 失去全部低通作用，而 l.18 的 `U⁽¹⁾` 是 nearest
+  上采样；Alg 4 的 Block 1 又完全以 x̂₁ 为中心。这是 stage-3 崩溃目前最可能的机制但未经检验，
+  而 CONSTRAINTS §采样器纪律明令"`g_bypass_stage3=True` 不关"。
+- **跑 §8.6 的多样性诊断**（固定 y 重复采样，量 ker(A_k) 内 spread）。
+  不跑它，"更小的 s² 更好"就不能写进任何结论——§8.2 说过那正是指标变好而多样性丧失的样子。
+- γ² 通道 ablation（冻结 γ² 重跑 stage 3），分离 σ_τ→0 与 velocity error 两条通道。
+- `S_prior` 换成训练集统计，消除当前 demo/eval 图的泄漏口径。
 - 修复 Issue #3 的必须修改项后请求 Codex 只复审增量（**本机无 gh/codex，需换机或先装工具**）。
 - （待用户确认研究方向：例如跑 `--full` 复现、补 baseline 表格、写 paper draft、或继续某个任务的调参）
 - 处理外层 repo 未提交状态（见"阻塞"第 2 条）

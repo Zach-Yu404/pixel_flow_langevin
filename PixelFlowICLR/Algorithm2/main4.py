@@ -367,20 +367,28 @@ def run_full_ip(args):
     os.makedirs(frames_dir, exist_ok=True)
     device = "cuda:0"
 
-    demos_all = load_demo_images(resolution=256, demo_dir=PATHS["demo_dir"])
+    # Every one of these touches the ceph share, and each has been observed to
+    # EIO on this machine. Retrying in-process is much cheaper than letting the
+    # outer loop restart and reload the 2.7GB checkpoint again.
+    demos_all = _with_retries("load_demo_images", lambda: load_demo_images(
+        resolution=256, demo_dir=PATHS["demo_dir"]))
     by_short = {d["short_name"]: d for d in demos_all}
     demos = [by_short[s] for s in args.images]
     tasks = list(args.tasks)
     if args.smoke:
         tasks, demos = tasks[:1], [by_short[TRAJ_IMAGE]]
 
-    config = OmegaConf.load(os.path.join(PATHS["model_dir"], "config.yaml"))
-    model = _load_model(config, device)
+    config = _with_retries("load model config", lambda: OmegaConf.load(
+        os.path.join(PATHS["model_dir"], "config.yaml")))
+    model = _with_retries("load model weights", lambda: _load_model(config, device))
     model.register_forward_pre_hook(count_nfe_hook)
     print("[setup] model loaded", flush=True)
 
-    gamma2_tab = json.load(open(PATHS["gamma2_table"]))["table"]
-    s2_fn = make_s2_fn(S_PRIOR, int(config.scheduler.num_stages))
+    gamma2_tab = _with_retries(
+        "read gamma2 table",
+        lambda: json.load(open(PATHS["gamma2_table"]))["table"])
+    s2_fn = _with_retries(
+        "build s2_fn", lambda: make_s2_fn(S_PRIOR, int(config.scheduler.num_stages)))
     print(f"[setup] S_prior={S_PRIOR} -> "
           f"s2(k=0..3, sigma=0.5) = "
           f"{[round(s2_fn(k, 0.5), 6) for k in range(int(config.scheduler.num_stages))]}",
