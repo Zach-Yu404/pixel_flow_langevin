@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.research/bin/research-gate\" session-start --agent codex",
+            "timeout": 10,
+            "statusMessage": "Loading Research OS L1",
+            "additionalContextLimit": 1400
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.research/bin/research-gate\" stop --agent codex",
+            "timeout": 20,
+            "statusMessage": "Checking Research OS handoff"
+          }
+        ]
+      }
+    ]
+  },
+  "description": "Research OS lifecycle gates shared with Claude Code."
+}

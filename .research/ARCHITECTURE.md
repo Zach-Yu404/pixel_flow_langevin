@@ -72,4 +72,47 @@
 
 - conda env `pixelflow`（py3.12, torch 2.6.0+cu124, piq 0.8.0, lpips 0.1.4）——解释器与 dataset/checkpoint 的本机绝对路径一律见 `local.yaml`（gitignored）
 - CBIG 集群登录节点**无 GPU**；采样/训练需 Slurm 申请（复现实验原硬件 A100-80GB）
+- **2026-08-21 本机（挂载服务器）无 gh、无 codex、无 GitHub 网络**；`git status` 全量扫描
+  因 ceph `Remote I/O error` 稳定失败（`-uno` 可用）。详见 `context/facts.md`
 - 2026-07 从旧机器迁移到 CBIG 集群；dataset root 注意**嵌套双层** `Zach_dataset/Zach_dataset`（见 `local.yaml`）；MRI prior 已恢复（`github_project_local/checkpoints/mri/CHECKPOINT_RESTORED.txt`）
+
+## 草稿谱系与 PixelFlowICLR 代码映射（2026-08-21 导入）
+
+四篇草稿，同一系列，都在 `PixelFlowICLR/Algorithm2/results/`：
+
+| 草稿 | 文件 | Block 1 | Block 2 | 需搜索的连续量 |
+|---|---|---|---|---|
+| Alg.1 | 早期 draft p.12 | 预条件 Langevin（h₁） | Langevin（h₀） | 2 |
+| Alg.2 | draft p.13 | 换元后**精确抽样** | Langevin（h₀） | 1 |
+| Alg.3 | `modified.pdf`（"CLIMB-Flow"） | 同 Alg.2，改了求解式 | Langevin（h₀） | 1 |
+| **Alg.4** | `algorithm.4pdf.pdf` | **精确抽样，中心是 x̂₁** | **直接重加噪，无步长** | **0** |
+
+- Alg.1/2/3 都是 **interpolant-coupled**：通过 flat-prior 高斯 `N(x_τ;H_τx_1,σ_τ²I)` 耦合，
+  learned marginal `p_τ` 留在 x_τ 的条件里 → 必须 Langevin → step size 与
+  `√2 σ_τ H_τ⁻¹` 的先验平滑同源、同时存在。
+- Alg.4 是 **clean-endpoint**：通过真实 denoising conditional 耦合，`p_τ` 相消，
+  两者一起消失；代价是把 `p(x_1|x_τ)` 当高斯，需要其协方差
+  `C⁻¹ = H_τᵀH_τ/σ_τ² + S_prior⁻¹`。精读见
+  `references/2026-08-21-algorithm4-clean-endpoint-sampler.md`。
+- **注意 `algorithm.4pdf.pdf` 内部把自己的 listing 编号为 "Algorithm 1"，
+  且 Table 2 表头字面是 `Alg. 1 | Alg. 2 | Alg. 1`（排版 bug）。**
+
+代码：
+
+- `PixelFlowICLR/Algorithm1/main_alg1.py` (+`config_alg1.json`) — Alg.1，只写 Block 1，
+  其余算子全部 import `Algorithm2/utils.py`
+- `PixelFlowICLR/Algorithm2/utils.py` — **数学唯一库**。`apply_B`/`apply_N`/`apply_H_tau_inv`
+  ↔ 草稿 (2)(3)/(p.20)；`score_solve` ↔ **(18) 且与 Alg.4 完全一致**；
+  `make_M_tau`+`data_rhs` = interpolant-coupled 的 Block 1；
+  `gamma2_meas.json` ↔ **(20) 的按 (k,τ) 表**（stage0 .0070–.0106、stage1 .0106–.0132、
+  stage2 .0115–.0166、stage3 .0094–**.1448**）
+- 三个采样器族（后两个在工作区未提交）：
+  `run_posterior_sampling_alg2`（Alg.2 本体）、
+  `run_posterior_wv_sampling_alg2`（velocity 作为对 x₁ 的第二个高斯观测，
+  `M += NᵀN/(σ_τ²γ²)`）、
+  `run_posterior_reg_sampling_alg2`（Tweedie anchor：`M += λP`、`b += λP·x1_model`；
+  **`P=I` 时 `λI` 就是 Alg.4 的 `S_prior⁻¹`，`s²=1/λ`**）
+- `PixelFlowICLR/Algorithm2/measurement.py` — 唯一改测量的地方；
+  inpainting 的加噪/居中对齐 baseline 靠它，`demo_runner` 不动
+- **符号冲突**：草稿 Alg.4 的 `S` = 先验协方差 surrogate；代码/报告里的 `S` =
+  内迭代次数 `num_langevin`。一律写 `S_prior` / `S_iter`。

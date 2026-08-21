@@ -1,6 +1,6 @@
 # Research OS 共享规则（Claude + Codex 共同遵守）
 
-rules_version: 6
+rules_version: 7
 
 本文件是 CLAUDE.md 与 AGENTS.md 共同引用的唯一规则源。两个 agent 必须完整遵守。
 冲突时优先级固定：**用户明确指令 > 本规则 > agent 自身默认行为**。
@@ -34,6 +34,11 @@ Project Canonical State (.research/) = Memory
 - `CURRENT.md` — 人类可读当前状态摘要（≤1 页）。
 - `CONSTRAINTS.md` — 用户约束全文，含【用户原始要求】原文。**约束一出现立即写入，先于一切其他工作。**
 - `tasks/<verb-object>.md` — 每个任务一个文件，第一节永远是【用户原始要求】逐字记录。
+- `plans/` 保存双方独立 plan 的有界结构化摘要；`reviews/<code-sha>.json` 保存绑定精确
+  code SHA 的 peer review；两者只能由 collaboration runner 生成。
+- `.research/bin/`、`policy.json`、`RULES.md`、双侧 hooks 与入口 managed block 属于
+  versioned policy bundle，不是普通项目记忆；禁止手改，只能用 `research-upgrade-project`
+  更新，并按协议代码走 plan/review。
 - `decisions/`、`experiments/`、`references/`、`handoffs/`、`history/` — 见各自 TEMPLATE。
 - `local.yaml` — machine-specific 路径，**gitignored**。由 `research-discover-paths`
   **自动扫描生成**（checkpoints/datasets/大文件），不要求用户手填。agent 在
@@ -48,13 +53,15 @@ Project Canonical State (.research/) = Memory
 
 任何 meaningful work 开始前：
 
-1. `git pull`（有 remote 时）；读取 `STATE.yaml` + `CURRENT.md` + `CONSTRAINTS.md`（Level 1）。
-2. 记录自己看到的 `memory_version` 与 `HEAD` commit 到 STATE.yaml 的 `last_seen.<agent>`。
-3. 按需分层加载：
+1. 先 inspect branch/worktree/active process；工作树安全且有 remote 时才 `git pull --ff-only`。
+   同一 worktree 有另一 writer 时停止写入，改用独立 worktree。
+2. 读取 `STATE.yaml` + `CURRENT.md` + `CONSTRAINTS.md`（Level 1）。
+3. 记录自己看到的 `memory_version` 与 `HEAD` commit 到 STATE.yaml 的 `last_seen.<agent>`。
+4. 按需分层加载：
    - L2：相关 decisions / consensus / 最新 handoff
    - L3：相关源码符号、tests、git diff、相关 commit
    - L4：完整历史讨论 / 全文论文 / 大 log —— 仅在确实需要时
-4. 不要整仓库通读；代码检索用 symbol → function → caller → deps 逐层展开。
+5. 不要整仓库通读；代码检索用 symbol → function → caller → deps 逐层展开。
 
 发布结果前（写回 memory / 提 PR / 发 GitHub 评论前）：
 
@@ -86,21 +93,25 @@ GitHub Issue/PR 标题用简短中文（如「加入 warped noise」）。
 
 **独立 Plan**：重要任务双方各自独立读取 shared facts 后独立生成 plan。
 禁止一方看另一方的 plan 后直接附和——先写完自己的再比较。
+独立 plan 只保存目标、关键假设、步骤、风险和验证；禁止保存或传递隐藏 chain-of-thought。
 
 **Consensus**：达成一致后写非常短的【共识】到 `decisions/` 并同步 STATE.yaml。
 共识 = authoritative task understanding。
 
-**Disagreement**：交换 objection → 各自 revise。数轮后仍无共识 → 状态置 `needs-user`，
+**Disagreement**：交换 objection → 各自 revise。默认最多 2 轮；仍无共识 → 状态置 `needs-user`，
 停止，向用户列出：分歧点 / Claude 推荐 / Codex 推荐 / 核心 tradeoff。**不允许投票表决。**
 
 **对话内自动互调**：用户在其中一个 agent 的对话里布置任务时，到达需要另一方的节点
-（独立方案、共识比较、review），当前 agent **自动 headless 调用另一方**，无需用户操作：
-- Claude 调 Codex：`codex exec --skip-git-repo-check "<任务上下文+要求>"`
-- Codex 调 Claude：`claude -p "<任务上下文+要求>"`
-调用时给足上下文（任务名、Issue 号、读哪些文件），并明确要求对方先走 sync protocol、
-输出以【Codex｜方案】/【Claude｜方案】等标记落到 `.research/` 或 GitHub。
+（独立方案、共识比较、review），当前 agent 通过 collaboration runner 自动 headless
+调用另一方，无需用户操作。runner prompt 只传 task/Issue、phase、base/head SHA、
+必读文件路径和结构化 output path；不得复制完整对话、另一方方案或大段代码。
+Agent 只写 run-specific JSON；runner 校验 `run_id + phase + exact SHA` 后再更新
+GitHub 和 `.research/`，避免模型自行改 label 或发布状态。
 **独立性纪律不变**：请求独立方案时不得把自己的方案放进 prompt。
 对方 CLI 不可用/超时 → 按 §12 degraded mode 继续，不阻塞用户。
+具体 runner 命令见 `.research/README.md`。代码任务只有在同一 task 的 Claude plan、Codex plan、
+implementation consensus 与另一 agent 的 exact-SHA review 都通过结构化校验后才算完成；
+Stop gate 检查这些 artifact，而不是相信聊天中的完成声明。
 
 **Shared Facts vs Independent Reasoning**：
 - 机械性事实（ls 结果、依赖关系、test 输出、log 摘要）写入 shared memory，只做一次。
@@ -128,7 +139,7 @@ scope 变化；重大 architecture 变化；destructive 操作；重大依赖或
 每个 meaningful phase 结束写 `handoffs/<date>-<task>.md`，至少含：
 目标 / 当前状态 / 完成了什么 / 修改文件 / branch / commit / tests / 结果 /
 assumptions / known concerns / remaining work / recommended next step。
-Handoff 必须让另一个 agent（或全新 session）不依赖本次对话即可接手。
+Handoff 必须可独立接手，但只写 delta 和必要证据，不复制 task/decision/完整日志。
 
 ## 10. GitHub 协议
 
@@ -143,6 +154,9 @@ Handoff 必须让另一个 agent（或全新 session）不依赖本次对话即�
   `【结果】【需要用户决定】`
   简洁，不闲聊。
 - Commit message 遵循 repo 既有 convention；无 convention 时用简洁中文或中英混合。
+- 同一 Issue 始终只有一个 `状态:*` label；状态与触发 label 的写入者是 orchestrator。
+- Implementation 必须走 branch + PR。Approve 只对 `reviewed_sha` 等于远端 branch
+  code HEAD 时有效；request changes 必须回到 `working`，不能标 `done`。
 
 ## 11. 并行执行
 
@@ -168,6 +182,8 @@ Handoff 必须让另一个 agent（或全新 session）不依赖本次对话即�
   ```
   授权只作用于该 scope，不扩展到未来任务。
 - 单方完成的工作标记 `pending <agent> review`，照常写 handoff。
+- Pending 工作可以提交到隔离 branch，但在另一 agent 补齐 plan/review 前，Stop gate 不把代码任务
+  判为完成，也不得 merge。
 - 恢复方 catch-up：sync → 读 STATE delta → 相关 commits → 最新 handoff → **只 review 增量**，不重做。
 
 ## 13. Token Efficiency
@@ -175,9 +191,17 @@ Handoff 必须让另一个 agent（或全新 session）不依赖本次对话即�
 优先级固定：Correctness > User constraints > Consensus semantics > Recoverability >
 减少冗余上下文 > 减少重复工作 > 减少 token。前四项不可为省 token 牺牲。
 
-手段：incremental sync、targeted retrieval、canonical summaries、diff-based review、
-symbol-based code retrieval、compact handoff、paper note 复用（`references/`）。
-禁止：重复整仓通读、重复读全文论文、重复跑同样的机械检查（写成 Shared Fact 复用）。
+强制手段：
+- CLAUDE.md / AGENTS.md 只放角色差异与硬 gate；完整 RULES 按相关 section 加载一次。
+- SessionStart 只注入有字符上限的 L1 指针和版本，不注入全文规则或历史。
+- Peer 调用只传路径、SHA 和 output schema；共享事实只采集一次，双方独立分析。
+- Plan/compare 默认最多 2 轮；review 对同一 code SHA 缓存，SHA 未变化不重复调用。
+- Review 采用 base + diff + affected symbols/tests；大 log 先机械过滤并写摘要。
+- Handoff、GitHub 评论和 consensus 只写 delta、结论、证据与下一步。
+
+继续使用 incremental sync、targeted retrieval、canonical summaries、symbol retrieval 和
+paper note 复用（`references/`）。禁止重复整仓通读、重复读全文论文、重复机械检查、
+把完整 transcript 交给 peer，或用多轮“讨论”替代可判定的测试与证据。
 
 ## 14. 实验与工件
 

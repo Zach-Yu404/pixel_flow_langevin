@@ -5,9 +5,22 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/research-sync-check.sh",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.research/bin/research-gate\" stop --agent claude",
             "timeout": 20,
-            "statusMessage": "research-sync 检查中"
+            "statusMessage": "Checking Research OS handoff"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.research/bin/research-gate\" session-start --agent claude",
+            "timeout": 10,
+            "statusMessage": "Loading Research OS L1"
           }
         ]
       }

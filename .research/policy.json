@@ -1,0 +1,22 @@
+{
+  "policy_version": 1,
+  "session_context_char_limit": 1400,
+  "collaboration": {
+    "independent_plans_for": [
+      "implementation",
+      "architecture",
+      "methodology"
+    ],
+    "max_plan_rounds": 2,
+    "max_peer_summary_chars": 4000,
+    "review_code_changes": true,
+    "review_exact_head": true
+  },
+  "gate": {
+    "require_clean_code_delta": true,
+    "require_memory_update_for_code": true,
+    "require_push_when_remote_exists": true,
+    "require_peer_plans_for_code": true,
+    "require_peer_review_for_code": true
+  }
+}

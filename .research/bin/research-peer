@@ -1,0 +1,545 @@
+#!/usr/bin/env -S python3 -I
+"""Run bounded, cacheable Claude/Codex collaboration in an isolated worktree."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+from typing import Any
+
+
+PHASE_OUTCOMES = {
+    "plan": {"ready", "needs_user"},
+    "compare": {"consensus", "disagreement", "needs_user"},
+    "review": {"approve", "request_changes", "needs_user"},
+}
+SHARED_INPUTS = (
+    ".research/STATE.yaml",
+    ".research/CURRENT.md",
+    ".research/CONSTRAINTS.md",
+    ".research/policy.json",
+    ".research/RULES.md",
+)
+
+
+def git(root: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+    result = subprocess.run(
+        ["git", "-C", str(root), *args],
+        capture_output=True,
+        text=True,
+        errors="replace",
+    )
+    if check and result.returncode != 0:
+        raise RuntimeError(result.stderr.strip() or f"git {' '.join(args)} failed")
+    return result
+
+
+def root_from(path: Path) -> Path:
+    result = git(path, "rev-parse", "--show-toplevel")
+    return Path(result.stdout.strip()).resolve()
+
+
+def common_dir(root: Path) -> Path:
+    result = git(root, "rev-parse", "--path-format=absolute", "--git-common-dir")
+    return Path(result.stdout.strip()).resolve()
+
+
+def load_policy(root: Path) -> dict[str, Any]:
+    path = root / ".research/policy.json"
+    try:
+        value = json.loads(path.read_text())
+        return value if isinstance(value, dict) else {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def sha256_bytes(*values: bytes) -> str:
+    digest = hashlib.sha256()
+    for value in values:
+        digest.update(len(value).to_bytes(8, "big"))
+        digest.update(value)
+    return digest.hexdigest()
+
+
+def read_required(root: Path, relative: str) -> bytes:
+    path = (root / relative).resolve()
+    try:
+        path.relative_to(root)
+    except ValueError as exc:
+        raise RuntimeError(f"path escapes repository: {relative}") from exc
+    if not path.is_file():
+        raise RuntimeError(f"required file does not exist: {relative}")
+    return path.read_bytes()
+
+
+def phase_fingerprint(root: Path, args: argparse.Namespace) -> str:
+    current_head = git(root, "rev-parse", "HEAD").stdout.strip()
+    values = [
+        current_head.encode(),
+        args.phase.encode(),
+        args.agent.encode(),
+        args.task.encode(),
+        read_required(root, args.task),
+        (args.base or "").encode(),
+        (args.head or "").encode(),
+    ]
+    entrypoint = "CLAUDE.md" if args.agent == "claude" else "AGENTS.md"
+    for shared in (*SHARED_INPUTS, entrypoint):
+        values.extend([shared.encode(), read_required(root, shared)])
+    for plan in args.plan or []:
+        values.extend([plan.encode(), read_required(root, plan)])
+    return sha256_bytes(*values)
+
+
+def atomic_json(path: Path, value: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    temp.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+    os.replace(temp, path)
+
+
+def total_string_chars(value: Any) -> int:
+    if isinstance(value, str):
+        return len(value)
+    if isinstance(value, list):
+        return sum(total_string_chars(item) for item in value)
+    if isinstance(value, dict):
+        return sum(
+            total_string_chars(key) + total_string_chars(item)
+            for key, item in value.items()
+        )
+    return 0
+
+
+def require_string_list(result: dict[str, Any], key: str, limit: int = 8) -> None:
+    value = result.get(key)
+    if not isinstance(value, list) or len(value) > limit:
+        raise RuntimeError(f"peer output {key} must be a list with at most {limit} items")
+    if any(not isinstance(item, str) for item in value):
+        raise RuntimeError(f"peer output {key} must contain only strings")
+
+
+def validate_result(
+    result: Any,
+    args: argparse.Namespace,
+    run_id: str,
+    char_limit: int,
+) -> dict[str, Any]:
+    if not isinstance(result, dict):
+        raise RuntimeError("peer output must be one JSON object")
+    expected = {
+        "run_id": run_id,
+        "phase": args.phase,
+        "agent": args.agent,
+        "task": args.task,
+    }
+    for key, value in expected.items():
+        if result.get(key) != value:
+            raise RuntimeError(f"peer output {key} must equal {value!r}")
+    if result.get("outcome") not in PHASE_OUTCOMES[args.phase]:
+        raise RuntimeError(f"invalid {args.phase} outcome")
+    if not isinstance(result.get("summary"), str) or not result["summary"].strip():
+        raise RuntimeError("peer output requires a non-empty summary")
+    if total_string_chars(result) > char_limit:
+        raise RuntimeError(f"peer output exceeds {char_limit} character budget")
+    if args.phase == "plan":
+        for key in ("assumptions", "steps", "risks", "validation"):
+            require_string_list(result, key)
+    elif args.phase == "compare":
+        for key in ("agreements", "differences"):
+            require_string_list(result, key)
+        if not isinstance(result.get("decision"), str):
+            raise RuntimeError("compare output requires a decision string")
+    else:
+        if result.get("reviewed_sha") != args.head:
+            raise RuntimeError("review is not bound to the requested head SHA")
+        if result.get("base_sha") != args.base:
+            raise RuntimeError("review is not bound to the requested base SHA")
+        findings = result.get("findings", [])
+        if not isinstance(findings, list):
+            raise RuntimeError("review findings must be a list")
+        if result["outcome"] == "request_changes" and not findings:
+            raise RuntimeError("request_changes requires at least one finding")
+        if len(findings) > 8:
+            raise RuntimeError("review findings exceed the limit of 8")
+        for finding in findings:
+            if not isinstance(finding, dict):
+                raise RuntimeError("each review finding must be an object")
+            if finding.get("severity") not in {"blocking", "major", "minor"}:
+                raise RuntimeError("review finding has invalid severity")
+            if not isinstance(finding.get("path"), str) or not finding["path"]:
+                raise RuntimeError("review finding requires a relative path")
+            if Path(finding["path"]).is_absolute() or ".." in Path(finding["path"]).parts:
+                raise RuntimeError("review finding path must be repository-relative")
+            if not isinstance(finding.get("line"), int) or finding["line"] < 1:
+                raise RuntimeError("review finding requires a positive line number")
+            if not isinstance(finding.get("message"), str) or not finding["message"]:
+                raise RuntimeError("review finding requires a message")
+        require_string_list(result, "tests")
+    if args.phase == "compare" and result.get("outcome") == "consensus":
+        if not isinstance(result.get("implementation_required"), bool):
+            raise RuntimeError("consensus requires boolean implementation_required")
+    result["source"] = "research-peer"
+    if args.phase == "review":
+        result["reviewer"] = args.agent
+        result["verdict"] = result["outcome"]
+    return result
+
+
+def output_schema(args: argparse.Namespace, run_id: str) -> dict[str, Any]:
+    common: dict[str, Any] = {
+        "run_id": run_id,
+        "phase": args.phase,
+        "agent": args.agent,
+        "task": args.task,
+        "outcome": "one of: " + " | ".join(sorted(PHASE_OUTCOMES[args.phase])),
+        "summary": "concise Chinese conclusion",
+    }
+    if args.phase == "plan":
+        common.update({
+            "assumptions": ["bounded list"],
+            "steps": ["bounded list"],
+            "risks": ["bounded list"],
+            "validation": ["bounded list"],
+        })
+    elif args.phase == "compare":
+        common.update({
+            "implementation_required": True,
+            "agreements": ["bounded list"],
+            "differences": ["bounded list"],
+            "decision": "concise Chinese consensus or user question",
+        })
+    else:
+        common.update({
+            "base_sha": args.base,
+            "reviewed_sha": args.head,
+            "findings": [{
+                "severity": "blocking|major|minor",
+                "path": "relative/path",
+                "line": 1,
+                "message": "specific Chinese finding",
+            }],
+            "tests": ["evidence already available or focused checks run"],
+        })
+    return common
+
+
+def prepare_worktree(root: Path, runtime: Path, run_id: str, ref: str, phase: str) -> Path:
+    worktree = runtime / "worktrees" / run_id
+    worktree.parent.mkdir(parents=True, exist_ok=True)
+    if worktree.exists():
+        git(root, "worktree", "remove", "--force", str(worktree), check=False)
+        shutil.rmtree(worktree, ignore_errors=True)
+    git(root, "worktree", "add", "--detach", str(worktree), ref)
+    output_dir = worktree / ".research/.runtime"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    if phase == "plan":
+        plans = worktree / ".research/plans"
+        if plans.is_dir():
+            for path in plans.glob("*.json"):
+                path.unlink()
+    return worktree
+
+
+def copy_inputs(root: Path, worktree: Path, args: argparse.Namespace) -> None:
+    entrypoint = "CLAUDE.md" if args.agent == "claude" else "AGENTS.md"
+    inputs = [*SHARED_INPUTS, entrypoint, args.task, *(args.plan or [])]
+    for relative in inputs:
+        source = (root / relative).resolve()
+        try:
+            source.relative_to(root)
+        except ValueError as exc:
+            raise RuntimeError(f"path escapes repository: {relative}") from exc
+        destination = (worktree / relative).resolve()
+        try:
+            destination.relative_to(worktree)
+        except ValueError as exc:
+            raise RuntimeError(f"destination escapes isolated worktree: {relative}") from exc
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if not destination.is_file() or source.read_bytes() != destination.read_bytes():
+            shutil.copyfile(source, destination)
+
+
+def peer_command(agent: str, prompt: str) -> list[str]:
+    if agent == "claude":
+        return ["claude", "-p", prompt, "--permission-mode", "acceptEdits"]
+    return [
+        "codex",
+        "exec",
+        "--sandbox",
+        "workspace-write",
+        "--skip-git-repo-check",
+        prompt,
+    ]
+
+
+def run_peer(
+    worktree: Path,
+    args: argparse.Namespace,
+    run_id: str,
+    char_limit: int,
+    runtime: Path,
+) -> dict[str, Any]:
+    relative_output = f".research/.runtime/{run_id}.json"
+    input_value = {
+        "run_id": run_id,
+        "phase": args.phase,
+        "agent": args.agent,
+        "task": args.task,
+        "base_sha": args.base,
+        "head_sha": args.head,
+        "plan_paths": args.plan or [],
+        "output_path": relative_output,
+        "character_budget": char_limit,
+        "schema": output_schema(args, run_id),
+    }
+    input_path = worktree / f".research/.runtime/{run_id}-input.json"
+    atomic_json(input_path, input_value)
+    entrypoint = "CLAUDE.md" if args.agent == "claude" else "AGENTS.md"
+    phase_instruction = {
+        "plan": (
+            "Produce an independent plan. Do not inspect any peer plan or GitHub discussion. "
+            "Use only shared facts and the task."
+        ),
+        "compare": (
+            "Compare only the two listed plan artifacts. Report bounded agreements/differences; "
+            "do not invent consensus. Use needs_user when evidence cannot resolve a material difference."
+        ),
+        "review": (
+            "Review only base..head plus affected symbols/tests. Bind every conclusion to head_sha. "
+            "Do not reread the whole repository."
+        ),
+    }[args.phase]
+    prompt = (
+        f"Read {entrypoint}, then .research/.runtime/{run_id}-input.json. "
+        f"{phase_instruction} Do not edit tracked files, commit, push, change GitHub, or call another agent. "
+        f"Write exactly one JSON object matching schema to {relative_output}; keep all human text Chinese."
+    )
+    command = peer_command(args.agent, prompt)
+    executable = shutil.which(command[0])
+    if executable is None:
+        raise RuntimeError(f"{command[0]} CLI is unavailable")
+    timeout = int(os.environ.get("RESEARCH_PEER_TIMEOUT", "1800"))
+    result = subprocess.run(
+        command,
+        cwd=worktree,
+        capture_output=True,
+        text=True,
+        errors="replace",
+        timeout=timeout,
+    )
+    logs = runtime / "logs"
+    logs.mkdir(parents=True, exist_ok=True)
+    combined_log = (result.stdout or "") + (result.stderr or "")
+    if len(combined_log) > 100_000:
+        combined_log = combined_log[:50_000] + "\n... log truncated ...\n" + combined_log[-50_000:]
+    (logs / f"{run_id}.log").write_text(
+        f"# command: {command[0]}\n# rc: {result.returncode}\n\n"
+        + combined_log
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"{args.agent} failed; see {logs / f'{run_id}.log'}")
+    output_path = worktree / relative_output
+    try:
+        value = json.loads(output_path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"peer did not produce valid JSON; see {logs / f'{run_id}.log'}") from exc
+    return validate_result(value, args, run_id, char_limit)
+
+
+def canonical_path(root: Path, args: argparse.Namespace) -> Path:
+    task_name = Path(args.task).stem
+    if args.phase == "plan":
+        return root / ".research/plans" / f"{task_name}-{args.agent}.json"
+    if args.phase == "compare":
+        return root / ".research/plans" / f"{task_name}-consensus.json"
+    return root / ".research/reviews" / f"{args.head}.json"
+
+
+def attach_provenance(
+    root: Path,
+    args: argparse.Namespace,
+    result: dict[str, Any],
+) -> dict[str, Any]:
+    enriched = dict(result)
+    enriched["input_head"] = (
+        args.head or git(root, "rev-parse", "HEAD").stdout.strip()
+    )
+    enriched["task_digest"] = hashlib.sha256(read_required(root, args.task)).hexdigest()
+    if args.phase == "compare":
+        run_ids = []
+        for relative in args.plan:
+            try:
+                plan = json.loads(read_required(root, relative))
+            except json.JSONDecodeError as exc:
+                raise RuntimeError(f"invalid plan artifact: {relative}") from exc
+            plan_run_id = plan.get("run_id") if isinstance(plan, dict) else None
+            if not isinstance(plan_run_id, str):
+                raise RuntimeError(f"plan artifact has no run_id: {relative}")
+            run_ids.append(plan_run_id)
+        enriched["plan_run_ids"] = run_ids
+    return enriched
+
+
+def marker_and_body(args: argparse.Namespace, result: dict[str, Any], run_id: str) -> str:
+    if args.phase == "plan":
+        marker = "【Claude｜方案】" if args.agent == "claude" else "【Codex｜方案】"
+    elif args.phase == "compare":
+        marker = {
+            "consensus": "【共识】",
+            "disagreement": "【Codex｜有异议】",
+            "needs_user": "【需要用户决定】",
+        }[result["outcome"]]
+    else:
+        marker = "【Codex｜Review】" if args.agent == "codex" else "【Claude｜Review】"
+    lines = [marker, result["summary"]]
+    if args.phase == "review":
+        lines.append(f"结论：{result['outcome']}；reviewed_sha：{args.head}")
+        for finding in result.get("findings", [])[:8]:
+            location = finding.get("path", "")
+            if finding.get("line"):
+                location += f":{finding['line']}"
+            lines.append(f"- [{finding.get('severity', 'major')}] {location} {finding.get('message', '')}")
+    lines.append(f"<!-- research-run:{run_id} -->")
+    return "\n".join(lines)
+
+
+def already_published(repo: str, kind: str, number: int, run_id: str) -> bool:
+    target = "pr" if kind == "pr" else "issue"
+    result = subprocess.run(
+        [
+            "gh",
+            target,
+            "view",
+            str(number),
+            "-R",
+            repo,
+            "--json",
+            "comments",
+            "-q",
+            f'[.comments[].body | contains("research-run:{run_id}")] | any',
+        ],
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0 and result.stdout.strip() == "true"
+
+
+def publish(repo: str, args: argparse.Namespace, result: dict[str, Any], run_id: str) -> None:
+    if not shutil.which("gh"):
+        raise RuntimeError("gh CLI is unavailable; result was saved but not published")
+    number = args.pr if args.phase == "review" and args.pr else args.issue
+    if not number:
+        return
+    kind = "pr" if args.phase == "review" and args.pr else "issue"
+    if already_published(repo, kind, number, run_id):
+        return
+    body = marker_and_body(args, result, run_id)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
+        handle.write(body)
+        body_path = handle.name
+    try:
+        command = ["gh", kind, "comment", str(number), "-R", repo, "--body-file", body_path]
+        posted = subprocess.run(command, capture_output=True, text=True)
+        if posted.returncode != 0:
+            raise RuntimeError(posted.stderr.strip() or "GitHub publish failed")
+    finally:
+        Path(body_path).unlink(missing_ok=True)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("phase", choices=sorted(PHASE_OUTCOMES))
+    parser.add_argument("--agent", required=True, choices=["claude", "codex"])
+    parser.add_argument("--task", required=True)
+    parser.add_argument("--base")
+    parser.add_argument("--head")
+    parser.add_argument("--plan", action="append")
+    parser.add_argument("--issue", type=int)
+    parser.add_argument("--pr", type=int)
+    parser.add_argument("--repo")
+    parser.add_argument("--root", default=".")
+    args = parser.parse_args()
+    if args.phase == "review" and (not args.base or not args.head):
+        parser.error("review requires --base and --head")
+    if args.phase == "compare" and len(args.plan or []) != 2:
+        parser.error("compare requires exactly two --plan paths")
+    if (args.issue or args.pr) and not args.repo:
+        parser.error("publishing requires --repo owner/name")
+    return args
+
+
+def commit_sha(root: Path, value: str) -> str:
+    result = git(root, "rev-parse", "--verify", f"{value}^{{commit}}")
+    sha = result.stdout.strip()
+    if len(sha) != 40:
+        raise RuntimeError(f"could not resolve exact commit SHA: {value}")
+    return sha
+
+
+def main() -> int:
+    args = parse_args()
+    root = root_from(Path(args.root).resolve())
+    if args.phase == "review":
+        args.base = commit_sha(root, args.base)
+        args.head = commit_sha(root, args.head)
+    policy = load_policy(root)
+    collaboration = policy.get("collaboration")
+    if not isinstance(collaboration, dict):
+        collaboration = {}
+    try:
+        configured_limit = int(collaboration.get("max_peer_summary_chars", 4000))
+    except (TypeError, ValueError):
+        configured_limit = 4000
+    char_limit = max(800, min(8000, configured_limit))
+    fingerprint = phase_fingerprint(root, args)
+    run_id = fingerprint[:20]
+    runtime = common_dir(root) / "research-os" / "peer"
+    cache_path = runtime / "cache" / f"{fingerprint}.json"
+    canonical = canonical_path(root, args)
+    result: dict[str, Any]
+    write_cache = False
+    if cache_path.is_file():
+        result = validate_result(json.loads(cache_path.read_text()), args, run_id, char_limit)
+        source = "cache"
+    else:
+        ref = args.head or git(root, "rev-parse", "HEAD").stdout.strip()
+        worktree = prepare_worktree(root, runtime, run_id, ref, args.phase)
+        try:
+            copy_inputs(root, worktree, args)
+            result = run_peer(worktree, args, run_id, char_limit, runtime)
+        finally:
+            git(root, "worktree", "remove", "--force", str(worktree), check=False)
+            shutil.rmtree(worktree, ignore_errors=True)
+        source = "agent"
+        write_cache = True
+    result = attach_provenance(root, args, result)
+    if total_string_chars(result) > char_limit:
+        raise RuntimeError(f"peer output exceeds {char_limit} character budget with provenance")
+    if write_cache:
+        atomic_json(cache_path, result)
+    atomic_json(canonical, result)
+    if args.repo:
+        publish(args.repo, args, result, run_id)
+    print(json.dumps({
+        "run_id": run_id,
+        "source": source,
+        "artifact": str(canonical.relative_to(root)),
+        "outcome": result["outcome"],
+    }, ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except Exception as exc:
+        print(f"research-peer: {exc}", file=sys.stderr)
+        raise SystemExit(1)

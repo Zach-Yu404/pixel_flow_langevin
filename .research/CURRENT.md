@@ -1,6 +1,63 @@
 # 当前状态（人类可读，保持 ≤1 页）
 
-更新时间：2026-08-18（晚）
+更新时间：2026-08-21
+
+## 2026-08-21：Research OS 核验 + Algorithm 4 草稿精读（本轮）
+
+- **Research OS**：早在 08-14 已接入；本轮 `research-upgrade-project` 确认在 bundle v2
+  且幂等，`research-doctor` = 25 通过 / 2 警告 / 1 失败（全部失败与警告都在
+  **本机 gh / codex 未安装**，项目侧 15 项全 ✅）。工具本地 clone 在
+  `/CBIG-Standard-ECE/Zach/research-init-impl`（分支 `agent/efficient-dual-agent`）。
+- **本机是 single-agent degraded**：无 gh、无 codex、无 GitHub 网络
+  → 记忆**只能 commit 不能 push**，Issue #3 的增量复审在本机无法推进。
+  另：`git status` 全量扫描因 ceph 的 `Remote I/O error` 稳定失败（`-uno` 可用）。
+  详见 `context/facts.md`。
+- **`pixel_flow_langevin` 导入**：该 GitHub repo **就是本工作区的 origin**。
+  `IP_branch` 领先 `origin/IP_branch` **9 个 commit（未 push）**，
+  逐条清单见 `context/facts.md`。
+- **algorithm.4pdf.pdf 精读完成（15 页全文）** → `references/2026-08-21-algorithm4-clean-endpoint-sampler.md`。
+  草稿把耦合从 flat-prior 高斯换成真实 denoising conditional，`p_τ` 相消，
+  **step size 与先验平滑同时消失**，两个 conditional 都精确抽样；唯一近似是把
+  `p(x_1|x_τ)` 当高斯，其协方差由 `C⁻¹ = H_τᵀH_τ/σ_τ² + S⁻¹` 给出（Lemma 3 + Prop. 4）。
+  三条与本项目的硬对应：
+  ① `score_solve` 就是草稿 (18)、`gamma2_meas.json` 就是 (20)，**已完全一致**；
+  ② **我们经验调出来的 Tweedie anchor λ 就是 (12) 的 S⁻¹**（`λI = S⁻¹` ⟺ `s²=1/λ`），
+     草稿要求**测量**而非搜索该量；我们最优的 λ≈100 ⟹ s²=0.01，图像在 [-1,1] 的
+     assumption-free 上界是 s²≤1，**λ=100 落在草稿 §8.2 警告的"低估 S"一侧**
+     （会收缩向去噪估计：重建指标变好而多样性丧失，且该失败在 MSE 上看不见）；
+  ③ 代码是"**加**"anchor 到 interpolant 项上，草稿是用 `C⁻¹x̂_1` **替换**它——
+     未提交的 `data_rhs_matchx1` 恰是 (22) 缺了 `S⁻¹x̂_1` 的那一半。
+  两个长期困扰按构造消失：**τ=0 的 ridge 整套机制**（Prop. 4(a)；与 `5734af2`
+  "ridge 不是把洞压在 1.0 的原因"互相印证）与 **h₀**（Block 2 变直接重加噪；
+  `regularization_final` 的头号结论"h₀ 主导、太小则 x₀ 冻住"即此病理）。
+  草稿自陈风险：Block 1 中心是 x̂_1，**全权重承担 velocity error**，优势随 γ 增大反转；
+  我们 γ² 表 stage 3 末端冲到 0.145（全表最大）。
+  详见 `tasks/read-algorithm4-draft.md`。**用户只要求"阅读"，未要求实现
+  → `execution_allowed: false`。**
+
+## 2026-08-19~21：记忆补记（此前未进 CURRENT）
+
+- `algorithm3-from-modified-draft`（`437151f`）、`diag-h-tau-inv`、
+  `algorithm2-line15-diagnosis`、`prior-injection-b-tau`、
+  `wv-coupling-precision-alg2`、`tweedie-anchor-reg-alg2`、`alg3-parameter-sweep`
+  七个任务文件已在 `tasks/` 内，但 CURRENT 停在 08-18/19。
+- **`results_reg_alg2`（Tweedie anchor λ 扫描，box/junco/seed42）**：
+  洞区 **1.0062 → 0.1023（λ=100，9.8×）**，可见区与 measurement residual **同向单调改善**
+  （可见区 −20%），即 anchor 在观测区没有与数据打架。stage-end：λ=0 第一个 stage 末就是 15.7，
+  λ≥5 全程压在 0.55 以下。P=identity 略优于 P=nullspace（0.1150 vs 0.1160）。
+- **`results_reg_alg2/regularization_final`（48 格 λ×h₀×S_iter 网格，随机项全保留）**：
+  最优 **λ=100, h₀=0.01, S_iter=10 → hole 0.084308**；综合最好 **λ=100, h₀=0.1, S_iter=5**。
+  三条结构性结论：(1) λ 在 16/16 个 (h₀,S_iter) 格上单调有帮助；
+  (2) **h₀ 是主导因子，1e-4/1e-3 全线不可用**（x₀ 冻住，λ 再大救不回来）；
+  (3) h₀ 与 S_iter 干净交互——小 h₀ 要大 S_iter、大 h₀ 要小 S_iter，最优点 `S_iter·h₀ ∈ [0.1,0.5]`。
+  S_iter 是 hole 与 visible 的权衡旋钮（每次内迭代注入一次 Lemma-5 噪声）。
+- **术语冲突警告**：草稿 algorithm.4 的 `S` = 先验协方差 surrogate；
+  本项目代码与报告的 `S` = 内迭代次数 `num_langevin`。今后一律写 `S_prior` / `S_iter`。
+- **工作区 `utils.py` 有 +525 行未提交**（wv / reg 两个采样器族 + 若干 helper），
+  且**同一 diff 改了 `run_posterior_sampling_alg2` 的内循环**（l.11 后重建 x_tau），
+  而 HEAD commit `d819043` 自述该改动 "neither beats the baseline"
+  ⟹ **工作区里的 baseline 采样器不是 baseline**。见 `context/facts.md`。
+
 
 ## 正在进行
 
@@ -110,11 +167,21 @@
 
 ## 下一步
 
-- 修复 Issue #3 的必须修改项后请求 Codex 只复审增量。
+- **（待用户决定）是否实现 Algorithm 4。** 现为 `execution_allowed: false`。
+  若要动，建议第一步**只做测量、不写采样器**：按 4 个 stage 各测一次训练图的
+  逐像素方差（或功率谱 (13)）得到 `S_prior`，把 `s² = 1/λ` 直接放到已有的 λ 曲线上看落点，
+  即可证伪"λ≈100 = 低估 S_prior"这条预测。
+- 修复 Issue #3 的必须修改项后请求 Codex 只复审增量（**本机无 gh/codex，需换机或先装工具**）。
 - （待用户确认研究方向：例如跑 `--full` 复现、补 baseline 表格、写 paper draft、或继续某个任务的调参）
 - 处理外层 repo 未提交状态（见"阻塞"第 2 条）
 
 ## 阻塞 / 需要用户决定
+
+0. **（2026-08-21，本机）无 gh / 无 codex / 无 GitHub 网络**：记忆只能 commit 不能 push；
+   `IP_branch` 已积压 9 个未 push commit；dual-agent 回路在本机不可用。
+   需要用户在本机 `gh auth login` + 安装 codex，或换回有工具的机器。
+0b. **工作区 `utils.py` 的 baseline 污染**：`run_posterior_sampling_alg2` 带着一个
+   HEAD 自述"无收益"的未提交改动（l.11 后重建 x_tau）。是否 revert 由用户定。
 
 1. **in-flight 工作已从 diff 复原(机械意图)**：未提交改动 = random_inpainting **第二阶段 OAT sweep**(数据契约 .pt→PNG + stage2_configs + 断点续跑)、train.py 训练韧性(resume/epoch-ckpt/epoch-eval)、CFG 空类 token 泛化、legacy 采样配置开 CFG=2.0(详见 ARCHITECTURE"工作区未提交改动"节)。**待用户确认**:stage2 sweep 跑到哪一步了、动机实验是什么(MRI 先验训练?)
 2. **外层 repo 工作区大量未提交变更**：`PixelFlow_train_code/` 整目录删除（−5226 行）、`IP_package/`、`debug_IP4/` 多数实验目录 untracked。是否按现状提交（大文件已被 .gitignore 排除）由用户决定
