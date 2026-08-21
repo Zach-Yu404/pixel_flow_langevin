@@ -84,22 +84,21 @@ def apply_H_tau_inv(x, tau, s_k, e_k, stage_idx=None):
         tau e_k                 on ker(G)
     and the inverse is the same split, no solve required.
 
-    Singular at tau=0 whenever ker(G) is non-trivial: H_0 = s_k G. That null
-    space is precisely what Prop. 4's ridge exists for, so tau=0 is refused
-    rather than silently returning inf.
+    Refused where H_tau is singular: at tau=0 it is s_k G, and at stage 0 that
+    is 0 outright. The guard has to come before the divides and cannot look at
+    x — testing the residual instead let r = 0 through, and 0/0 returned NaN
+    silently, which is exactly the case the sampler hits at stage 0, tau=0.
     """
     lam_range = (1.0 - tau) * s_k + tau * e_k
     lam_ker = tau * e_k
+    has_ker = stage_idx != 3                   # G = I at stage 3, so ker(G) = {0}
+    if lam_range <= 0 or (has_ker and lam_ker <= 0):
+        raise ValueError(
+            f"H_tau is singular at tau={tau}, s_k={s_k}: x1_hat is undefined. "
+            "Start the grid at the first tau > 0.")
     Gx = apply_G(x, stage_idx=stage_idx)
     out = Gx / lam_range
-    ker_part = x - Gx                          # ker(G) component (G is a projection)
-    if lam_ker > 0:
-        return out + ker_part / lam_ker
-    if float(ker_part.abs().max()) > 0:
-        raise ValueError(
-            f"H_tau is singular at tau={tau} (H_0 = s_k G, ker(G) non-trivial): "
-            "x1_hat is undefined there. Start the grid at the first tau > 0.")
-    return out                                  # G = I (stage 3): nothing in ker
+    return out + (x - Gx) / lam_ker if has_ker else out
 
 
 def power_iter_norm(M_fn, shape, device, iters=20, seed=0):
