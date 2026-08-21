@@ -75,6 +75,33 @@ def apply_N(x, s_k, e_k, stage_idx):
     return e_k * (1.0 - s_k) * x - s_k * (1.0 - e_k) * apply_G(x, stage_idx=stage_idx)
 
 
+def apply_H_tau_inv(x, tau, s_k, e_k, stage_idx=None):
+    """(H_tau^k)^-1 in closed form — paper p.20 (7.2) needs it for x1_hat.
+
+    G is an orthogonal projection (G^2 = G, G^T = G; V1 verifies both), so
+    H_tau = (1-tau) s_k G + tau e_k I has exactly two eigenvalues:
+        (1-tau) s_k + tau e_k   on range(G)
+        tau e_k                 on ker(G)
+    and the inverse is the same split, no solve required.
+
+    Singular at tau=0 whenever ker(G) is non-trivial: H_0 = s_k G. That null
+    space is precisely what Prop. 4's ridge exists for, so tau=0 is refused
+    rather than silently returning inf.
+    """
+    lam_range = (1.0 - tau) * s_k + tau * e_k
+    lam_ker = tau * e_k
+    Gx = apply_G(x, stage_idx=stage_idx)
+    out = Gx / lam_range
+    ker_part = x - Gx                          # ker(G) component (G is a projection)
+    if lam_ker > 0:
+        return out + ker_part / lam_ker
+    if float(ker_part.abs().max()) > 0:
+        raise ValueError(
+            f"H_tau is singular at tau={tau} (H_0 = s_k G, ker(G) non-trivial): "
+            "x1_hat is undefined there. Start the grid at the first tau > 0.")
+    return out                                  # G = I (stage 3): nothing in ker
+
+
 def power_iter_norm(M_fn, shape, device, iters=20, seed=0):
     """Matrix-free largest-eigenvalue estimate of SPD M (no ridge term)."""
     g = torch.Generator(device="cpu").manual_seed(seed)
