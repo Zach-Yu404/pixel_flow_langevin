@@ -1,4 +1,4 @@
-# AGENTS.md — msflow-upgrade-fixture
+# AGENTS.md — MSFlow
 
 <!-- research-os:managed:start -->
 ## Research OS
