@@ -1,0 +1,451 @@
+#!/usr/bin/env python3
+"""Deterministic lifecycle gate shared by Claude Code and Codex."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+
+DEFAULT_POLICY = {
+    "session_context_char_limit": 1400,
+    "gate": {
+        "require_clean_code_delta": True,
+        "require_memory_update_for_code": True,
+        "require_push_when_remote_exists": True,
+        "require_peer_plans_for_code": True,
+        "require_peer_review_for_code": True,
+    },
+}
+RUNTIME_PREFIX = ".research/.runtime/"
+MEMORY_FILES = {".research/STATE.yaml", ".research/CURRENT.md"}
+
+
+def hook_input() -> dict[str, Any]:
+    try:
+        value = json.load(sys.stdin)
+        return value if isinstance(value, dict) else {}
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def git(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", "-C", str(root), *args],
+        capture_output=True,
+        text=True,
+        errors="replace",
+    )
+
+
+def find_root(payload: dict[str, Any]) -> Path:
+    candidates = [
+        payload.get("cwd"),
+        os.environ.get("CLAUDE_PROJECT_DIR"),
+        str(Path(__file__).resolve().parents[2]),
+    ]
+    for raw in candidates:
+        if not raw:
+            continue
+        candidate = Path(str(raw)).resolve()
+        result = git(candidate, "rev-parse", "--show-toplevel")
+        if result.returncode == 0:
+            return Path(result.stdout.strip()).resolve()
+    raise RuntimeError("Research OS hook is not running inside a git repository")
+
+
+def load_policy(root: Path) -> dict[str, Any]:
+    policy = json.loads(json.dumps(DEFAULT_POLICY))
+    path = root / ".research/policy.json"
+    try:
+        loaded = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return policy
+    if isinstance(loaded, dict):
+        policy.update({k: v for k, v in loaded.items() if k != "gate"})
+        if isinstance(loaded.get("gate"), dict):
+            policy["gate"].update(loaded["gate"])
+    # Tracked project configuration cannot disable completion invariants.
+    policy["gate"].update(DEFAULT_POLICY["gate"])
+    return policy
+
+
+def file_fingerprint(path: Path) -> str:
+    try:
+        stat = path.stat()
+        if not path.is_file():
+            return "non-file"
+        if stat.st_size > 5 * 1024 * 1024:
+            return f"large:{stat.st_size}:{stat.st_mtime_ns}"
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError:
+        return "missing"
+
+
+def status_snapshot(root: Path) -> dict[str, dict[str, str]]:
+    result = git(root, "status", "--porcelain=v1", "--untracked-files=normal")
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.strip() or "git status failed")
+    snapshot: dict[str, dict[str, str]] = {}
+    for line in result.stdout.splitlines():
+        if len(line) < 4:
+            continue
+        path = line[3:]
+        if " -> " in path:
+            path = path.rsplit(" -> ", 1)[1]
+        snapshot[path] = {
+            "status": line[:2],
+            "fingerprint": file_fingerprint(root / path),
+        }
+    return snapshot
+
+
+def head(root: Path) -> str:
+    result = git(root, "rev-parse", "HEAD")
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
+def common_runtime(root: Path) -> Path:
+    result = git(root, "rev-parse", "--path-format=absolute", "--git-common-dir")
+    if result.returncode == 0:
+        common = Path(result.stdout.strip())
+    else:
+        common = root / ".git"
+    runtime = common / "research-os" / "sessions"
+    runtime.mkdir(parents=True, exist_ok=True)
+    return runtime
+
+
+def session_path(root: Path, agent: str, payload: dict[str, Any]) -> Path:
+    session_id = str(payload.get("session_id") or payload.get("transcript_path") or "unknown")
+    key = hashlib.sha256(f"{agent}:{session_id}".encode()).hexdigest()[:24]
+    return common_runtime(root) / f"{key}.json"
+
+
+def make_snapshot(root: Path, agent: str, payload: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "agent": agent,
+        "session_id": str(payload.get("session_id") or "unknown"),
+        "head": head(root),
+        "status": status_snapshot(root),
+    }
+
+
+def save_snapshot(path: Path, value: dict[str, Any]) -> None:
+    temp = path.with_suffix(".tmp")
+    temp.write_text(json.dumps(value, sort_keys=True))
+    os.replace(temp, path)
+
+
+def read_snapshot(path: Path) -> dict[str, Any] | None:
+    try:
+        value = json.loads(path.read_text())
+        return value if isinstance(value, dict) else None
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def memory_version(root: Path) -> str:
+    try:
+        text = (root / ".research/STATE.yaml").read_text()
+    except OSError:
+        return "missing"
+    match = re.search(r"^memory_version:\s*(\S+)", text, re.MULTILINE)
+    return match.group(1) if match else "unknown"
+
+
+def active_tasks(root: Path) -> str:
+    try:
+        text = (root / ".research/STATE.yaml").read_text()
+    except OSError:
+        return "unknown"
+    names = re.findall(r"^\s*-\s+name:\s*(\S+)", text, re.MULTILINE)
+    return ",".join(names[:3]) if names else "none"
+
+
+def session_context(root: Path, agent: str, policy: dict[str, Any]) -> str:
+    branch_result = git(root, "branch", "--show-current")
+    branch = branch_result.stdout.strip() or "detached"
+    dirty = "yes" if status_snapshot(root) else "no"
+    text = (
+        f"[Research OS L1] agent={agent}; branch={branch}; head={head(root)[:12]}; "
+        f"memory_version={memory_version(root)}; active_tasks={active_tasks(root)}; dirty={dirty}.\n"
+        "Before meaningful work read only .research/STATE.yaml, CURRENT.md, and CONSTRAINTS.md; "
+        "then load the relevant task/decision/handoff and affected symbols or diff. "
+        "Do not scan sibling repositories or load full history by default. "
+        "For important implementation/method changes, use independent peer plans; exchange conclusions, "
+        "not hidden reasoning. Before stopping after code changes: commit, update task+CURRENT+STATE+handoff, "
+        "push, and obtain peer review bound to the exact code SHA. Full policy: .research/RULES.md."
+    )
+    try:
+        configured_limit = int(policy.get("session_context_char_limit", 1400))
+    except (TypeError, ValueError):
+        configured_limit = 1400
+    limit = max(200, min(2000, configured_limit))
+    return text[:limit]
+
+
+def changed_committed_paths(root: Path, old_head: str, new_head: str) -> set[str]:
+    if not old_head or old_head == new_head:
+        return set()
+    result = git(root, "diff", "--name-only", f"{old_head}..{new_head}")
+    if result.returncode != 0:
+        return set()
+    return {line for line in result.stdout.splitlines() if line}
+
+
+def is_code_path(path: str) -> bool:
+    if not path.startswith(".research/"):
+        return True
+    return (
+        path.startswith(".research/bin/")
+        or path in {".research/policy.json", ".research/RULES.md"}
+    )
+
+
+def latest_code_head(root: Path, old_head: str, new_head: str) -> str:
+    if not old_head or old_head == new_head:
+        return ""
+    commits = git(root, "log", "--format=%H", f"{old_head}..{new_head}")
+    if commits.returncode != 0:
+        return ""
+    for commit in commits.stdout.splitlines():
+        paths = git(root, "diff-tree", "--no-commit-id", "--name-only", "-r", commit)
+        if paths.returncode == 0 and any(is_code_path(path) for path in paths.stdout.splitlines()):
+            return commit
+    return ""
+
+
+def load_artifact(path: Path) -> dict[str, Any] | None:
+    try:
+        value = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def validate_plans(root: Path, review: dict[str, Any]) -> str | None:
+    task = review.get("task")
+    if not isinstance(task, str):
+        return "peer review record does not identify its canonical task"
+    task_path = Path(task)
+    if (
+        task_path.is_absolute()
+        or ".." in task_path.parts
+        or task_path.parts[:2] != (".research", "tasks")
+        or task_path.suffix != ".md"
+    ):
+        return "peer review task must be a relative .research/tasks/*.md path"
+    if not (root / task_path).is_file():
+        return f"peer review task does not exist: {task}"
+    stem = task_path.stem
+    plans = root / ".research/plans"
+    expected = (
+        (plans / f"{stem}-claude.json", "plan", "claude", "ready"),
+        (plans / f"{stem}-codex.json", "plan", "codex", "ready"),
+        (plans / f"{stem}-consensus.json", "compare", None, "consensus"),
+    )
+    plan_run_ids: list[str] = []
+    consensus: dict[str, Any] | None = None
+    for path, phase, expected_agent, outcome in expected:
+        value = load_artifact(path)
+        if value is None:
+            return f"missing collaboration artifact {path.relative_to(root)}"
+        if value.get("source") != "research-peer" or value.get("task") != task:
+            return f"invalid collaboration provenance in {path.relative_to(root)}"
+        if value.get("phase") != phase or value.get("outcome") != outcome:
+            return f"invalid collaboration outcome in {path.relative_to(root)}"
+        run_id = value.get("run_id")
+        if not isinstance(run_id, str) or re.fullmatch(r"[0-9a-f]{20}", run_id) is None:
+            return f"invalid collaboration run_id in {path.relative_to(root)}"
+        if expected_agent and value.get("agent") != expected_agent:
+            return f"invalid collaboration agent in {path.relative_to(root)}"
+        if phase == "plan":
+            plan_run_ids.append(run_id)
+        else:
+            consensus = value
+    if consensus is None or consensus.get("implementation_required") is not True:
+        return "consensus artifact does not authorize implementation"
+    referenced = consensus.get("plan_run_ids")
+    if not isinstance(referenced, list) or set(referenced) != set(plan_run_ids):
+        return "consensus artifact is not bound to the current independent plans"
+    return None
+
+
+def validate_review(
+    root: Path,
+    code_head: str,
+    agent: str,
+    require_plans: bool,
+) -> str | None:
+    path = root / ".research/reviews" / f"{code_head}.json"
+    review = load_artifact(path)
+    if review is None:
+        return f"missing peer review record .research/reviews/{code_head}.json"
+    if review.get("reviewed_sha") != code_head:
+        return "peer review record is not bound to the exact code SHA"
+    if review.get("verdict") not in {"approve", "approved"}:
+        return "peer review has not approved the exact code SHA"
+    if review.get("reviewer") in {None, "", agent}:
+        return "peer review must come from the other agent"
+    if review.get("source") not in {"orchestrator", "research-peer"}:
+        return "peer review record must be produced by the collaboration runner"
+    if review.get("source") == "research-peer" and re.fullmatch(
+        r"[0-9a-f]{20}", str(review.get("run_id", ""))
+    ) is None:
+        return "peer review record has no valid collaboration run_id"
+    base_sha = review.get("base_sha")
+    if not isinstance(base_sha, str) or re.fullmatch(r"[0-9a-f]{40}", base_sha) is None:
+        return "peer review record has no exact base SHA"
+    ancestor = git(root, "merge-base", "--is-ancestor", base_sha, code_head)
+    if base_sha == code_head or ancestor.returncode != 0:
+        return "peer review base is not a proper ancestor of the code SHA"
+    if require_plans:
+        plan_problem = validate_plans(root, review)
+        if plan_problem:
+            return plan_problem
+    return None
+
+
+def push_violation(root: Path) -> str | None:
+    remotes = git(root, "remote")
+    if remotes.returncode != 0 or not remotes.stdout.strip():
+        return None
+    upstream = git(root, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}")
+    if upstream.returncode != 0:
+        return "current branch has no upstream; push with tracking"
+    ahead = git(root, "rev-list", "--count", "@{upstream}..HEAD")
+    if ahead.returncode != 0:
+        return "cannot verify whether the current branch is pushed"
+    if int(ahead.stdout.strip() or "0") > 0:
+        return f"{ahead.stdout.strip()} commit(s) are not pushed"
+    return None
+
+
+def block(reasons: list[str]) -> None:
+    reason = "[research-gate] " + "; ".join(reasons)
+    print(json.dumps({"decision": "block", "reason": reason[:1200]}, ensure_ascii=False))
+
+
+def handle_session(root: Path, agent: str, payload: dict[str, Any], policy: dict[str, Any]) -> None:
+    path = session_path(root, agent, payload)
+    if read_snapshot(path) is None:
+        save_snapshot(path, make_snapshot(root, agent, payload))
+    context = session_context(root, agent, policy)
+    output = {
+        "hookSpecificOutput": {
+            "hookEventName": "SessionStart",
+            "additionalContext": context,
+        }
+    }
+    print(json.dumps(output, ensure_ascii=False))
+
+
+def handle_stop(root: Path, agent: str, payload: dict[str, Any], policy: dict[str, Any]) -> None:
+    path = session_path(root, agent, payload)
+    before = read_snapshot(path)
+    current = make_snapshot(root, agent, payload)
+    if before is None:
+        save_snapshot(path, current)
+        block(["session baseline was missing; inspect the existing worktree before continuing"])
+        return
+
+    old_status = before.get("status") if isinstance(before.get("status"), dict) else {}
+    new_status = current["status"]
+    uncommitted_delta = {
+        name for name, value in new_status.items()
+        if old_status.get(name) != value and not name.startswith(RUNTIME_PREFIX)
+    }
+    committed = changed_committed_paths(root, str(before.get("head") or ""), current["head"])
+    changed = committed | uncommitted_delta
+    if not changed:
+        save_snapshot(path, current)
+        return
+
+    code_paths = {name for name in changed if is_code_path(name)}
+    gate_policy = policy["gate"]
+    reasons: list[str] = []
+
+    if uncommitted_delta and gate_policy.get("require_clean_code_delta", True):
+        preview = ", ".join(sorted(uncommitted_delta)[:4])
+        reasons.append(f"new worktree changes are uncommitted: {preview}")
+
+    if code_paths and gate_policy.get("require_memory_update_for_code", True):
+        missing = sorted(MEMORY_FILES - changed)
+        has_task = any(name.startswith(".research/tasks/") for name in changed)
+        has_handoff = any(name.startswith(".research/handoffs/") for name in changed)
+        if missing or not has_task or not has_handoff:
+            required = missing
+            if not has_task:
+                required.append(".research/tasks/<task>.md")
+            if not has_handoff:
+                required.append(".research/handoffs/<handoff>.md")
+            reasons.append("code changed without canonical updates: " + ", ".join(required))
+
+    code_commit = latest_code_head(root, str(before.get("head") or ""), current["head"])
+    if code_paths and not code_commit:
+        reasons.append("code changes do not have a committed code SHA")
+
+    if current["head"] != before.get("head") and gate_policy.get(
+        "require_push_when_remote_exists", True
+    ):
+        push_problem = push_violation(root)
+        if push_problem:
+            reasons.append(push_problem)
+
+    if code_commit and gate_policy.get("require_peer_review_for_code", True):
+        review_problem = validate_review(
+            root,
+            code_commit,
+            agent,
+            bool(gate_policy.get("require_peer_plans_for_code", True)),
+        )
+        if review_problem:
+            reasons.append(review_problem)
+
+    if reasons:
+        block(reasons)
+        return
+    save_snapshot(path, current)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("event", choices=["session-start", "stop", "check"])
+    parser.add_argument("--agent", choices=["claude", "codex"], required=True)
+    args = parser.parse_args()
+    payload = hook_input()
+    try:
+        root = find_root(payload)
+        policy = load_policy(root)
+        if args.event == "session-start":
+            handle_session(root, args.agent, payload, policy)
+        elif args.event == "stop":
+            handle_stop(root, args.agent, payload, policy)
+        else:
+            print(json.dumps({
+                "root": str(root),
+                "agent": args.agent,
+                "head": head(root),
+                "memory_version": memory_version(root),
+                "dirty": bool(status_snapshot(root)),
+                "policy_version": policy.get("policy_version", "unknown"),
+            }, ensure_ascii=False))
+        return 0
+    except Exception as exc:
+        if args.event == "stop":
+            block([f"gate check failed closed: {exc}"])
+            return 0
+        print(json.dumps({"systemMessage": f"[research-gate] {exc}"}, ensure_ascii=False))
+        return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
