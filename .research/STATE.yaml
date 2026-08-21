@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 29
+memory_version: 30
 updated_at: "2026-08-21"
 updated_by: "claude"          # claude | codex | user
 
@@ -8,14 +8,28 @@ updated_by: "claude"          # claude | codex | user
 # 不是项目级决定。换回有 codex 的机器后改回 dual-agent。详见 context/facts.md。
 mode: single-agent-degraded      # dual-agent | single-agent-degraded
 unavailable_agent: codex         # mode 为 degraded 时填 claude | codex
-single_agent_execution_authorized: false
-authorized_agent: null
-authorized_scope: null
+# 2026-08-21：用户原话"按照main.py调用utils.py的方式写main4.py并在utils.py补充
+# posterior_sampling的算法，把page4的algorithm实现出来，结果放在results/alg4"。
+# 本机 codex 不可用（见上），用户直接指定实现 → 记录单 agent 执行授权。
+single_agent_execution_authorized: true
+authorized_agent: claude
+authorized_scope: "implement-algorithm4：新增 PixelFlowICLR/Algorithm2/{main4.py,config_alg4.json}
+  与 utils.py 的 Alg-4 纯新增函数；不得改动既有采样器、main.py、main2.py、config.json"
 
 # 全局执行开关（用户说"先不要实现"→ 立即置 false）
 execution_allowed: true
 
 active_tasks:
+- name: implement-algorithm4
+  type: implementation
+  state: working
+  owner: claude
+  branch: IP_branch
+  depends_on: [read-algorithm4-draft]
+  execution_allowed: true    # 用户 2026-08-21 明确要求实现
+  issue: null
+  pr: null
+  pending_review_by: codex   # 本机无 codex；换机后需对精确 code SHA 补 review
 - name: read-algorithm4-draft
   type: research
   state: done
