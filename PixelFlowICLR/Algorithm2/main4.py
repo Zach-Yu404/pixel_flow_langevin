@@ -297,6 +297,69 @@ def run_measure_s2(args):
     return 0
 
 
+# ═══════════════════ incremental, resumable result writing ════════════════
+# main.py accumulates every row in memory and writes the CSVs only after the
+# whole task x image loop finishes. On this ceph share that lost 21 completed
+# GPU runs to a single transient EIO raised while motion_blur lazily imported
+# DAPS. Results are therefore appended per cell here, and a re-run skips the
+# cells already on disk.
+METRIC_FIELDS = ["task", "image", "stage", "step", "tau", "sigma_tau",
+                 "s2", "gamma2", "mse_x1", "meas_resid", "x0_rms",
+                 "mse_hole", "mse_obs"]
+
+
+def _final_fields(num_stages):
+    return (["task", "image", "trw", "pre_mse", "post_mse", "meas_resid",
+             "post_hole", "post_obs"]
+            + [f"stage{k}_hole" for k in range(num_stages)])
+
+
+def _append_rows(path, fields, rows):
+    """Append rows, writing the header only when the file is new. restval=''
+    keeps blur/SR (no hole) and inpainting in one table."""
+    new = not os.path.exists(path)
+    with open(path, "a", newline="") as f:
+        wcsv = csv.DictWriter(f, fieldnames=fields, restval="",
+                              extrasaction="ignore")
+        if new:
+            wcsv.writeheader()
+        wcsv.writerows(rows)
+
+
+def _completed_cells(path):
+    """(task, image) pairs already present in a final CSV, for resume."""
+    if not os.path.exists(path):
+        return set()
+    try:
+        with open(path, newline="") as f:
+            return {(r["task"], r["image"]) for r in csv.DictReader(f)
+                    if r.get("task") and r.get("image")}
+    except (OSError, KeyError) as exc:
+        print(f"[resume] could not read {path} ({exc}); starting fresh",
+              flush=True)
+        return set()
+
+
+def _with_retries(what, fn, attempts=6, delay=20):
+    """Run one cell, retrying transient filesystem faults.
+
+    The ceph share EIOs during Python's import machinery as well as during
+    stats, and a lazily imported dependency (DAPS' forward_operator) is reached
+    only when the first motion_blur cell runs -- i.e. 40 minutes into a run.
+    A cell is cheap to redo; the run is not.
+    """
+    for i in range(attempts):
+        try:
+            return fn()
+        except OSError as exc:
+            if exc.errno not in _RETRYABLE_ERRNO or i == attempts - 1:
+                raise
+            print(f"[fs] transient {exc.strerror!r} during {what}, "
+                  f"retry {i + 1}/{attempts - 1}", flush=True)
+            time.sleep(delay)
+    raise RuntimeError("unreachable")
+
+
 # ═════════════════════════════ mode: full_ip ═══════════════════════════════
 def run_full_ip(args):
     out = _resolve_out(args.out)
@@ -323,6 +386,15 @@ def run_full_ip(args):
           f"{[round(s2_fn(k, 0.5), 6) for k in range(int(config.scheduler.num_stages))]}",
           flush=True)
 
+    num_stages = int(config.scheduler.num_stages)
+    metrics_path = os.path.join(out, "full_ip_metrics.csv")
+    final_path = os.path.join(out, "full_ip_final.csv")
+    final_fields = _final_fields(num_stages)
+    done = _completed_cells(final_path)
+    if done:
+        print(f"[resume] {len(done)} cell(s) already on disk, skipping them",
+              flush=True)
+
     all_rows, final_rows, nfe_stats, trajs = [], [], {}, {}
     t0 = time.time()
     for task in tasks:
@@ -333,8 +405,13 @@ def run_full_ip(args):
         sigma_n = float(TASKS_SETUP[task]["sigma_n"])
         for d in demos:
             name = d["short_name"]
-            op, mask, y, _, _, make_Ak_fns_fn, _ = build_setup_and_measurement(
-                task, op_cfg, d, sigma_n, 256, device)
+            if (task, name) in done:
+                print(f"[skip] {task}/{name} (already in {final_path})", flush=True)
+                continue
+            op, mask, y, _, _, make_Ak_fns_fn, _ = _with_retries(
+                f"{task}/{name} setup",
+                lambda: build_setup_and_measurement(
+                    task, op_cfg, d, sigma_n, 256, device))
             if task in ("gaussian_blur", "motion_blur"):
                 inner = make_Ak_fns_fn
 
@@ -354,17 +431,19 @@ def run_full_ip(args):
 
             NFE["n"] = 0
             ts = time.time()
-            x1_final, rows, traj = run_posterior_sampling_alg4(
-                model, config, gt, y, op, sigma_n, device,
-                gamma2_tab=gamma2_tab, s2_fn=s2_fn, hole_mask=hole_mask,
-                make_Ak_fns_fn=make_Ak_fns_fn,
-                seed=int(kw.get("seed", ALG["seed"])), record_trajectory=record,
-                sigma_min=ALG["sigma_min"],
-                cg_max_iter_endpoint=ALG["cg_max_iter_endpoint"],
-                terminal_replace_weight=TASKS_SETUP[task]["terminal_replace_weight"],
-                **{k_: v for k_, v in kw.items()
-                   if k_ not in ("class_label", "seed")},
-                class_label=int(d["class_idx"]))
+            x1_final, rows, traj = _with_retries(
+                f"{task}/{name} sampling",
+                lambda: run_posterior_sampling_alg4(
+                    model, config, gt, y, op, sigma_n, device,
+                    gamma2_tab=gamma2_tab, s2_fn=s2_fn, hole_mask=hole_mask,
+                    make_Ak_fns_fn=make_Ak_fns_fn,
+                    seed=int(kw.get("seed", ALG["seed"])), record_trajectory=record,
+                    sigma_min=ALG["sigma_min"],
+                    cg_max_iter_endpoint=ALG["cg_max_iter_endpoint"],
+                    terminal_replace_weight=TASKS_SETUP[task]["terminal_replace_weight"],
+                    **{k_: v for k_, v in kw.items()
+                       if k_ not in ("class_label", "seed")},
+                    class_label=int(d["class_idx"])))
             for r in rows:
                 r.update(task=task, image=name)
             all_rows += rows
@@ -384,6 +463,10 @@ def run_full_ip(args):
                     last = [r for r in rows if r["stage"] == k][-1]
                     fin[f"stage{k}_hole"] = last.get("mse_hole")
             final_rows.append(fin)
+            # Written now, not at the end of the loop: a cell that completed is
+            # a cell that survives whatever the filesystem does next.
+            _append_rows(metrics_path, METRIC_FIELDS, rows)
+            _append_rows(final_path, final_fields, [fin])
             nfe_stats[f"{task}/{name}"] = NFE["n"]
             if record:
                 trajs[task] = traj
@@ -393,23 +476,36 @@ def run_full_ip(args):
                   f"mse={fin['post_mse']:.4f} resid={fin['meas_resid']:.3f} "
                   f"[{time.time()-ts:.0f}s tot {time.time()-t0:.0f}s]", flush=True)
 
-    json.dump(nfe_stats, open(os.path.join(out, "nfe.json"), "w"), indent=1)
-    if all_rows:
-        with open(os.path.join(out, "full_ip_metrics.csv"), "w", newline="") as f:
-            wcsv = csv.DictWriter(f, fieldnames=list(all_rows[0].keys()))
-            wcsv.writeheader(); wcsv.writerows(all_rows)
-    if final_rows:
-        keys = sorted({k for r in final_rows for k in r})
-        with open(os.path.join(out, "full_ip_final.csv"), "w", newline="") as f:
-            wcsv = csv.DictWriter(f, fieldnames=keys, restval="")
-            wcsv.writeheader(); wcsv.writerows(final_rows)
-    print(f"[done-sampling] rows={len(all_rows)} final={len(final_rows)}", flush=True)
+    # nfe.json is merged rather than overwritten so a resumed run keeps the
+    # counts of the cells it skipped.
+    nfe_path = os.path.join(out, "nfe.json")
+    if os.path.exists(nfe_path):
+        try:
+            nfe_stats = {**json.load(open(nfe_path)), **nfe_stats}
+        except (OSError, ValueError):
+            pass
+    json.dump(nfe_stats, open(nfe_path, "w"), indent=1)
+    print(f"[done-sampling] new rows={len(all_rows)} new final={len(final_rows)}",
+          flush=True)
+
+    # Plot from disk, not from memory, so a resumed run draws every cell and
+    # not just the ones this process happened to compute.
+    if os.path.exists(metrics_path):
+        with open(metrics_path, newline="") as f:
+            all_rows = [{k: (float(v) if k not in ("task", "image") and v != ""
+                             else v)
+                         for k, v in r.items()}
+                        for r in csv.DictReader(f)]
+        for r in all_rows:
+            r["stage"] = int(r["stage"])
 
     # ── loss curves + the Sec. 8.6 measurement residual, per task panel ──
     if all_rows and not args.smoke:
-        fig, axes = plt.subplots(2, len(tasks), figsize=(4.0 * len(tasks), 6.4),
+        plot_tasks = [t for t in tasks if any(r["task"] == t for r in all_rows)]
+        fig, axes = plt.subplots(2, len(plot_tasks),
+                                 figsize=(4.0 * len(plot_tasks), 6.4),
                                  squeeze=False)
-        for ti, task in enumerate(tasks):
+        for ti, task in enumerate(plot_tasks):
             rs = [r for r in all_rows if r["task"] == task]
             xs = sorted({r["stage"] + r["tau"] for r in rs})
             for row_i, (key, lab, color) in enumerate(

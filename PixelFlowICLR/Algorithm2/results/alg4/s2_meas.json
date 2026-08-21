@@ -1,0 +1,46 @@
+{
+ "note": "S_prior isotropic surrogate: pooled per-pixel variance of the stage pyramid x1^k, per stage k. Draft (13) reduction S = s2*I; Sec. 8.6 asks for this to be reported, not tuned. 1/s2 is the equivalent Tweedie-anchor lambda of run_posterior_reg_sampling_alg2.",
+ "CAVEAT": "Measured on the demo/eval images, NOT on the training set. Replace with a training-set measurement before reporting.",
+ "images": [
+  "breastplate_armor",
+  "crane_structure",
+  "ibex_horns",
+  "junco",
+  "lakeside_beach",
+  "sea_anemone",
+  "shetland_sheepdog"
+ ],
+ "image_range": "[-1, 1] (demo_runner normalisation); Popoviciu bound s2 <= (b-a)^2/4 = 1",
+ "detail": {
+  "0": {
+   "n_pixels": 21504,
+   "mean": -0.08385058086302404,
+   "per_pixel_var": 0.2000590571988071,
+   "lambda_equivalent": 4.998524005870216
+  },
+  "1": {
+   "n_pixels": 86016,
+   "mean": -0.08385058108459427,
+   "per_pixel_var": 0.21108518838244975,
+   "lambda_equivalent": 4.737423822405642
+  },
+  "2": {
+   "n_pixels": 344064,
+   "mean": -0.08385058123786578,
+   "per_pixel_var": 0.2203612135091675,
+   "lambda_equivalent": 4.538003689829916
+  },
+  "3": {
+   "n_pixels": 1376256,
+   "mean": -0.08385058130027444,
+   "per_pixel_var": 0.22819071692139276,
+   "lambda_equivalent": 4.382299216599948
+  }
+ },
+ "table": {
+  "0": 0.2000590571988071,
+  "1": 0.21108518838244975,
+  "2": 0.2203612135091675,
+  "3": 0.22819071692139276
+ }
+}
