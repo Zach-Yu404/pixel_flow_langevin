@@ -1,7 +1,7 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 24
-updated_at: "2026-08-18"
-updated_by: "codex"          # claude | codex | user
+memory_version: 28
+updated_at: "2026-08-19"
+updated_by: "claude"          # claude | codex | user
 
 mode: dual-agent                 # dual-agent | single-agent-degraded（codex v0.147.0 已装并登录，2026-08-14）
 unavailable_agent: null          # mode 为 degraded 时填 claude | codex
@@ -13,6 +13,46 @@ authorized_scope: null
 execution_allowed: true
 
 active_tasks:
+- name: diag-h-tau-inv
+  type: debug
+  state: done
+  owner: claude
+  branch: null
+  depends_on: []
+  execution_allowed: true
+  issue: null
+  pr: null
+  pending_review_by: null
+- name: algorithm3-from-modified-draft
+  type: experiment
+  state: done
+  owner: claude
+  branch: null
+  depends_on: []
+  execution_allowed: true
+  issue: null
+  pr: null
+  pending_review_by: null
+- name: implement-algorithm1
+  type: implementation
+  state: review
+  owner: claude
+  branch: null
+  depends_on: []
+  execution_allowed: true
+  issue: null
+  pr: null
+  pending_review_by: codex
+- name: score-solve-x1hat-72
+  type: experiment
+  state: done
+  owner: claude
+  branch: null
+  depends_on: []
+  execution_allowed: true
+  issue: null
+  pr: null
+  pending_review_by: null
 - name: measurement-alignment-inpainting
   type: experiment
   state: working

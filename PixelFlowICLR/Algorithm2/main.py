@@ -41,7 +41,7 @@ import time       # noqa: E402
 from utils import (  # noqa: E402  (import first: sets IP_package sys.path + chdir)
     HERE, NFE, count_nfe_hook,
     apply_B, apply_N, power_iter_norm, make_exact_AT, adjoint_test, mse_masked,
-    score_solve, clean_image_solve, build_task_setups,
+    score_solve, clean_image_solve, build_task_setups, apply_H_tau_inv,
     run_posterior_sampling_alg2,
 )
 import onestep_mse_vs_t as base  # noqa: E402
@@ -301,8 +301,19 @@ def run_onestep(args):
                 x0_hat = score_solve(x_tau, v, sk, ek, tau, 0.0, eff_si, cg_tol, cg_max_iter)
                 x0_hat_g2 = score_solve(x_tau, v, sk, ek, tau, g2_meas, eff_si,
                                         cg_tol, cg_max_iter)
+                ##Predict x_1_hat^k:
+                # paper p.20 (7.2): x1_hat = (H_tau)^-1 (x_tau - sigma_tau*x0_hat).
+                # With the exact displacement it is the ground truth exactly;
+                # with v_theta it should read as a plausible denoising of x_tau.
+                x1_hat = apply_H_tau_inv(x_tau - sigma_tau * x0_hat,
+                                         tau, sk, ek, eff_si)
+                x1_hat_g2 = apply_H_tau_inv(x_tau - sigma_tau * x0_hat_g2,
+                                            tau, sk, ek, eff_si)
+
                 sc_err = ((x0_hat - x0) ** 2).mean(dim=(1, 2, 3))
                 sc_err_g2 = ((x0_hat_g2 - x0) ** 2).mean(dim=(1, 2, 3))
+                x1h_err = ((x1_hat - x1_gt) ** 2).mean(dim=(1, 2, 3))
+                x1h_err_g2 = ((x1_hat_g2 - x1_gt) ** 2).mean(dim=(1, 2, 3))
 
             for task in args.tasks:
                 eta, setups = task_setups[task]
@@ -325,6 +336,8 @@ def run_onestep(args):
                                if x1_a2 is not None else float("nan"),
                                score_err=float(sc_err[bi]) if not skip_alg2 else float("nan"),
                                score_err_g2=float(sc_err_g2[bi]) if not skip_alg2 else float("nan"),
+                               x1hat_err=float(x1h_err[bi]) if not skip_alg2 else float("nan"),
+                               x1hat_err_g2=float(x1h_err_g2[bi]) if not skip_alg2 else float("nan"),
                                gamma2_meas=g2_meas)
                     if inp:
                         m = stage_mask[task][bi]

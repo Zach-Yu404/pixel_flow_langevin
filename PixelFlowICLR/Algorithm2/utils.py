@@ -75,6 +75,32 @@ def apply_N(x, s_k, e_k, stage_idx):
     return e_k * (1.0 - s_k) * x - s_k * (1.0 - e_k) * apply_G(x, stage_idx=stage_idx)
 
 
+def apply_H_tau_inv(x, tau, s_k, e_k, stage_idx=None):
+    """(H_tau^k)^-1 in closed form — paper p.20 (7.2) needs it for x1_hat.
+
+    G is an orthogonal projection (G^2 = G, G^T = G; V1 verifies both), so
+    H_tau = (1-tau) s_k G + tau e_k I has exactly two eigenvalues:
+        (1-tau) s_k + tau e_k   on range(G)
+        tau e_k                 on ker(G)
+    and the inverse is the same split, no solve required.
+
+    Refused where H_tau is singular: at tau=0 it is s_k G, and at stage 0 that
+    is 0 outright. The guard has to come before the divides and cannot look at
+    x — testing the residual instead let r = 0 through, and 0/0 returned NaN
+    silently, which is exactly the case the sampler hits at stage 0, tau=0.
+    """
+    lam_range = (1.0 - tau) * s_k + tau * e_k
+    lam_ker = tau * e_k
+    has_ker = stage_idx != 3                   # G = I at stage 3, so ker(G) = {0}
+    if lam_range <= 0 or (has_ker and lam_ker <= 0):
+        raise ValueError(
+            f"H_tau is singular at tau={tau}, s_k={s_k}: x1_hat is undefined. "
+            "Start the grid at the first tau > 0.")
+    Gx = apply_G(x, stage_idx=stage_idx)
+    out = Gx / lam_range
+    return out + (x - Gx) / lam_ker if has_ker else out
+
+
 def power_iter_norm(M_fn, shape, device, iters=20, seed=0):
     """Matrix-free largest-eigenvalue estimate of SPD M (no ridge term)."""
     g = torch.Generator(device="cpu").manual_seed(seed)
