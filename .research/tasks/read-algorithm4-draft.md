@@ -11,6 +11,10 @@ created: 2026-08-21
 > 把这个项目接入 Research OS，工具在 https://github.com/Zach-Yu404/research-init，
 > 接入后初始化记忆，阅读/CBIG-Standard-ECE/Zach/MSFlow下的代码，把https://github.com/Zach-Yu404/pixel_flow_langevin导入记忆，仔细阅读/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/results/algorithm.4pdf.pdf
 
+> 注：上面的引用块含绝对路径，故本文件会被 `research-doctor` 的
+> "canonical memory 中发现绝对路径" 检查标出。**这是有意的**——
+> 【用户原始要求】是 Authoritative Source，不得改写。机器路径本身已入 `local.yaml`。
+
 ## 已确认 Interpretation
 
 四件事，其中前两件是**确认/补齐**而不是从零做：
@@ -43,7 +47,7 @@ created: 2026-08-21
 
 ## 执行记录
 
-- `research-upgrade-project /CBIG-Standard-ECE/Zach/MSFlow` → bundle v2，幂等（无新增 diff）。
+- `research-upgrade-project <repo 根>` → bundle v2，幂等（无新增 diff）。
 - `research-doctor` → 25 通过 / 2 警告（gh 未登录、codex 未安装）/ 1 失败（gh 未安装）。
 - 读代码：`PixelFlowICLR/{README,onestep_mse_vs_t,consolidate_results,onestep_visual}`、
   `Algorithm1/{main_alg1.py,config_alg1.json}`、

@@ -3,7 +3,7 @@ memory_version: 29
 updated_at: "2026-08-21"
 updated_by: "claude"          # claude | codex | user
 
-# 2026-08-21：本机（挂载服务器 /CBIG-Standard-ECE，HOME=/home2/rqx6rs）无 codex、无 gh、
+# 2026-08-21：本机（挂载服务器，路径见 local.yaml external.mount_root / external.home）无 codex、无 gh、
 # 无 GitHub 网络。旧机上 codex v0.147.0 已装并登录（2026-08-14），所以这是**按机器**的降级，
 # 不是项目级决定。换回有 codex 的机器后改回 dual-agent。详见 context/facts.md。
 mode: single-agent-degraded      # dual-agent | single-agent-degraded

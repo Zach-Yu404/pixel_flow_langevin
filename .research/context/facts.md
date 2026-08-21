@@ -4,7 +4,7 @@
 
 ## 2026-08-21 · claude · 仓库导入（github.com/Zach-Yu404/pixel_flow_langevin）
 
-- Shared Fact: **`/CBIG-Standard-ECE/Zach/MSFlow` 的 `origin` 就是
+- Shared Fact: **本 repo 的 `origin` 就是
   `https://github.com/Zach-Yu404/pixel_flow_langevin.git`**（`git remote -v`）。
   用户要求"导入"的 GitHub repo 与本工作区是同一个 repo，不是外部资料。
 - Shared Fact: 分支两条。`IP_branch`（当前 HEAD，`d819043`，
@@ -23,11 +23,11 @@
   `c6c26aa` Add the p.20 implied clean image and test the score solve in isolation
 - Shared Fact: `github_project_local/` 是**独立嵌套 repo**，不在上述历史内（PROJECT.md 已载）。
 
-## 2026-08-21 · claude · 本机环境（挂载服务器 /CBIG-Standard-ECE）
+## 2026-08-21 · claude · 本机环境（挂载服务器，路径见 `local.yaml` 的 `external.mount_root`）
 
 - Shared Fact: **`gh` 未安装、`codex` 未安装**（`command -v` 均为空；
   `PATH` 含 `~/.local/bin`，其中只有 `claude` 一个符号链接）。
-  HOME 是 `/home2/rqx6rs`，不与旧机共享。
+  HOME 见 `local.yaml` 的 `external.home`，不与旧机共享。
   ⟹ 本机事实上 **single-agent degraded**，且**记忆只能 commit，无法 push**。
   `git fetch` 报 `could not read Username for 'https://github.com'`。
 - Shared Fact: `research-doctor`（2026-08-21）= **25 通过 / 2 警告 / 1 失败**。
@@ -42,7 +42,7 @@
   ⟹ 任何依赖 `git status` 全量扫描的自动化（含 Research OS Stop gate）在本机可能非确定性失败；
   用 `-uno` 或显式路径的 `git add` 可以绕开。
 - Shared Fact: `research-init` 工具的本地 clone 在
-  `/CBIG-Standard-ECE/Zach/research-init-impl`（**不是** HANDBOOK 说的 `~/research-init`），
+  `local.yaml` 的 `external.research_init_clone`（**不是** HANDBOOK 说的 `~/research-init`），
   分支 `agent/efficient-dual-agent`，HEAD `dd4e766`，领先 `origin/main` 3 个 commit（未 push）。
 
 ## 2026-08-21 · claude · 工作区未提交状态

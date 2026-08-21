@@ -6,8 +6,8 @@
 
 - **Research OS**：早在 08-14 已接入；本轮 `research-upgrade-project` 确认在 bundle v2
   且幂等，`research-doctor` = 25 通过 / 2 警告 / 1 失败（全部失败与警告都在
-  **本机 gh / codex 未安装**，项目侧 15 项全 ✅）。工具本地 clone 在
-  `/CBIG-Standard-ECE/Zach/research-init-impl`（分支 `agent/efficient-dual-agent`）。
+  **本机 gh / codex 未安装**，项目侧 15 项全 ✅）。工具本地 clone 路径见
+  `local.yaml` 的 `external.research_init_clone`（分支 `agent/efficient-dual-agent`）。
 - **本机是 single-agent degraded**：无 gh、无 codex、无 GitHub 网络
   → 记忆**只能 commit 不能 push**，Issue #3 的增量复审在本机无法推进。
   另：`git status` 全量扫描因 ceph 的 `Remote I/O error` 稳定失败（`-uno` 可用）。
