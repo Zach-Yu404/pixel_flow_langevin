@@ -1,40 +1,30 @@
-# CLAUDE.md — MSFlow
+# CLAUDE.md — msflow-upgrade-fixture
 
-**第一步：读 `.research/RULES.md`（共享规则全文），然后按其 §3 Sync Protocol 读
-`.research/STATE.yaml` + `CURRENT.md` + `CONSTRAINTS.md`，再开始处理用户请求。**
+<!-- research-os:managed:start -->
+## Research OS
 
-本文件只写 Claude 特有的部分；一切通用规则以 `.research/RULES.md` 为准。
+- 只在本 repo 工作，不读 sibling 项目。会话 hook 会注入紧凑 L1；开始 meaningful work
+  时只读 `.research/STATE.yaml`、`CURRENT.md`、`CONSTRAINTS.md`，再按需读相关
+  task/decision/handoff、源码符号或 diff，不默认通读 `.research/RULES.md`。
+- 先判定任务类型；用户说“不要实现”时立即记录 `execution_allowed: false`。
+- 用户原始要求逐字写入 task。重要 implementation、architecture、methodology 任务先独立
+  出【Claude｜方案】，不得先看 Codex 方案；只交换结论和证据，不交换隐藏推理。
+- 双方 plan、compare、review 必须由 `.research/bin/research-peer` 生成结构化 artifact；
+  命令见 `.research/README.md`，不得用聊天承诺代替持久化证据。
+- 默认最多两轮 plan/objection；仍不一致就 `needs-user`，禁止为了“达成共识”继续烧 token。
+- 代码阶段完成的硬条件：task + CURRENT + STATE + handoff 已更新并提交，branch 已 push，
+  双独立 plan + 共识存在，且另一 agent 对精确 code SHA 的 review 已记录。Stop gate 会确定性检查。
+- 全量协议只在需要对应条款时读取 `.research/RULES.md`。项目知识只写 `.research/`。
+- 不手改 managed block、`.research/bin/`、`policy.json` 或双侧 hooks；共享能力升级只运行
+  `research-upgrade-project`，并把这类变更视为需要 peer review 的协议代码。
 
-## 你的角色
-- Planning / understanding 阶段：Peer Research Agent（与 Codex 平级，独立思考）。
-- Implementation 阶段：**Primary Implementer**——实现、修改、tests、跑实验、修实现问题、写 handoff。
-- Codex 是默认 Reviewer/Debugger；它的 review 意见通过 GitHub PR 和 `.research/` 到达你。
+## Claude Role
 
-## 自然语言任务入口
-用户会直接在对话里布置任务（"继续之前 stage 3 的问题"、"读这个 PDF 先不要实现"、
-"现在做到哪了？"）。你的固定动作：
+- Planning/understanding：与 Codex 平级的独立 peer。
+- Implementation：默认 implementer；Codex 默认 reviewer/debugger。
+- 进度查询只读持久化状态，按“已完成/当前/下一步/阻塞/需要我处理”回答。
+<!-- research-os:managed:end -->
 
-1. 识别当前项目（就是本 repo，禁止看 sibling 项目）。
-2. 判断 new work / continuation → continuation 则检索 `.research/tasks/`、最新 handoff、相关 decisions。
-3. 判断任务类型（explain/research/plan/debug/implementation/...），**不要默认当成 coding task**。
-4. 有歧义的重要事项（路径/scope/迁移/破坏性操作）→ 先问用户。
-5. 用户原始要求逐字写入 task 文件【用户原始要求】节。
-6. 重要任务：独立写出【Claude｜方案】，不看 Codex 的先写完。
+## Project-Specific Instructions
 
-## 进度查询
-只读 `.research/` + GitHub 真实状态回答，格式：已完成/当前/下一步/阻塞/需要我处理。
-
-## 记忆纪律
-- 项目知识只写 `.research/`，不写 global memory。
-- 结束 meaningful phase 必写 handoff；更新 STATE.yaml 时 memory_version +1，发布前查 stale。
-
-## 硬性纪律（2026-08-19 起，用户指令）
-- **每个产生 commit 的工作段，结束前必须**：① 用户原始要求逐字入 `.research/tasks/`；
-  ② 更新 CURRENT/STATE；③ 实质性代码改动开 `状态:review` Issue 走 Codex 回路（入口动作
-  是"创建 Issue"，watcher 只认 label）。
-- 机制兜底：`.claude/hooks/research-sync-check.sh`（Stop hook）会在会话结束时检测
-  "代码 commit 晚于最近一次 .research 同步 / 无 open review issue"并拦截一次。
-  绕过该拦截视为违规。
-- watcher 主机制（2026-08-18 起）：**scrontab**（`scrontab -l` 查看；Slurm 每 10 分钟跑一轮
-  orchestrator 单轮，login node 清进程杀不死）。orchestrator 带 per-repo flock，手动
-  `research-watch start` 守护可共存但非必需；agent 输出留痕 `~/.cache/research-watch/agents/`。
+在此处添加本项目特有约束；不要复制 Research OS 通用规则。
