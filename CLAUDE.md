@@ -1,4 +1,4 @@
-# CLAUDE.md — msflow-upgrade-fixture
+# CLAUDE.md — MSFlow
 
 <!-- research-os:managed:start -->
 ## Research OS
