@@ -181,8 +181,7 @@ def main():
             }
             rec = dict(stage=si, step=step_idx, tau=round(tau, 6),
                        sigma_tau=sigma_tau, gamma2=g2,
-                       x_tau_mse=float(((x_tau - x1_gt) ** 2).mean()),
-                       x_tau_hole=utils.mse_masked(x_tau, x1_gt, hole))
+                       x_tau_vs_x1=float(((x_tau - x1_gt) ** 2).mean()))
             imgs = {}
             for name, x0_hat in solves.items():
                 x1_hat = utils.apply_H_tau_inv(x_tau - sigma_tau * x0_hat,
@@ -192,13 +191,20 @@ def main():
                 rec[f"x1_{name}"] = float(((x1_hat - x1_gt) ** 2).mean())
                 rec[f"x1_{name}_hole"] = utils.mse_masked(x1_hat, x1_gt, hole)
                 rec[f"x1_{name}_obs"] = utils.mse_masked(x1_hat, x1_gt, obs)
+                # x_tau_hat = H_tau x1_hat + sigma_tau x0_hat. With the p.20
+                # recovery this returns x_tau by construction, so the curve is a
+                # machine-precision identity rather than a measurement — it is
+                # recorded to show that, not because it carries information.
+                x_tau_hat = (apply_H_tau(x1_hat, tau, s_k, e_k, eff_si)
+                             + sigma_tau * x0_hat)
+                rec[f"xtau_{name}"] = float(((x_tau_hat - x_tau) ** 2).mean())
             rows.append(rec)
             panels[si].append((tau, x_tau[0], imgs["exact"][0], imgs["model"][0]))
             print(f"[s{si} tau={tau:.3f} sig={sigma_tau:.3f}] "
                   f"exact: x0err={rec['x0err_exact']:.2e} x1={rec['x1_exact']:.2e} | "
                   f"model: x0err={rec['x0err_model']:.4f} "
                   f"x1={rec['x1_model']:.4f} (hole {rec['x1_model_hole']:.4f}, "
-                  f"obs {rec['x1_model_obs']:.4f}) | x_tau={rec['x_tau_mse']:.4f}",
+                  f"obs {rec['x1_model_obs']:.4f}) | xtau={rec['xtau_model']:.1e}",
                   flush=True)
 
     out = os.path.join(A2, cli.out)
