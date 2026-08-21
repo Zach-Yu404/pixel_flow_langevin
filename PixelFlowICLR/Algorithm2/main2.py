@@ -71,7 +71,8 @@ def run_posterior_sampling_alg3(
     cg_tol=1e-5, cg_max_iter=50, make_Ak_fns_fn=None, seed=42,
     record_trajectory=False, gamma2_tab=None, h0=utils.H0,
     sigma_min=utils.SIGMA_MIN, ridge_rel=1e-6, cg_max_iter_l14=200,
-    terminal_replace_weight=0.0, check_52=True, rebuild_state=True, **unused_kw,
+    terminal_replace_weight=0.0, check_52=True, rebuild_state=True,
+    recompute_x0=True, **unused_kw,
 ):
     """Algorithm 3 (modified draft p.15).
 
@@ -151,7 +152,7 @@ def run_posterior_sampling_alg3(
 
             for s in range(S):                                       # l.8
                 x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + sigma_tau * x0  # l.9
-                x1_at9, x0_at9, x_tau_l9 = x1, x0, x_tau   # (52) uses these
+                x1_at9, x0_at9 = x1, x0        # (52) compares against these
                 with torch.no_grad():
                     v = model_velocity(model, T, prompt_embeds, size_tensor,
                                        rope_pos, do_cfg, guidance_scale, si)(x_tau)
@@ -180,12 +181,12 @@ def run_posterior_sampling_alg3(
                     b_tilde = b_tilde + math.sqrt(epsilon) * randn_like_cpu(x1)
                 x1 = utils.cg_solve(M_tau, b_tilde, x0=x1.clone(), tol=cg_tol,
                                     max_iter=cg_max_iter_l14 if tau == 0.0 else L)  # l.18
-                x0 = (x_tau - apply_H_tau(x1, tau, s_k, e_k, eff_si)) / float(sigma_tau)  # l.19
-                if os.environ.get("ALG3_TRACE"):
-                    print(f"    s{si} tau={tau:.3f} it{s}: |x0|={float(x0.norm()):.4g} "
-                          f"|x1|={float(x1.norm()):.4g} |x1_hat|={float(x1_hat.norm()):.4g} "
-                          f"|x0_hat|={float(x0_hat.norm()):.4g}", flush=True)
-
+                if recompute_x0:                                     # l.19
+                    # The amplifier: x_tau was rebuilt from x1_hat at l.15, the
+                    # draw returns x1 != x1_hat, and that difference reaches x0
+                    # divided by sigma_tau. Keeping the Langevin x0 instead
+                    # leaves it bounded (0.69-0.80 against 1051 with l.19 on).
+                    x0 = (x_tau - apply_H_tau(x1, tau, s_k, e_k, eff_si)) / float(sigma_tau)
                 if check_52 and s == 0:
                     # (52): H(x1_hat - x1) == sigma(x0 - x0_hat), against the x1
                     # and x0 that built x_tau at l.9 — not the updated ones.
@@ -193,13 +194,6 @@ def run_posterior_sampling_alg3(
                     rhs = float(sigma_tau) * (x0_at9 - x0_hat)
                     scale = max(float(rhs.abs().max()), 1e-12)
                     resid = float((lhs - rhs).abs().max()) / scale
-                    if os.environ.get("ALG3_DEBUG"):
-                        print(f"    [52] s{si} tau={tau:.3f} rel_resid={resid:.2e} "
-                              f"|lhs|max={float(lhs.abs().max()):.3e} "
-                              f"|rhs|max={float(rhs.abs().max()):.3e} "
-                              f"sigma={float(sigma_tau):.4f} "
-                              f"H(H^-1)err={float((apply_H_tau(x1_hat,tau,s_k,e_k,eff_si)-(x_tau_l9 - float(sigma_tau)*x0_hat)).abs().max()):.3e}",
-                              flush=True)
                     # relative: (52) is exact, so only float32 round-off remains
                     if resid > 1e-4:
                         raise AssertionError(
