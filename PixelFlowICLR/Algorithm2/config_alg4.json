@@ -142,6 +142,32 @@
    45
   ]
  },
+ "contraction": {
+  "out": "results/alg4_box_stage3_diagnosis",
+  "image": "junco",
+  "frames": [
+   25,
+   29,
+   30,
+   31,
+   32,
+   34,
+   36,
+   38
+  ],
+  "deltas": [
+   0.02,
+   0.05,
+   0.1,
+   0.2,
+   0.4,
+   0.8,
+   1.6,
+   3.2
+  ],
+  "repeats": 1,
+  "replay_x1": "results/alg4_box_stage3_diagnosis/diversity/measured_seed42.npy"
+ },
  "verify": {
   "res": 16
  }

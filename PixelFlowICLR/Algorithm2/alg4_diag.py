@@ -492,3 +492,78 @@ def plot_s_prior_vs_diversity(summary, path):
     axes[1].grid(alpha=0.3); axes[1].legend(fontsize=8)
     axes[1].set_title("...but is that posterior width, or divergence?")
     fig.tight_layout(); fig.savefig(path, dpi=150); plt.close(fig)
+
+
+def plot_contraction_map(rows, path):
+    """The one-step map of the inner loop, measured rather than inferred.
+
+    x-axis: hole MSE planted before the pass. y-axis: hole MSE after one
+    clean-endpoint -> Block 1 -> Block 2 pass. The diagonal is the fixed-point
+    line: a frame whose curve sits below it contracts, above it diverges, and
+    where the curve crosses the diagonal from below the crossing is a stable
+    fixed point -- the value the inner loop settles at.
+    """
+    byf, byr = {}, {}
+    for r in rows:
+        # The replay arm is the accumulated error the sampler itself produced,
+        # injected at this frame. It is drawn as a separate marker and never as
+        # part of the white-corruption curve: the point of the probe is that the
+        # two behave differently at the same magnitude.
+        (byr if r.get("kind") == "replay" else byf).setdefault(
+            r["frame"], []).append(r)
+    frames = sorted(byf)
+    fig, axes = plt.subplots(1, 2, figsize=(12.5, 5.2))
+
+    ax = axes[0]
+    lo = min(r["d_in"] for r in rows); hi = max(max(r["d_in"] for r in rows),
+                                                max(r["d_out"] for r in rows))
+    ax.plot([lo, hi], [lo, hi], "k--", lw=1,
+            label=r"fixed-point line $\delta'=\delta$")
+    cmap = plt.get_cmap("viridis")
+    for i, f in enumerate(frames):
+        rs = sorted(byf[f], key=lambda r: r["d_in"])
+        xs, ys = {}, {}
+        for r in rs:
+            xs.setdefault(r["delta_planted"], []).append(r["d_in"])
+            ys.setdefault(r["delta_planted"], []).append(r["d_out"])
+        dl = sorted(xs)
+        ax.plot([np.mean(xs[d]) for d in dl], [np.mean(ys[d]) for d in dl],
+                "-o", ms=3, color=cmap(i / max(len(frames) - 1, 1)),
+                label=f"frame {f} (st {rs[0]['stage']}, "
+                      fr"$\sigma_\tau$={rs[0]['sigma_tau']:.3f})")
+    for i, f in enumerate(sorted(byr)):
+        r = byr[f][0]
+        col = cmap(frames.index(f) / max(len(frames) - 1, 1)) if f in frames else "k"
+        ax.plot([r["d_in"]], [r["d_out"]], "*", ms=14, color=col,
+                markeredgecolor="k", markeredgewidth=0.6,
+                label="replay: error the sampler produced" if i == 0 else None)
+    ax.set_xscale("log"); ax.set_yscale("log")
+    ax.set_xlabel(r"hole MSE planted, $\delta$")
+    ax.set_ylabel(r"hole MSE after one pass, $\delta'$")
+    ax.set_title("One-step map (lines = white corruption, stars = replay)")
+    ax.grid(alpha=0.3); ax.legend(fontsize=7)
+
+    ax = axes[1]
+    for i, f in enumerate(frames):
+        rs = sorted(byf[f], key=lambda r: r["d_in"])
+        by_d = {}
+        for r in rs:
+            by_d.setdefault(r["delta_planted"], []).append(r)
+        dl = sorted(by_d)
+        ax.plot([np.mean([r["d_in"] for r in by_d[d]]) for d in dl],
+                [np.mean([r["d_hat"] / max(r["d_in"], 1e-12) for r in by_d[d]])
+                 for d in dl],
+                "-o", ms=3, color=cmap(i / max(len(frames) - 1, 1)),
+                label=f"frame {f}")
+    for f in sorted(byr):
+        r = byr[f][0]
+        col = cmap(frames.index(f) / max(len(frames) - 1, 1)) if f in frames else "k"
+        ax.plot([r["d_in"]], [r["d_hat"] / max(r["d_in"], 1e-12)], "*", ms=14,
+                color=col, markeredgecolor="k", markeredgewidth=0.6)
+    ax.axhline(1.0, color="k", ls="--", lw=1)
+    ax.set_xscale("log")
+    ax.set_xlabel(r"hole MSE planted, $\delta$")
+    ax.set_ylabel(r"contraction of (19): MSE$(\hat{x}_1)$ / $\delta$")
+    ax.set_title("Does (19) pull it back?  stars = replay")
+    ax.grid(alpha=0.3); ax.legend(fontsize=7)
+    fig.tight_layout(); fig.savefig(path, dpi=150); plt.close(fig)

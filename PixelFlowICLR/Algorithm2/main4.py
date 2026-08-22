@@ -72,6 +72,7 @@ import argparse   # noqa: E402
 import csv        # noqa: E402
 import errno      # noqa: E402
 import json       # noqa: E402
+import math       # noqa: E402
 import time       # noqa: E402
 
 from utils import (  # noqa: E402  (import first: sets IP_package sys.path + chdir)
@@ -92,7 +93,10 @@ import matplotlib.pyplot as plt                                # noqa: E402
 
 from ms_posterior_sampling_article_version_final_utils import (  # noqa: E402
     apply_G, apply_H_tau, compute_sigma_tau, cg_solve, make_Ak_fns,
+    make_velocity_fn,
 )
+import torch.nn.functional as F                                # noqa: E402
+from pixelflow.scheduling_pixelflow import PixelFlowScheduler  # noqa: E402
 from pixelflow.utils import config as config_utils             # noqa: E402
 from demo_runner import load_demo_images                        # noqa: E402
 import measurement                                              # noqa: E402
@@ -834,6 +838,139 @@ def run_diversity(args):
     return 0
 
 
+# ═════════ mode: contraction (controlled one-step probe, box only) ═════════
+def _stage_schedule(config, si, ode_steps, shift, device):
+    """The sampler's own scheduler state for one stage, so the probe runs on
+    exactly the (s_k, e_k, tau, T) the trajectory saw."""
+    sc = PixelFlowScheduler(config.scheduler.num_train_timesteps,
+                            num_stages=int(config.scheduler.num_stages), gamma=-1 / 3)
+    sc.set_timesteps(int(ode_steps), si, device=device, shift=shift)
+    return sc
+
+
+def run_contraction(args):
+    """Is the stage-3 runaway inevitable, and does the network still pull back?
+
+    The trajectory alone cannot separate "the inner loop is unstable here" from
+    "one unlucky Block-2 draw kicked it out". So probe the map directly: plant a
+    KNOWN amount of error in the hole, run exactly one clean-endpoint -> Block 1
+    -> Block 2 pass at a given frame, and read off where the error goes. Sweeping
+    the planted error traces the one-step map and its fixed points.
+
+    Nothing here is a new hyperparameter: the planted error is the probe's
+    independent variable, not a setting the sampler ever uses.
+    """
+    out = os.path.join(_resolve_out(args.out), "contraction")
+    os.makedirs(out, exist_ok=True)
+    device = "cuda:0"
+
+    config = _with_retries("load model config", lambda: OmegaConf.load(
+        os.path.join(PATHS["model_dir"], "config.yaml")))
+    model = _with_retries("load model weights", lambda: _load_model(config, device))
+    gamma2_tab = _with_retries("read gamma2 table",
+                               lambda: json.load(open(PATHS["gamma2_table"]))["table"])
+    num_stages = int(config.scheduler.num_stages)
+    s2_fn = make_s2_fn(S_PRIOR, num_stages)
+    S = _box_setup(args.image, device, config)
+    kw = S["kw"]
+    ode_steps = int(kw["ode_steps_per_stage"])
+    pyr = base.gt_stage_pyramid(S["gt"], num_stages)
+
+    rows = []
+    gen = torch.Generator(device="cpu").manual_seed(int(ALG["seed"]))
+    for frame in args.frames:
+        si, step = divmod(int(frame), ode_steps)
+        sc = _stage_schedule(config, si, ode_steps, float(kw["shift"]), device)
+        s_k, e_k = float(sc.start_t[si]), float(sc.end_t[si])
+        tau = float(sc.t[step]); T = sc.Timesteps[step]
+        sigma_tau = compute_sigma_tau(tau, s_k, e_k)
+        gamma2 = float(gamma2_tab[str(si)].get(
+            f"{round(tau, 6)}", list(gamma2_tab[str(si)].values())[step]))
+        s2 = float(s2_fn(si, float(sigma_tau)))
+        gt_k = pyr[si]
+        h, w = gt_k.shape[-2:]
+        hole_k = F.interpolate(S["hole"], size=(h, w), mode="nearest")
+        Ak, ATk = S["mkA"](S["op"], S["y"], (1, 3, h, w), device)
+        M_den, Cinv, inv_e2, inv_s2, inv_S = make_M_tau_den(
+            Ak, ATk, S["sigma_n"], sigma_tau, tau, s_k, e_k, si, s2)
+        inv_S_half = 1.0 / math.sqrt(s2)
+        pe = torch.tensor([int(S["demo"]["class_idx"])], dtype=torch.int32, device=device)
+        do_cfg = float(kw["guidance_scale"]) > 0
+        emb = (torch.cat([int(model.num_classes) * torch.ones_like(pe), pe], 0)
+               if do_cfg else pe)
+        size_tensor, rope_pos = base.rope_for(model, h, w, device)
+        vfn = make_velocity_fn(model, T, emb, size_tensor, rope_pos, do_cfg,
+                               float(kw["guidance_scale"]), si)
+
+        # The planted-noise sweep, plus (optionally) a REPLAY arm: the actual x1
+        # the sampler ended up with, injected at this frame. White corruption of
+        # the same MSE and the sampler's own structured error are not the same
+        # object, and the probe is only informative if it says which one the
+        # denoiser can undo.
+        probes = [("gauss", d) for d in args.deltas]
+        replay = None
+        if getattr(args, "replay_x1", None):
+            rp = _resolve_out(args.replay_x1)
+            if os.path.exists(rp):
+                replay = torch.from_numpy(np.load(rp)).to(device)
+                probes.append(("replay", float("nan")))
+            else:
+                print(f"[contraction] replay_x1 {rp} not found, skipping", flush=True)
+        for kind, delta in probes:
+            for rep in range(int(args.repeats)):
+                if kind == "replay":
+                    # downsample the full-res sample to this stage, hole only:
+                    # the observed region is kept at GT so the two arms differ
+                    # ONLY in the structure of the hole error.
+                    rk = F.interpolate(replay, size=(h, w), mode="area")
+                    x1 = gt_k * (1.0 - hole_k) + rk * hole_k
+                else:
+                    n = torch.randn(gt_k.shape, generator=gen).to(device)
+                    x1 = gt_k + math.sqrt(delta) * n * hole_k
+                d_in = mse_masked(x1, gt_k, hole_k)
+                xi0 = torch.randn(gt_k.shape, generator=gen).to(device)
+                x_tau = apply_H_tau(x1, tau, s_k, e_k, si) + sigma_tau * xi0
+                with torch.no_grad():
+                    v = vfn(x_tau)
+                x1_hat = clean_endpoint_solve(x_tau, v, sigma_tau, s_k, e_k, tau,
+                                              gamma2, si, float(kw["cg_tol"]),
+                                              ALG["cg_max_iter_endpoint"],
+                                              x1_warm=x1.clone())
+                d_hat = mse_masked(x1_hat, gt_k, hole_k)
+                xi_y = torch.randn(S["y"].shape, generator=gen).to(device)
+                xi_h = torch.randn(gt_k.shape, generator=gen).to(device)
+                xi_s = torch.randn(gt_k.shape, generator=gen).to(device)
+                b_t = (inv_e2 * ATk(S["y"]) + Cinv(x1_hat)
+                       + (1.0 / S["sigma_n"]) * ATk(xi_y)
+                       + (1.0 / float(sigma_tau)) * apply_H_tau(xi_h, tau, s_k, e_k, si)
+                       + inv_S_half * xi_s)
+                x1_out = cg_solve(M_den, b_t, x0=x1.clone(),
+                                  tol=float(kw["cg_tol"]),
+                                  max_iter=int(kw["cg_max_iter"]))
+                d_out = mse_masked(x1_out, gt_k, hole_k)
+                rows.append(dict(frame=int(frame), stage=si, step=step, tau=tau,
+                                 kind=kind,
+                                 sigma_tau=float(sigma_tau), gamma2=gamma2, s2=s2,
+                                 h_tau=(1 - tau) * s_k + tau * e_k,
+                                 C_inv=inv_s2 * ((1 - tau) * s_k + tau * e_k) ** 2 + inv_S,
+                                 rep=rep, delta_planted=delta,
+                                 d_in=d_in, d_hat=d_hat, d_out=d_out,
+                                 endpoint_gain=d_hat - d_in,
+                                 block1_gain=d_out - d_hat,
+                                 net_gain=d_out - d_in))
+                print(f"  frame {frame:>2} {kind:<6} delta={delta:<6} rep{rep}: "
+                      f"in={d_in:.4f} -> hat={d_hat:.4f} -> out={d_out:.4f}",
+                      flush=True)
+
+    path = os.path.join(out, "contraction_map.csv")
+    with open(path, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        w.writeheader(); w.writerows(rows)
+    alg4_diag.plot_contraction_map(rows, os.path.join(out, "contraction_map.png"))
+    print(f"[contraction] wrote {path}", flush=True)
+    return 0
+
+
 # ══════════════════════════════ mode: verify ═══════════════════════════════
 def run_verify(args):
     """CPU component audit A1-A7 (dense float64) of the ALGORITHM-4-SPECIFIC
@@ -970,6 +1107,35 @@ def run_verify(args):
         eta * np.sqrt(y_probe.numel()))
     report("||A x1 - y||/(eta sqrt(m))", abs(resid - ref), 1e-12)
 
+    print("== A8: sigma_tau -> 0 drives (19) to H_tau^-1 x_tau, network excluded ==")
+    # Using N = sigma B + (e-s) H (draft (3)), sigma -> 0 gives N -> (e-s) H, so
+    #     [N^2+g2H^2] x1_hat = N[(e-s)x_tau + sigma v] + g2 H x_tau
+    # collapses to [(e-s)^2+g2] H^2 x1_hat = [(e-s)^2+g2] H x_tau, i.e.
+    #     x1_hat = H_tau^-1 x_tau,   for ANY G and independently of v_theta.
+    # The velocity enters (19) only through the term sigma * N * v, so its weight
+    # is O(sigma_tau). This is the sigma->0 counterpart of the draft's gamma->inf
+    # limit (A.3); the draft does not state it, and it is what empties the
+    # clean-endpoint estimate of network information at the end of the last stage.
+    s3, e3 = 0.6, 1.0                      # the only stage with e_k = 1
+    v1 = torch.randn(SHAPE, generator=g)
+    v2 = torch.randn(SHAPE, generator=g)
+    dv = float((v1 - v2).norm())
+    print(f"  {'tau':>7}{'sigma_tau':>11}{'|x1hat-H^-1 x_tau|':>21}"
+          f"{'d|x1hat|/d|v| (=b)':>20}")
+    for tau3 in (0.5, 0.9, 0.99, 0.999, 0.9999):
+        sig3 = compute_sigma_tau(tau3, s3, e3)
+        xt = torch.randn(SHAPE, generator=g)
+        g2 = 0.02
+        a1 = clean_endpoint_solve(xt, v1, sig3, s3, e3, tau3, g2, 3, 1e-13, 6000)
+        a2 = clean_endpoint_solve(xt, v2, sig3, s3, e3, tau3, g2, 3, 1e-13, 6000)
+        ref = apply_H_tau_inv(xt, tau3, s3, e3, 3)
+        gap = float((a1 - ref).abs().max())
+        bcoef = float((a1 - a2).norm()) / dv
+        print(f"  {tau3:>7.4f}{sig3:>11.6f}{gap:>21.3e}{bcoef:>20.6f}")
+        if tau3 == 0.9999:
+            report("sigma->0: (19) == H_tau^-1 x_tau", gap, 1e-3)
+            report("sigma->0: velocity weight b -> 0", bcoef, 1e-3, "b")
+
     print("\n" + ("ALL CHECKS PASSED" if checks["ok"] else "** SOME CHECKS FAILED **"))
     return 0 if checks["ok"] else 1
 
@@ -977,7 +1143,7 @@ def run_verify(args):
 # ═════════════════════════════ dispatcher ══════════════════════════════════
 RUNNERS = {"full_ip": run_full_ip, "measure_s2": run_measure_s2,
            "diagnose": run_diagnose, "diversity": run_diversity,
-           "verify": run_verify}
+           "contraction": run_contraction, "verify": run_verify}
 
 # Exact key contract for config_alg4.json — same discipline as main.py.
 # "algorithm" deliberately has NO h0 and NO ridge_rel: Algorithm 4 has no step
@@ -998,6 +1164,7 @@ CONFIG_SCHEMA = {
     "measure_s2": {"out"},
     "diagnose": {"out", "image", "sit_variants", "compare_to"},
     "diversity": {"out", "image", "arms", "seeds"},
+    "contraction": {"out", "image", "frames", "deltas", "repeats", "replay_x1"},
     "verify": {"res"},
 }
 TASK_KEYS = {"sigma_n", "operator", "terminal_replace_weight", "measurement_mode",
