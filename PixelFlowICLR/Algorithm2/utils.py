@@ -520,11 +520,12 @@ def run_posterior_sampling_alg4(
     ode_steps_per_stage=10, shift=1.0,
     # Structural / physical
     guidance_scale=0.0, class_label=10,
-    g_bypass_stage3=True,
     cg_tol=1e-5, cg_max_iter=50,     # draft: CG iterations L
     make_Ak_fns_fn=None,
     seed=42,
     record_trajectory=False,
+    diag=None,                       # optional Alg4Diagnostics recorder;
+                                     # READ-ONLY and RNG-free (see alg4_diag.py)
     # Algorithm-4 specific
     gamma2_tab=None,                 # measured gamma^2(k, tau) table, (20)
     s2_fn=None,                      # REQUIRED (stage_idx, sigma_tau) -> s^2
@@ -615,6 +616,12 @@ def run_posterior_sampling_alg4(
             f"run_posterior_sampling_alg4 got {dead}: Algorithm 4 has no step "
             "size (Sec. 6.3) and needs no ridge (Prop. 4(a)). Passing these "
             "would change nothing, so they are refused rather than ignored.")
+    if "g_bypass_stage3" in unused_kw:
+        raise TypeError(
+            "run_posterior_sampling_alg4 got g_bypass_stage3: it is not a "
+            "variable here. The stage-3 bypass is the repo's normal flow and is "
+            "fixed on (eff_si = si), so there is nothing to pass; CONSTRAINTS "
+            "forbids turning it off in any case.")
 
     B = gt.shape[0]
     S_it = int(float(num_langevin))      # draft symbol S (inner iterations)
@@ -650,6 +657,8 @@ def run_posterior_sampling_alg4(
     pyr = base.gt_stage_pyramid(gt, num_stages)
     x1 = torch.zeros((B, 3, h, w), device=device)                    # l.1
     rows, traj = [], []
+    frame = -1          # global step index across all stages; the "frame id"
+                        # the trajectory frames are numbered by
 
     # ── main loop ──────────────────────────────────────────────────────
     for si in range(num_stages):                                     # l.2
@@ -658,7 +667,11 @@ def run_posterior_sampling_alg4(
         sc.set_timesteps(ode_steps_si, si, device=device, shift=shift)
         s_k = float(sc.start_t[si])
         e_k = float(sc.end_t[si])
-        eff_si = si if g_bypass_stage3 else None
+        # Fixed, not configurable. Passing the stage index is the repo's normal
+        # flow: apply_G returns the identity at stage 3, so there G = I, H_tau
+        # and N_k are scalars, and ker(G) is trivial. CONSTRAINTS forbids
+        # turning this off, so Algorithm 4 does not carry it as a knob.
+        eff_si = si
 
         if si > 0:                                                   # l.18: U^(1)
             h *= 2
@@ -675,6 +688,7 @@ def run_posterior_sampling_alg4(
             hole_mask.to(device).float(), size=(h, w), mode="nearest")
 
         for step_idx, T in enumerate(sc.Timesteps):                  # l.4
+            frame += 1
             tau = float(sc.t[step_idx])
             sigma_tau = compute_sigma_tau(tau, s_k, e_k)             # l.5
             velocity_fn = make_velocity_fn(
@@ -696,10 +710,17 @@ def run_posterior_sampling_alg4(
                 M_den, Cinv, inv_e2, inv_s2, inv_S = make_M_tau_den(
                     Ak, ATk, eta, sigma_tau, tau, s_k, e_k, eff_si, s2)
                 inv_S_half = 1.0 / math.sqrt(s2)
+                if diag is not None:
+                    diag.on_frame_setup(
+                        frame=frame, stage=si, step=step_idx, tau=tau,
+                        s_k=s_k, e_k=e_k, sigma_tau=float(sigma_tau),
+                        gamma2=gamma2, s2=s2, eta=eta, eff_si=eff_si,
+                        A_fn=Ak, AT_fn=ATk, shape=x1.shape, device=device)
 
                 x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + sigma_tau * x0  # l.8
 
                 for s in range(S_it):                                # l.9
+                    x1_in = x1 if diag is None else x1.clone()
                     with torch.no_grad():
                         v = velocity_fn(x_tau)                       # l.10
                     # l.11 (19): the clean endpoint, one solve
@@ -727,6 +748,13 @@ def run_posterior_sampling_alg4(
                     xi_0 = randn_like_cpu(x0)                        # l.14
                     x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + \
                         float(sigma_tau) * xi_0                      # (23)
+                    if diag is not None:
+                        diag.on_inner(
+                            frame=frame, stage=si, step=step_idx, inner=s,
+                            tau=tau, sigma_tau=float(sigma_tau),
+                            x1_in=x1_in, x1_hat=x1_hat, x1_out=x1,
+                            x_tau=x_tau, v=v, gt_k=pyr[si], hole_k=hole_k,
+                            s_k=s_k, e_k=e_k, eff_si=eff_si)
 
                 # l.16 — leave the coordinates. Provably equal to the last
                 # xi_0 (see A5); computed from the state as the listing writes it.
@@ -741,7 +769,13 @@ def run_posterior_sampling_alg4(
             if hole_k is not None:
                 row["mse_hole"] = mse_masked(x1, pyr[si], hole_k)
                 row["mse_obs"] = mse_masked(x1, pyr[si], 1.0 - hole_k)
+            row["frame"] = frame
             rows.append(row)
+            if diag is not None:
+                diag.on_frame_end(frame=frame, row=row, x1=x1, x0=x0,
+                                  x1_hat=x1_hat, gt_k=pyr[si], hole_k=hole_k,
+                                  tau=tau, sigma_tau=float(sigma_tau),
+                                  s_k=s_k, e_k=e_k, eff_si=eff_si)
             if record_trajectory:
                 x_tau_rec = apply_H_tau(x1, tau, s_k, e_k, eff_si) + \
                     float(sigma_tau) * x0

@@ -44,6 +44,13 @@ Modes:
                inpainting), loss curves, trajectory frames
   measure_s2 : measure the per-pixel variance of the stage pyramid per stage
                and write s2_meas.json (the Sec. 8.6 quantity), no GPU needed
+  diagnose   : THE box-inpainting diagnosis entry point. One image, full
+               per-frame trajectory metrics, Block-1/Block-2 error
+               decomposition, schedule and precision terms, critical-frame
+               detection, S_it comparison, plots and a montage
+  diversity  : repeated posterior samples at fixed y across S_prior arms, so a
+               reconstruction gain can be told apart from Block 1 collapsing
+               onto x1_hat (draft Sec. 8.2 / 8.6)
   verify     : CPU component audit A1-A7 (dense float64) of the claims that are
                specific to Algorithm 4 -- the shared operators are already
                covered by main.py --mode verify
@@ -74,6 +81,7 @@ from utils import (  # noqa: E402  (import first: sets IP_package sys.path + chd
     measurement_residual, mse_masked, run_posterior_sampling_alg4,
 )
 import onestep_mse_vs_t as base  # noqa: E402
+import alg4_diag  # noqa: E402
 
 import numpy as np                                             # noqa: E402
 import torch                                                   # noqa: E402
@@ -565,6 +573,267 @@ def run_full_ip(args):
     print(f"[done] {frame_idx} frames -> {frames_dir}", flush=True)
 
 
+# ═══════════════════ mode: diagnose (box_inpainting only) ══════════════════
+def _box_setup(image, device, config):
+    """The single (task, image) cell every diagnosis mode runs on. box only --
+    this entry point is deliberately not general."""
+    task = "box_inpainting"
+    if task not in TASKS_SETUP:
+        raise KeyError('tasks_setup has no "box_inpainting" entry')
+    demos_all = _with_retries("load_demo_images", lambda: load_demo_images(
+        resolution=256, demo_dir=PATHS["demo_dir"]))
+    by_short = {d["short_name"]: d for d in demos_all}
+    if image not in by_short:
+        raise KeyError(f"image {image!r} not in demo set {sorted(by_short)}")
+    d = by_short[image]
+    spec = TASKS_SETUP[task]
+    sigma_n = float(spec["sigma_n"])
+    op, mask, y, _, _, mkA, _ = _with_retries(
+        f"{task}/{image} setup",
+        lambda: build_setup_and_measurement(
+            task, spec["operator"], d, sigma_n, 256, device))
+    gt = d["gt"].unsqueeze(0).to(device)
+    hole = (1.0 - mask).to(device).float()
+    return dict(task=task, demo=d, op=op, mask=mask, y=y, mkA=mkA, gt=gt,
+                hole=hole, sigma_n=sigma_n, kw=task_kw(task), spec=spec)
+
+
+def _run_once(model, config, S, device, *, s2_fn, gamma2_tab, seed,
+              num_langevin=None, diag=None, record_trajectory=False):
+    kw = dict(S["kw"])
+    if num_langevin is not None:
+        kw["num_langevin"] = int(num_langevin)
+    return run_posterior_sampling_alg4(
+        model, config, S["gt"], S["y"], S["op"], S["sigma_n"], device,
+        gamma2_tab=gamma2_tab, s2_fn=s2_fn, hole_mask=S["hole"],
+        make_Ak_fns_fn=S["mkA"], seed=int(seed), diag=diag,
+        record_trajectory=record_trajectory,
+        sigma_min=ALG["sigma_min"],
+        cg_max_iter_endpoint=ALG["cg_max_iter_endpoint"],
+        terminal_replace_weight=S["spec"]["terminal_replace_weight"],
+        **{k: v for k, v in kw.items() if k not in ("class_label", "seed")},
+        class_label=int(S["demo"]["class_idx"]))
+
+
+def run_diagnose(args):
+    out = _resolve_out(args.out)
+    os.makedirs(out, exist_ok=True)
+    device = "cuda:0"
+
+    config = _with_retries("load model config", lambda: OmegaConf.load(
+        os.path.join(PATHS["model_dir"], "config.yaml")))
+    model = _with_retries("load model weights", lambda: _load_model(config, device))
+    model.register_forward_pre_hook(count_nfe_hook)
+    gamma2_tab = _with_retries(
+        "read gamma2 table",
+        lambda: json.load(open(PATHS["gamma2_table"]))["table"])
+    s2_fn = make_s2_fn(S_PRIOR, int(config.scheduler.num_stages))
+    S = _box_setup(args.image, device, config)
+    print(f"[diagnose] box_inpainting/{args.image}  S_prior={S_PRIOR}  "
+          f"S_it={S['kw']['num_langevin']}", flush=True)
+
+    # ── the instrumented run ───────────────────────────────────────────────
+    n_frames = 4 * int(S["kw"]["ode_steps_per_stage"])
+    diag = alg4_diag.Alg4Diagnostics(
+        gt_full=S["gt"], hole_full=S["hole"],
+        capture_frames=range(n_frames))          # capture everything: one image
+    NFE["n"] = 0
+    t0 = time.time()
+    x1, rows, _ = _run_once(model, config, S, device, s2_fn=s2_fn,
+                            gamma2_tab=gamma2_tab, seed=ALG["seed"], diag=diag)
+    print(f"[diagnose] instrumented run done, NFE={NFE['n']} "
+          f"[{time.time()-t0:.0f}s]", flush=True)
+
+    paths = diag.write_csv(out)
+    critical = alg4_diag.find_critical_frames(diag.frames)
+    with open(os.path.join(out, "critical_frames.csv"), "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=["kind", "stage", "frame", "tau",
+                                          "value", "note"])
+        w.writeheader(); w.writerows(critical)
+    print("[diagnose] critical frames:")
+    for c in critical:
+        print(f"    {c['kind']:<16} frame {c['frame']:>3}  stage {c['stage']}  "
+              f"tau={c['tau']:.3f}  mse_full={c['value']:.4f}  ({c['note']})")
+
+    # ── the diagnostics must not perturb the sampler ───────────────────────
+    # Compared against the committed full_ip run of the same cell, which used
+    # the same seed and config and had no diag object and no diagnostics code
+    # path at all. Any disagreement beyond GPU non-determinism means the hooks
+    # are not read-only.
+    cmp_path = _resolve_out(args.compare_to)
+    ident = {}
+    if os.path.exists(cmp_path):
+        with open(cmp_path, newline="") as f:
+            ref = [r for r in csv.DictReader(f)
+                   if r["task"] == "box_inpainting" and r["image"] == args.image]
+        if ref:
+            got = dict(post_mse=float(((x1 - S["gt"]) ** 2).mean()),
+                       post_hole=mse_masked(x1, S["gt"], S["hole"]),
+                       meas_resid=rows[-1]["meas_resid"])
+            for k, v in got.items():
+                rv = float(ref[0][k])
+                ident[k] = dict(instrumented=v, committed=rv,
+                                rel=abs(v - rv) / max(abs(rv), 1e-12))
+            print("[diagnose] read-only check vs committed full_ip run:")
+            for k, d in ident.items():
+                print(f"    {k:<12} {d['instrumented']:.6f} vs {d['committed']:.6f}"
+                      f"   rel {d['rel']:.2e}")
+    json.dump(ident, open(os.path.join(out, "readonly_check.json"), "w"), indent=1)
+
+    # ── S_it comparison (Sec. 4): is the decay inner-loop feedback? ─────────
+    sit_rows = []
+    default_sit = int(S["kw"]["num_langevin"])
+    for sit in [default_sit] + [int(v) for v in args.sit_variants]:
+        if any(r["S_it"] == sit for r in sit_rows):
+            continue
+        if sit == default_sit:
+            frames = diag.frames
+        else:
+            d2 = alg4_diag.Alg4Diagnostics(gt_full=S["gt"], hole_full=S["hole"])
+            _run_once(model, config, S, device, s2_fn=s2_fn,
+                      gamma2_tab=gamma2_tab, seed=ALG["seed"],
+                      num_langevin=sit, diag=d2)
+            frames = d2.frames
+            with open(os.path.join(out, f"trajectory_metrics_Sit{sit}.csv"),
+                      "w", newline="") as f:
+                fields = list(dict.fromkeys(k for r in frames for k in r))
+                w = csv.DictWriter(f, fieldnames=fields, restval="")
+                w.writeheader(); w.writerows(frames)
+        st3 = [r for r in frames if r["stage"] == 3]
+        sit_rows.append(dict(
+            S_it=sit,
+            mse_full_final=frames[-1]["mse_full"],
+            psnr_full_final=frames[-1]["psnr_full"],
+            hole_full_final=frames[-1].get("hole_full", ""),
+            obs_full_final=frames[-1].get("obs_full", ""),
+            mse_full_stage3_start=st3[0]["mse_full"],
+            mse_full_stage3_growth=(st3[-1]["mse_full"] / st3[0]["mse_full"]
+                                    if st3[0]["mse_full"] > 0 else float("nan")),
+            meas_resid_final=frames[-1]["meas_resid"]))
+        print(f"[diagnose] S_it={sit:<3} final mse_full="
+              f"{sit_rows[-1]['mse_full_final']:.4f}  stage3 growth="
+              f"{sit_rows[-1]['mse_full_stage3_growth']:.2f}x", flush=True)
+    with open(os.path.join(out, "sit_comparison.csv"), "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(sit_rows[0].keys()))
+        w.writeheader(); w.writerows(sit_rows)
+
+    # ── plots ──────────────────────────────────────────────────────────────
+    alg4_diag.plot_loss_vs_frame(diag.frames, critical,
+                                 os.path.join(out, "loss_vs_frame.png"))
+    alg4_diag.plot_h_sigma(diag.precision, diag.frames, critical,
+                           os.path.join(out, "h_sigma_vs_frame.png"))
+    alg4_diag.plot_block_decomposition(
+        diag.inner, diag.frames, critical,
+        os.path.join(out, "block_error_decomposition.png"))
+    alg4_diag.plot_inner_feedback(diag.inner,
+                                  os.path.join(out, "inner_loop_feedback.png"))
+    ids = alg4_diag.montage_frames(diag.frames, critical)
+    alg4_diag.plot_montage(diag.captured, diag.frames, ids, S["gt"], S["hole"],
+                           os.path.join(out, "trajectory_montage.png"),
+                           device=device)
+    json.dump(dict(montage_frames=ids), open(
+        os.path.join(out, "montage_frames.json"), "w"), indent=1)
+    print(f"[diagnose] wrote {sorted(os.listdir(out))}", flush=True)
+    return 0
+
+
+# ═════════════ mode: diversity (S_prior arms x seeds, fixed y) ═════════════
+def run_diversity(args):
+    """Sec. 8.2 / 8.6: a smaller s2 improves reconstruction, but the draft says
+    that is also what collapsing Block 1 onto x1_hat looks like. The two are
+    told apart by the spread of repeated posterior samples inside ker(A_k) --
+    for box inpainting, the hole.
+
+    y is built once and reused for every seed (measurement_seed is independent
+    of the sampler seed), which is the repo's standing rule for this kind of
+    comparison.
+    """
+    out = os.path.join(_resolve_out(args.out), "diversity")
+    sens = os.path.join(_resolve_out(args.out), "s_prior_sensitivity")
+    os.makedirs(out, exist_ok=True); os.makedirs(sens, exist_ok=True)
+    device = "cuda:0"
+
+    config = _with_retries("load model config", lambda: OmegaConf.load(
+        os.path.join(PATHS["model_dir"], "config.yaml")))
+    model = _with_retries("load model weights", lambda: _load_model(config, device))
+    model.register_forward_pre_hook(count_nfe_hook)
+    gamma2_tab = _with_retries(
+        "read gamma2 table",
+        lambda: json.load(open(PATHS["gamma2_table"]))["table"])
+    num_stages = int(config.scheduler.num_stages)
+    S = _box_setup(args.image, device, config)
+
+    per_run = os.path.join(out, "per_run.csv")
+    done = set()
+    if os.path.exists(per_run):
+        with open(per_run, newline="") as f:
+            done = {(r["arm"], int(r["seed"])) for r in csv.DictReader(f)}
+        print(f"[diversity] resuming; {len(done)} run(s) already on disk", flush=True)
+
+    summary = []
+    for arm in args.arms:
+        name = arm["name"]
+        spec = {k: v for k, v in arm.items() if k != "name"}
+        _check_s_prior(spec)
+        s2_fn = make_s2_fn(spec, num_stages)
+        samples = []
+        for seed in args.seeds:
+            tag = f"{name}_seed{seed}"
+            npy = os.path.join(out, f"{tag}.npy")
+            if (name, int(seed)) in done and os.path.exists(npy):
+                samples.append(torch.from_numpy(np.load(npy)).to(device))
+                print(f"[skip] {tag}", flush=True)
+                continue
+            t0 = time.time()
+            x1, rows, _ = _with_retries(tag, lambda: _run_once(
+                model, config, S, device, s2_fn=s2_fn, gamma2_tab=gamma2_tab,
+                seed=seed))
+            np.save(npy, x1.detach().cpu().numpy())
+            samples.append(x1.detach())
+            row = dict(arm=name, seed=int(seed),
+                       s2_stage3=float(s2_fn(num_stages - 1, 0.4)),
+                       mse=float(((x1 - S["gt"]) ** 2).mean()),
+                       hole=mse_masked(x1, S["gt"], S["hole"]),
+                       obs=mse_masked(x1, S["gt"], 1.0 - S["hole"]),
+                       meas_resid=rows[-1]["meas_resid"])
+            _append_rows(per_run, ["arm", "seed", "s2_stage3", "mse", "hole",
+                                   "obs", "meas_resid"], [row])
+            print(f"[{tag}] hole={row['hole']:.4f} obs={row['obs']:.5f} "
+                  f"resid={row['meas_resid']:.3f} [{time.time()-t0:.0f}s]",
+                  flush=True)
+
+        # spread across seeds, per pixel, then pooled over the hole / observed
+        st = torch.stack(samples, 0)                       # [n_seed,1,3,H,W]
+        sd = st.std(dim=0, unbiased=True)                  # [1,3,H,W]
+        hole = S["hole"]
+        n_h = (hole.sum() * 3).clamp(min=1)
+        n_o = ((1 - hole).sum() * 3).clamp(min=1)
+        summary.append(dict(
+            arm=name, n_seeds=len(samples),
+            s2_stage3=float(s2_fn(num_stages - 1, 0.4)),
+            lambda_eq=1.0 / float(s2_fn(num_stages - 1, 0.4)),
+            hole_spread=float((sd * hole).sum() / n_h),
+            obs_spread=float((sd * (1 - hole)).sum() / n_o),
+            hole_mse_mean=float(np.mean(
+                [mse_masked(x, S["gt"], hole) for x in samples])),
+            obs_mse_mean=float(np.mean(
+                [mse_masked(x, S["gt"], 1 - hole) for x in samples]))))
+        r = summary[-1]
+        print(f"[diversity] {name:<10} lambda_eq={r['lambda_eq']:>8.1f}  "
+              f"hole_mse={r['hole_mse_mean']:.4f}  "
+              f"hole_spread={r['hole_spread']:.5f}  "
+              f"obs_spread={r['obs_spread']:.5f}", flush=True)
+
+    with open(os.path.join(sens, "summary.csv"), "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(summary[0].keys()))
+        w.writeheader(); w.writerows(summary)
+    # All plotting for the diagnosis modes lives in alg4_diag.
+    alg4_diag.plot_s_prior_vs_diversity(
+        summary, os.path.join(sens, "s_prior_vs_diversity.png"))
+    print(f"[diversity] wrote {sens} and {out}", flush=True)
+    return 0
+
+
 # ══════════════════════════════ mode: verify ═══════════════════════════════
 def run_verify(args):
     """CPU component audit A1-A7 (dense float64) of the ALGORITHM-4-SPECIFIC
@@ -707,6 +976,7 @@ def run_verify(args):
 
 # ═════════════════════════════ dispatcher ══════════════════════════════════
 RUNNERS = {"full_ip": run_full_ip, "measure_s2": run_measure_s2,
+           "diagnose": run_diagnose, "diversity": run_diversity,
            "verify": run_verify}
 
 # Exact key contract for config_alg4.json — same discipline as main.py.
@@ -717,12 +987,17 @@ CONFIG_SCHEMA = {
     "mode": None,
     "paths": {"model_dir", "demo_dir", "gamma2_table"},
     "algorithm": {"sigma_min", "seed", "measurement_seed", "cg_max_iter_endpoint"},
+    # g_bypass_stage3 is deliberately absent: the stage-3 bypass is the repo's
+    # normal flow and is fixed on inside run_posterior_sampling_alg4, so it is
+    # not a variable here and a config that sets it fails loudly.
     "sampler_kw": {"num_langevin", "ode_steps_per_stage", "shift", "guidance_scale",
-                   "g_bypass_stage3", "cg_tol", "cg_max_iter"},
+                   "cg_tol", "cg_max_iter"},
     "S_prior": None,          # mode-dependent, checked by _check_s_prior
     "tasks_setup": None, "tasks": None, "images": None, "traj_image": None,
     "full_ip": {"out", "smoke"},
     "measure_s2": {"out"},
+    "diagnose": {"out", "image", "sit_variants", "compare_to"},
+    "diversity": {"out", "image", "arms", "seeds"},
     "verify": {"res"},
 }
 TASK_KEYS = {"sigma_n", "operator", "terminal_replace_weight", "measurement_mode",
@@ -742,7 +1017,8 @@ S_PRIOR_KEYS = {
     "sigma_scaled": {"mode", "c"},
 }
 DEAD_ALG2_KEYS = {"h0", "h1", "ridge_rel", "cg_max_iter_l14",
-                  "anchor_lambda", "anchor_P", "block1_noise", "block2_noise"}
+                  "anchor_lambda", "anchor_P", "block1_noise", "block2_noise",
+                  "g_bypass_stage3"}
 
 
 def _check_s_prior(spec):

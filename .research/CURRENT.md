@@ -1,6 +1,42 @@
 # 当前状态（人类可读，保持 ≤1 页）
 
-更新时间：2026-08-21（晚）
+更新时间：2026-08-22
+
+## 2026-08-22：Algorithm 4 stage-3 失效诊断（box_inpainting）
+
+用户指令：只测 box_inpainting；**把 `g_bypass_stage3` 从变量面删掉、走正常流程**；
+不重新加入 `h0`/`ridge_rel`/新超参数；查清"frame 20 多仍正常、之后逐渐恶化、问题集中在 stage 3"。
+（歧义读法已判定并记录在 `tasks/alg4-box-stage3-diagnosis.md`，需用户复核。）
+
+- **失效点 = frame 31（stage 3, τ=0.111）**，单帧 4.68×，全轨迹最大跳变。
+  frames 0–30 平在 mse_full 0.074–0.127，**frame 30 是最好的一帧（0.0786）**。
+  观测区全程单调改善、`resid` 单调→1、`‖x₀‖²/n` 全程 0.99–1.02
+  ⟹ **失效 100% 在 measurement null space 内**。
+- **Block 1 注入的正是它自己的后验方差 `1/C⁻¹`**（洞内无数据项），
+  实测/预测比 **0.98–1.08** 跨全部 stage ⟹ **Block 1 按规范工作，不是 bug**。
+- **失效瞬间 Block 1 先坏、x̂₁ 后坏**（frame 31 的 s=0/1 上 x̂₁ 仍改善输入，s=2 才转坏）。
+- **判别变量是去噪器在洞内的收缩率**（0.27–0.45 → 0.8 → ≥1），随 σ_τ 下降而衰减；
+  **stage 转移重置 σ_τ 从而救回收缩率，stage 3 之后没有重置**。
+  不动点公式 `hole(x̂₁)+1/C⁻¹` 精确成立（0.1488+0.1508=0.2996 vs 实测 0.2997）。
+  **排除**"stage 3 注入方差最大"：C⁻¹ 全局最小在 frame 10（注入 0.210 > frame 31 的 0.130）却稳定。
+- **是 inner-loop feedback 累积**：S_it 10/2/1 → stage 3 增长 **11.23×/3.36×/1.80×**，
+  S_it=1 在 frame 31 完全无跳变。
+- **是真发散不是多样性**：最终洞内 **99.1% 像素出 [-1,1]**（std 1.855，GT std 0.478）；
+  S_prior 四个 arm 全部发散 ⟹ **"更强 precision 是否牺牲 diversity"本数据无法判定**。
+- **最小下一步**：`num_langevin` 10→1（既有 config key，非新超参数）。
+  但它修的是**发散**不是质量——S_it=1 最终 hole 仍 0.826，远差于 anchored Alg 2 的 0.10。
+- 产物：`PixelFlowICLR/Algorithm2/results/alg4_box_stage3_diagnosis/`（report + 6 CSV + 5 PNG
+  + `s_prior_sensitivity/` + `diversity/`）。入口 `main4.py --mode diagnose|diversity`。
+  新增 `Algorithm2/alg4_diag.py`（recorder + metric + 全部诊断绘图）。
+  **只读性已证**：与已提交 full_ip 同格相对差 2.5e-5 / 2.5e-5 / 2.0e-7。
+
+### 更正：撤回"删目录会毒坏父目录"的说法
+
+上一轮 `results/alg4/report.md` 写过"在这个 ceph 挂载上删除目录会让父目录 readdir 返回 EIO"。
+**证据不支持，已撤回**：会话最开始就已在从未删除过的目录上观察到 EIO。
+能站住的只有"readdir 会间歇性 EIO，随机命中任意目录"。
+真正有效的缓解是**进程内重试 import**（所有失败都在 importlib 的 `_fill_cache`；
+进程级重试要白白重载 2.7GB checkpoint）＋ `PYTHONDONTWRITEBYTECODE=1`。
 
 ## 2026-08-21（晚）：Algorithm 4 实现完成并首次全量跑通
 
@@ -207,6 +243,7 @@
 
 ## 下一步
 
+- **（最小下一步）`num_langevin` 10→1 重跑 box_inpainting**，再在 S_it=1 下重跑 diversity。
 - **（待用户裁决）是否允许为诊断关掉 `g_bypass_stage3` 跑一格。** stage 3 是唯一 `G = I`
   的 stage，H_τ/N_k 退化为标量、interpolant 失去全部低通作用，而 l.18 的 `U⁽¹⁾` 是 nearest
   上采样；Alg 4 的 Block 1 又完全以 x̂₁ 为中心。这是 stage-3 崩溃目前最可能的机制但未经检验，
