@@ -65,3 +65,24 @@
   工作区的插入用 `direct_estimate_x1` 配 state 自己的 x0，
   **与 A、B 都不完全相同**（A 用 x0_hat，B 用 (51)），是第三种组合，其结果未见记录。
   ⟹ 工作区里的"baseline 采样器"**不是 baseline**。
+
+## 2026-08-22 · claude · results/ 盘点与清理
+
+- Shared Fact: `PixelFlowICLR/Algorithm2/results/` 下 15 个目录**全部**能追溯到某个 commit
+  或某个 `.research/tasks/` 文件，**没有孤儿目录**。
+  逐条归属见本轮 handoff；`inverse_diagnosis`(32M) 是 commit `39f61c3`/`d819043`
+  「Diagnose main.py against main2.py」的证据且部分已 git 跟踪。
+- Shared Fact: **唯一可安全删除的大块是 PNG 帧转储**，全部由本轮 Alg-4 工作产生：
+  `alg4/frames_tmp`(19M, 80 帧) 与 `alg4/s2_sens/*/frames_tmp`(5 臂 × 40 帧, 42M)。
+  未被任何记忆/报告引用、未被 git 跟踪（`*.png` 已 gitignore）、由
+  `main4.py --mode full_ip` 可重新生成。已删除，`results/alg4` 从 **61M → 866K**，
+  全部 CSV/JSON/report 完好。
+- Shared Fact: `algorithm2_diagnosis`(8.0M) 与 `prior_injection`(14M) 被
+  `tasks/algorithm2-line15-diagnosis.md`、`tasks/prior-injection-b-tau.md` 引用，
+  但**此前 0 个文件进 git** —— 结论只存在于这块间歇性 EIO 的 ceph 盘上。
+  已把两者的 `report.md` + `comparison.csv`（共 ~70KB，其余 21MB 是 gitignored 的 PNG）入库。
+- Shared Fact: 远端 `origin/IP_branch` 与本地**已分叉**：远端有 3 个 workflow/entrypoint
+  基础设施提交（PR #4/#5/#6，`5ed3313`/`e7d21c3`/`d25ec85`），本地有 20 个研究提交。
+  备份因此推到**新分支** `agent/alg4-clean-endpoint-2026-08-22`（纯增量，未动 `IP_branch`）。
+  远端另有 `sync/algorithm2-d819043`、`agent/research-workflow-v7` 等分支。
+  合并 IP_branch 需要用户决定，未执行。
