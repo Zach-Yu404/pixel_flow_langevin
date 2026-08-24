@@ -16,7 +16,8 @@
   frame 0 起即平；stage 3 下界 0.5（op.measure 洞内也加噪）。早期高 resid 是表示极限。
 - **让步**：采样器实际停在 σ_τ≈0.4（反驳草稿 §8.3）；hole 0.272 仍差 anchored Alg2 (0.102) 2.7×。
 - CG 收敛（另一问题）也已闭环：cg_max_iter=300，全 1365 步收敛（motion 最大需 175）。
-- 详见 report §11–§12、`tasks/alg4-box-stage3-diagnosis.md`。**待跑**：smin=0.39 的 5 任务全量。
+- 详见 report §11–§12、`tasks/alg4-box-stage3-diagnosis.md`。5 任务全量已跑完：**五个任务全部收敛**，mse 改善 12.5×–16.7×，
+  resid 全部趋近 1（含此前失格的 SR：3.747→0.921），0/1400 步未收敛，NFE 270。
 
 ## 2026-08-22（第二轮）：Alg 4 stage-3 根因查清，并更正上一轮的机制解释
 

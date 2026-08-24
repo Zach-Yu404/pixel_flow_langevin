@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 35
+memory_version: 36
 updated_at: "2026-08-21"
 updated_by: "claude"          # claude | codex | user
 
