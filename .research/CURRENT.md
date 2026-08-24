@@ -2,6 +2,18 @@
 
 更新时间：2026-08-22
 
+## 2026-08-24（尾）：诊断实验产物按用户指令清理
+
+用户裁决"现在做的这些实验都没用，给清理掉"。已删除
+`results/alg4_box_stage3_diagnosis/`（含 fix_smin04/039、contraction、cg_audit、
+diversity、montage）与 `results/alg4/s2_sens/`，git 同步移除。
+**结论不受影响**：机制、修复推导与全部数字保留在
+`tasks/alg4-box-stage3-diagnosis.md` 及 git 历史（分支
+agent/alg4-clean-endpoint-2026-08-22，commit a182a9f 及之前）。
+保留：核心代码（utils.py 的 alg4 段 + main4.py + config_alg4.json）、
+最终 5 任务结果 `results/alg4/`（含 config 依赖的 s2_meas.json）。
+config 现值即修复后参数：sigma_min=0.39、cg_max_iter=300、S_prior=实测表。
+
 ## 2026-08-24：Alg 4 收敛已修复（sigma_min=0.39，b≥1 截止）+ measurement 下界分析
 
 - **修复**：`sigma_min` 0.01→0.39（既有 key）。判据：只在 (19) 的 velocity 权重

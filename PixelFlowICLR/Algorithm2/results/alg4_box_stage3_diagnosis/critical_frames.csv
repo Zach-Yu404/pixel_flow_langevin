@@ -1,8 +1,0 @@
-kind,stage,frame,tau,value,note
-stage_start,0,0,0.0,0.08629918098449707,first frame of stage 0
-stage_start,1,10,0.0,0.08997471630573273,first frame of stage 1
-stage_start,2,20,0.0,0.08718457072973251,first frame of stage 2
-stage_start,3,30,0.0,0.0786755383014679,first frame of stage 3
-first_jump,3,31,0.111,0.36722880601882935,first frame with mse_full ratio >= 1.5 (ratio 4.67)
-max_jump,3,31,0.111,0.36722880601882935,largest single-frame ratio 4.67
-onset_sustained,3,30,0.0,0.0786755383014679,mse_full never decreases after this frame and grows 11.2x by the end
