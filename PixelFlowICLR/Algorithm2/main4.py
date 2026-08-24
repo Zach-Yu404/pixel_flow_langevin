@@ -770,6 +770,9 @@ def run_diagnose(args):
     alg4_diag.plot_montage(diag.captured, diag.frames, ids, S["gt"], S["hole"],
                            os.path.join(out, "trajectory_montage.png"),
                            device=device)
+    alg4_diag.plot_final_output(diag.captured, diag.frames, S["gt"], S["hole"],
+                                os.path.join(out, "final_output.png"),
+                                device=device)
     json.dump(dict(montage_frames=ids), open(
         os.path.join(out, "montage_frames.json"), "w"), indent=1)
     print(f"[diagnose] wrote {sorted(os.listdir(out))}", flush=True)

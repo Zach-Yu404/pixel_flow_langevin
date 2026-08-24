@@ -161,6 +161,12 @@ class Alg4Diagnostics:
                 x1_hat=x1_hat[0].detach().cpu(),
                 x1_out=x1_out[0].detach().cpu(),
                 x_tau=x_tau[0].detach().cpu())
+        if frame in self.capture_frames:
+            # ...and the LAST inner iteration's clean endpoint (overwritten each
+            # s): the natural denoised output of the frame, needed to separate
+            # "the estimate is bad" from "the draw carries injected variance".
+            self.captured.setdefault(frame, {})["x1_hat_last"] = \
+                x1_hat[0].detach().cpu()
 
     # ---- hook 3: once per frame, after the state leaves the coordinates --
     def on_frame_end(self, *, frame, row, x1, x0, x1_hat, gt_k, hole_k,
@@ -435,8 +441,13 @@ def plot_montage(captured, frames, ids, gt_full, hole_full, path, device="cpu"):
         cap = captured[f]
         row = byf.get(f, {})
         gt_k = gt_full
+        # A frame with no x1_in never ran: sigma_tau < sigma_min skipped its
+        # whole block and the state was simply carried. Render the carried x1
+        # instead of four blank panels, and say so.
+        skipped = "x1_in" not in cap
         panels = [gt_k[0].cpu() if gt_k.dim() == 4 else gt_k,
-                  cap.get("x1_in"), cap.get("x1_hat"), cap.get("x1_out"),
+                  cap.get("x1_in"), cap.get("x1_hat"),
+                  cap.get("x1_out", cap.get("x1_end") if skipped else None),
                   cap.get("x_tau"), None]
         for ci in range(len(cols)):
             ax = axes[ri][ci]
@@ -453,10 +464,14 @@ def plot_montage(captured, frames, ids, gt_full, hole_full, path, device="cpu"):
             t = panels[ci]
             if t is not None:
                 ax.imshow(to_img(t.to(device)))
+            elif skipped and ci in (1, 2, 4):
+                ax.text(0.5, 0.5, "skipped\n" + r"$\sigma_\tau<\sigma_{min}$",
+                        ha="center", va="center", fontsize=8, color="0.45",
+                        transform=ax.transAxes)
             if ri == 0:
                 ax.set_title(cols[ci], fontsize=9)
         axes[ri][0].set_ylabel(
-            f"f{f}  st{row.get('stage','?')}\n"
+            f"f{f}  st{row.get('stage','?')}{' (skip)' if skipped else ''}\n"
             fr"$\tau$={row.get('tau', float('nan')):.2f}"
             f"\nmse={row.get('mse_full', float('nan')):.3f}",
             fontsize=7, rotation=0, ha="right", va="center", labelpad=34)
@@ -567,3 +582,40 @@ def plot_contraction_map(rows, path):
     ax.set_title("Does (19) pull it back?  stars = replay")
     ax.grid(alpha=0.3); ax.legend(fontsize=7)
     fig.tight_layout(); fig.savefig(path, dpi=150); plt.close(fig)
+
+
+def plot_final_output(captured, frames, gt_full, hole_full, path, device="cpu"):
+    """The returned sample against the denoised endpoint at the last frame that
+    actually ran. The draw carries the injected posterior variance 1/C^-1 on
+    purpose -- a grainy hole is a SAMPLE, not a failed reconstruction -- and
+    this figure is what separates the two."""
+    ran = [f for f in sorted(captured) if "x1_hat_last" in captured[f]]
+    if not ran:
+        return
+    f = ran[-1]
+    cap = captured[f]
+    draw = cap.get("x1_end", cap.get("x1_out"))
+    hat = cap["x1_hat_last"]
+    gt = gt_full[0].cpu() if gt_full.dim() == 4 else gt_full.cpu()
+    def hole_mse(t):
+        up = upsample_to(t.unsqueeze(0), gt_full.shape[-2:])
+        return mse_masked(up, gt_full.cpu(), hole_full.cpu())
+    fig, axes = plt.subplots(1, 5, figsize=(5 * 2.4, 3.0))
+    items = [(gt, "GT"),
+             (draw, f"returned draw\nhole={hole_mse(draw):.3f}"),
+             (hat, f"$\\hat{{x}}_1$ (last iter)\nhole={hole_mse(hat):.3f}"),
+             (None, "|err| draw"), (None, "|err| $\\hat{{x}}_1$")]
+    for ci, (t, lab) in enumerate(items):
+        ax = axes[ci]; ax.set_xticks([]); ax.set_yticks([])
+        if ci < 3:
+            ax.imshow(to_img(t.to(device)))
+        else:
+            src = draw if ci == 3 else hat
+            up = upsample_to(src.unsqueeze(0), gt_full.shape[-2:])
+            ax.imshow((up - gt_full.cpu()).abs().mean(1)[0].numpy(),
+                      cmap="magma", vmin=0, vmax=1.0)
+        ax.set_title(lab, fontsize=8)
+    fig.suptitle(f"final executed frame f{f}: the sample vs the denoised "
+                 "endpoint it was drawn around", fontsize=10)
+    fig.tight_layout(rect=[0, 0, 1, 0.92])
+    fig.savefig(path, dpi=150); plt.close(fig)
