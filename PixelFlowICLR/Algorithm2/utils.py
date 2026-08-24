@@ -592,6 +592,14 @@ def run_posterior_sampling_alg4(
     is measured (Sec. 4.2, Sec. 8.6) and a code-side default would silently
     reintroduce the tuned parameter the construction removes.
 
+    Line 13 uses ``pcg_solve`` with a Jacobi preconditioner rather than
+    ``cg_solve``. The system, and therefore the sampled distribution, is
+    identical; the preconditioner only changes how many iterations reaching the
+    solution takes. It is here because plain CG was NOT reaching it: see
+    ``--mode cg_audit``. Every row carries ``blk1_cg_iters`` /
+    ``blk1_cg_resid`` / ``blk1_cg_converged`` so a truncated solve is visible
+    instead of silent.
+
     Returns (x1, rows, traj). ``rows`` carries the Algorithm-2 columns plus
     ``meas_resid`` (Sec. 8.6), the ``s2`` actually used at that step, the
     ``x0_rms`` diagnostic the draft asks for in Sec. 7 (||x_0||^2/n ~ 1), and,
@@ -699,6 +707,7 @@ def run_posterior_sampling_alg4(
                 f"{round(tau, 6)}", list(gamma2_stage.values())[step_idx]))
             x1_hat = None
             s2 = float("nan")
+            cg_iters, cg_resid = 0, 0.0
             # sigma_tau == 0 exactly at tau=1 of the final stage (the draft
             # notes this in Sec. 2.1), where 1/sigma_tau^2 does not exist. The
             # threshold is the repo's existing one so the schedules stay
@@ -710,6 +719,12 @@ def run_posterior_sampling_alg4(
                 M_den, Cinv, inv_e2, inv_s2, inv_S = make_M_tau_den(
                     Ak, ATk, eta, sigma_tau, tau, s_k, e_k, eff_si, s2)
                 inv_S_half = 1.0 / math.sqrt(s2)
+                # Line 13 is an exact draw only if its solve converges
+                # (Lemma 9). With A_k = A . U^(K-1-k) plain CG needs 57-76
+                # iterations at stages 0-2 and the inherited cap is 50, so it
+                # was silently truncating. Jacobi preconditioning solves the
+                # SAME system -- the draw is unchanged -- in 18-22.
+                M_inv = make_jacobi_precond(M_den, x1.shape, device)
                 if diag is not None:
                     diag.on_frame_setup(
                         frame=frame, stage=si, step=step_idx, tau=tau,
@@ -741,8 +756,11 @@ def run_posterior_sampling_alg4(
                                + (1.0 / float(sigma_tau)) * apply_H_tau(
                                    xi_h, tau, s_k, e_k, eff_si)
                                + inv_S_half * xi_s)                  # l.13 (22)
-                    x1 = cg_solve(M_den, b_tilde, x0=x1.clone(), tol=cg_tol,
-                                  max_iter=L)
+                    x1, cg_it, cg_rel = pcg_solve(
+                        M_den, b_tilde, M_inv, x0=x1.clone(), tol=cg_tol,
+                        max_iter=L)
+                    cg_iters = max(cg_iters, cg_it)
+                    cg_resid = max(cg_resid, cg_rel)
 
                     # ── Block 2: exact draw of x_tau, no solve, no step size ──
                     xi_0 = randn_like_cpu(x0)                        # l.14
@@ -765,7 +783,11 @@ def run_posterior_sampling_alg4(
                        s2=s2, gamma2=gamma2,
                        mse_x1=float(((x1 - pyr[si]) ** 2).mean()),
                        meas_resid=measurement_residual(Ak, x1, y, eta),
-                       x0_rms=float((x0 ** 2).mean().sqrt()))
+                       x0_rms=float((x0 ** 2).mean().sqrt()),
+                       # Never let a non-converged Block-1 solve pass silently
+                       # again: these two columns are the receipt.
+                       blk1_cg_iters=cg_iters, blk1_cg_resid=cg_resid,
+                       blk1_cg_converged=int(cg_iters == 0 or cg_resid < cg_tol))
             if hole_k is not None:
                 row["mse_hole"] = mse_masked(x1, pyr[si], hole_k)
                 row["mse_obs"] = mse_masked(x1, pyr[si], 1.0 - hole_k)
@@ -790,3 +812,75 @@ def run_posterior_sampling_alg4(
         x1 = terminal_replace_weight * (m * y + (1.0 - m) * x1) + \
             (1.0 - terminal_replace_weight) * x1
     return x1, rows, traj
+
+
+# ── Algorithm 4: making the Block-1 solve actually converge ────────────────
+# Line 13 solves M_tau^den x1 = b + zeta. Lemma 9's guarantee -- that the
+# solution is a draw from N(M^-1 b, M^-1) -- holds for the EXACT solution. A
+# truncated CG returns something else, and the repo's inherited cap of L = 50
+# is not enough here: with A_k = A . U^(K-1-k) the upsample destroys the
+# two-eigenvalue structure that makes the other solves terminate immediately,
+# and plain CG needs 60-77 iterations at stages 1-2 to reach tol 1e-5.
+#
+# The fix does not change what is being solved. A preconditioner alters only
+# the path CG takes to the same x, so the sampled distribution is untouched;
+# what changes is whether the iteration actually gets there within the cap.
+#
+# NOTE these are additions. cg_solve, score_solve and the alg2 / wv / reg
+# samplers are untouched, and line 11 keeps plain cg_solve because its operator
+# is a polynomial in G, has at most two distinct eigenvalues, and therefore
+# terminates in <= 2 iterations exactly (measured: 1 or 2 at every stage).
+
+def make_jacobi_precond(M_fn, shape, device, floor=1e-12):
+    """Diagonal (Jacobi) preconditioner for an SPD matrix-free operator.
+
+    Uses M applied to the all-ones vector, which is the exact diagonal when M
+    is diagonal -- the inpainting case, where A_k^T A_k counts observed
+    children per coarse pixel -- and the row sums otherwise. That distinction
+    does not affect correctness: ANY symmetric positive-definite preconditioner
+    leaves the solution of M x = b unchanged, so the draw stays exact either
+    way. It only affects how fast CG gets there.
+
+    Returns None if the probe is not strictly positive, so the caller falls
+    back to unpreconditioned CG rather than dividing by something invalid.
+    """
+    d = M_fn(torch.ones(shape, device=device))
+    if not bool(torch.isfinite(d).all()) or float(d.min()) <= floor:
+        return None
+    inv = 1.0 / d
+    return lambda r: inv * r
+
+
+def pcg_solve(A_fn, b, M_inv=None, x0=None, tol=1e-5, max_iter=50):
+    """Preconditioned CG. With M_inv=None this is cg_solve's iteration.
+
+    Returns (x, iters, rel_residual) -- the caller can tell whether the solve
+    converged instead of assuming it did, which is the failure this exists to
+    stop.
+    """
+    B = b.shape[0]
+
+    def dot(u, v):
+        return (u * v).reshape(B, -1).sum(dim=1)
+
+    x = torch.zeros_like(b) if x0 is None else x0.clone()
+    r = b - A_fn(x)
+    z = r if M_inv is None else M_inv(r)
+    p = z.clone()
+    rz = dot(r, z)
+    b_norm = dot(b, b).sqrt().clamp(min=1e-12)
+    rel = float((dot(r, r).sqrt() / b_norm).max())
+    it = 0
+    for it in range(1, int(max_iter) + 1):
+        Ap = A_fn(p)
+        alpha = (rz / dot(p, Ap).clamp(min=1e-12)).reshape(B, 1, 1, 1)
+        x = x + alpha * p
+        r = r - alpha * Ap
+        rel = float((dot(r, r).sqrt() / b_norm).max())
+        if rel < tol:
+            break
+        z = r if M_inv is None else M_inv(r)
+        rz_new = dot(r, z)
+        p = z + (rz_new / rz.clamp(min=1e-12)).reshape(B, 1, 1, 1) * p
+        rz = rz_new
+    return x, it, rel

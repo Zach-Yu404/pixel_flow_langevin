@@ -1,6 +1,6 @@
 # alg4-box-stage3-diagnosis
 
-state: review
+state: done
 type: debug
 owner: claude
 issue: null
@@ -140,3 +140,38 @@ frame 38 是 **1.007 vs 0.872**。即：Block 1 注入白噪声 → 端点步把
 
 新增产物：`results/alg4_box_stage3_diagnosis/contraction/{contraction_map.csv, contraction_map.png}`；
 `main4.py --mode contraction`（含 `replay_x1` 臂）；verify A8。
+
+
+## 追加（2026-08-23/24：修复收敛 + measurement 下界）
+
+【用户原始要求】
+> 修正测试一下，帮我修改过来保证他收敛，另外早期是不是对measurement consistency的match不够
+> 没用的话就保持原样，撤销修改
+
+**修复 = `sigma_min` 0.01 → 0.39（既有 key，判据推导而非搜索）**：只在 (19) 的
+velocity 权重 b = N·σ_τ/(N²+γ²h²) ≥ 1 的步上运行，即 σ_τ ≥ N_k ≈ 0.4；
+0.39 = 0.4 − float32 容差（scheduler s_k=0.600000024 使 f30 σ=0.39999998，
+0.40 会误跳这个唯一仍收缩、携带全分辨率数据项的 stage-3 帧）。
+
+**验证（box/junco）**：hole 3.53→**0.288**（12×）、mse_full 0.885→0.076、
+resid 0.994（回到 §8.6 目标）、stage-3 增长 1.00×、NFE 390→270。
+**4 seeds**：hole 0.262–0.288、出界 99.2%→**2.88%**、洞内 std 0.453（GT 0.478）、
+跨 seed spread 0.356（真后验宽度，未塌缩）→ §7.7 可答：多样性存活。
+另测 smin=0.40（f30 被毛刺跳过）：hole 0.319 但 obs/resid 差（0.0104/1.86），确认 f30 必须保留。
+
+**起点更正**（用户观察 f24 触发）：恶化从 **frame 26** 开始（b<1 的第一帧），
+f31 只是最大单帧跳变；领先指标是 x̂₁ 洞内下限（f26 翻倍），b≥1/b<1 把 40 帧干净二分
+（下限中位 0.068 vs 1.356）。b 与 σ_τ 在轨迹上共线，靠受控探针分离：
+网络贡献 (a·h)²−实测 从 0.300（f30）塌到 0.058（f38），与 b 同步。
+
+**measurement consistency（问题 2）**：用真实 A_k 求 LS 下界
+（`measurement_floor.json`）——stage 0 实测距下界 **0.2%** 且 frame 0 起即平，
+**早期已饱和在表示极限，不是权重不够**；stage 3 下界为 0.5 而非 0
+（op.measure 洞内也加噪，√0.25），§8.6 口径需按此读。损伤全在 ker(A)。
+
+**概念让步（已写进 report §12.5）**：修复后采样器实际停在 σ_τ≈0.4，从未走到
+schedule 末端——直接反驳草稿 §8.3"误差在末端最小"。hole 0.272 仍比
+anchored Alg2 的 0.102 差 2.7×：修的是发散，不是反超。
+
+产物：`fix_smin04/`、`fix_smin039/`（含 diversity 4 seeds）、`measurement_floor.json`、
+report §12。config_alg4.json：sigma_min=0.39、cg_max_iter=300（均为验证后落盘）。

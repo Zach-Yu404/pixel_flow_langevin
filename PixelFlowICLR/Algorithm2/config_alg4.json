@@ -6,7 +6,7 @@
   "gamma2_table": "{HERE}/gamma2_meas.json"
  },
  "algorithm": {
-  "sigma_min": 0.01,
+  "sigma_min": 0.39,
   "seed": 42,
   "measurement_seed": 42,
   "cg_max_iter_endpoint": 200
@@ -17,7 +17,7 @@
   "shift": 1.0,
   "guidance_scale": 2.0,
   "cg_tol": 1e-05,
-  "cg_max_iter": 50
+  "cg_max_iter": 300
  },
  "S_prior": {
   "mode": "table",
@@ -167,6 +167,26 @@
   ],
   "repeats": 1,
   "replay_x1": "results/alg4_box_stage3_diagnosis/diversity/measured_seed42.npy"
+ },
+ "cg_audit": {
+  "out": "results/alg4_box_stage3_diagnosis",
+  "image": "junco",
+  "frames": [
+   0,
+   5,
+   9,
+   10,
+   15,
+   19,
+   20,
+   25,
+   29,
+   30,
+   34,
+   38
+  ],
+  "task": "box_inpainting",
+  "max_probe": 2000
  },
  "verify": {
   "res": 16

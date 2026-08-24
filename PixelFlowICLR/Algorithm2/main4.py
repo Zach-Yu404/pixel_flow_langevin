@@ -25,7 +25,14 @@ config plumbing, instrumentation and plots.
       for Alg 1)                             measured (20), S is measured (Sec. 8.6)
 
 ONE config file (config_alg4.json) is the ONLY source of configuration, with
-the same strict key contract main.py enforces. Two of Algorithm 2's
+the same strict key contract main.py enforces. Two values are derived rather
+than tuned and their derivations live in the diagnosis report (Sec. 11-12):
+``cg_max_iter = 300`` covers the measured worst case of the line-13 solve
+(motion_blur stage 0 needs 174 plain-CG iterations), and ``sigma_min = 0.39``
+stops each stage where the velocity weight of (19), b = N sigma/(N^2+g2 h^2),
+falls below 1 -- sigma_tau >= N_k ~= 0.4, minus float32 tolerance so the
+sigma_tau = 0.4 boundary frame still runs. Past that point the clean-endpoint
+step is provably network-free (verify A8) and measured to only add error. Two of Algorithm 2's
 "algorithm" keys are DELIBERATELY absent -- ``h0`` and ``ridge_rel`` -- so a
 config copied over from Algorithm 2 fails loudly instead of silently passing a
 step size that Algorithm 4 would ignore.
@@ -80,6 +87,7 @@ from utils import (  # noqa: E402  (import first: sets IP_package sys.path + chd
     apply_B, apply_N, apply_H_tau_inv, make_exact_AT, score_solve,
     make_endpoint_operator, clean_endpoint_solve, make_M_tau_den,
     measurement_residual, mse_masked, run_posterior_sampling_alg4,
+    make_jacobi_precond, pcg_solve,
 )
 import onestep_mse_vs_t as base  # noqa: E402
 import alg4_diag  # noqa: E402
@@ -315,9 +323,14 @@ def run_measure_s2(args):
 # GPU runs to a single transient EIO raised while motion_blur lazily imported
 # DAPS. Results are therefore appended per cell here, and a re-run skips the
 # cells already on disk.
+# Keep this in sync with the row dict in run_posterior_sampling_alg4:
+# _append_rows uses extrasaction="ignore", so a column missing HERE is dropped
+# from full_ip's CSV without a word. That is exactly how the blk1_cg_* columns
+# -- added to stop a solve failing silently -- were themselves silently lost.
 METRIC_FIELDS = ["task", "image", "stage", "step", "tau", "sigma_tau",
                  "s2", "gamma2", "mse_x1", "meas_resid", "x0_rms",
-                 "mse_hole", "mse_obs"]
+                 "mse_hole", "mse_obs",
+                 "blk1_cg_iters", "blk1_cg_resid", "blk1_cg_converged"]
 
 
 def _final_fields(num_stages):
@@ -507,6 +520,15 @@ def run_full_ip(args):
     json.dump(nfe_stats, open(nfe_path, "w"), indent=1)
     print(f"[done-sampling] new rows={len(all_rows)} new final={len(final_rows)}",
           flush=True)
+    bad = [r for r in all_rows if str(r.get("blk1_cg_converged", "1")) == "0"]
+    if bad:
+        worst = max(float(r["blk1_cg_resid"]) for r in bad)
+        print(f"[WARN] Block-1 solve did not converge on {len(bad)}/{len(all_rows)} "
+              f"steps (worst relative residual {worst:.2e}). Lemma 9 only gives an "
+              f"exact draw for the exact solution -- raise cg_max_iter or improve "
+              f"the preconditioner.", flush=True)
+    else:
+        print("[ok] Block-1 solve converged on every step", flush=True)
 
     # Plot from disk, not from memory, so a resumed run draws every cell and
     # not just the ones this process happened to compute.
@@ -578,12 +600,12 @@ def run_full_ip(args):
 
 
 # ═══════════════════ mode: diagnose (box_inpainting only) ══════════════════
-def _box_setup(image, device, config):
-    """The single (task, image) cell every diagnosis mode runs on. box only --
-    this entry point is deliberately not general."""
-    task = "box_inpainting"
+def _task_setup(task, image, device, config):
+    """One (task, image) cell. The diagnosis modes run on box_inpainting; the
+    CG audit takes a task because the Block-1 solve's conditioning depends
+    entirely on A_k, and blur is a different operator from a mask."""
     if task not in TASKS_SETUP:
-        raise KeyError('tasks_setup has no "box_inpainting" entry')
+        raise KeyError(f'tasks_setup has no "{task}" entry')
     demos_all = _with_retries("load_demo_images", lambda: load_demo_images(
         resolution=256, demo_dir=PATHS["demo_dir"]))
     by_short = {d["short_name"]: d for d in demos_all}
@@ -596,10 +618,23 @@ def _box_setup(image, device, config):
         f"{task}/{image} setup",
         lambda: build_setup_and_measurement(
             task, spec["operator"], d, sigma_n, 256, device))
+    if task in ("gaussian_blur", "motion_blur"):
+        # same exact-adjoint substitution run_full_ip makes, so the audit sees
+        # the operator the sampler actually solves against
+        inner = mkA
+
+        def mkA(operator, y_, ss, dev, _inner=inner):
+            Af, _ = _inner(operator, y_, ss, dev)
+            return Af, make_exact_AT(Af, tuple(ss))
     gt = d["gt"].unsqueeze(0).to(device)
     hole = (1.0 - mask).to(device).float()
     return dict(task=task, demo=d, op=op, mask=mask, y=y, mkA=mkA, gt=gt,
                 hole=hole, sigma_n=sigma_n, kw=task_kw(task), spec=spec)
+
+
+def _box_setup(image, device, config):
+    """The cell every box-inpainting diagnosis mode runs on."""
+    return _task_setup("box_inpainting", image, device, config)
 
 
 def _run_once(model, config, S, device, *, s2_fn, gamma2_tab, seed,
@@ -971,6 +1006,103 @@ def run_contraction(args):
     return 0
 
 
+# ═══════════ mode: cg_audit (does line 13 actually converge?) ══════════════
+def run_cg_audit(args):
+    """Line 13 is only an exact draw if its solve converges (Lemma 9).
+
+    This measures, at the REAL resolution and with the real box mask, how many
+    CG iterations line 13 needs, what the residual still is at the configured
+    cap, and how far the truncated answer sits from the converged one -- with
+    and without the Jacobi preconditioner. No network is needed: line 13 uses
+    only A_k, H_tau and S.
+    """
+    out = os.path.join(_resolve_out(args.out), "cg_audit")
+    os.makedirs(out, exist_ok=True)
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
+    config = _with_retries("load model config", lambda: OmegaConf.load(
+        os.path.join(PATHS["model_dir"], "config.yaml")))
+    num_stages = int(config.scheduler.num_stages)
+    s2_fn = make_s2_fn(S_PRIOR, num_stages)
+    S = _task_setup(getattr(args, "task", "box_inpainting"), args.image,
+                    device, config)
+    kw = S["kw"]
+    ode_steps = int(kw["ode_steps_per_stage"])
+    cap = int(kw["cg_max_iter"])
+    tol = float(kw["cg_tol"])
+    gt = S["gt"]
+    pyr = base.gt_stage_pyramid(gt, num_stages)
+    g = torch.Generator(device="cpu").manual_seed(int(ALG["seed"]))
+
+    rows = []
+    for frame in args.frames:
+        si, step = divmod(int(frame), ode_steps)
+        sc = _stage_schedule(config, si, ode_steps, float(kw["shift"]), device)
+        s_k, e_k = float(sc.start_t[si]), float(sc.end_t[si])
+        tau = float(sc.t[step])
+        sigma_tau = compute_sigma_tau(tau, s_k, e_k)
+        if sigma_tau < ALG["sigma_min"]:
+            continue
+        s2 = float(s2_fn(si, float(sigma_tau)))
+        h, w = pyr[si].shape[-2:]
+        Ak, ATk = S["mkA"](S["op"], S["y"], (1, 3, h, w), device)
+        M_den, Cinv, inv_e2, inv_s2, inv_S = make_M_tau_den(
+            Ak, ATk, S["sigma_n"], sigma_tau, tau, s_k, e_k, si, s2)
+        # a right-hand side with the same structure line 13 builds
+        xi_y = torch.randn(S["y"].shape, generator=g).to(device)
+        xi_h = torch.randn(pyr[si].shape, generator=g).to(device)
+        xi_s = torch.randn(pyr[si].shape, generator=g).to(device)
+        b = (inv_e2 * ATk(S["y"]) + Cinv(pyr[si])
+             + (1.0 / S["sigma_n"]) * ATk(xi_y)
+             + (1.0 / float(sigma_tau)) * apply_H_tau(xi_h, tau, s_k, e_k, si)
+             + (1.0 / math.sqrt(s2)) * xi_s)
+        warm = pyr[si].clone()
+
+        probe = int(getattr(args, "max_probe", 4000))
+        ref, it_ref, rel_ref = pcg_solve(M_den, b, None, x0=warm.clone(),
+                                         tol=1e-10, max_iter=probe)
+        x_cap, it_cap, rel_cap = pcg_solve(M_den, b, None, x0=warm.clone(),
+                                           tol=tol, max_iter=cap)
+        x_tolc, it_tolc, _ = pcg_solve(M_den, b, None, x0=warm.clone(),
+                                       tol=tol, max_iter=probe)
+        Minv = make_jacobi_precond(M_den, pyr[si].shape, device)
+        if Minv is None:
+            it_pc, rel_pc, err_pc = -1, float("nan"), float("nan")
+        else:
+            x_pc, it_pc, rel_pc = pcg_solve(M_den, b, Minv, x0=warm.clone(),
+                                            tol=tol, max_iter=probe)
+            err_pc = float((x_pc - ref).norm() / ref.norm())
+        rows.append(dict(
+            task=S["task"], frame=int(frame), stage=si, step=step, tau=tau,
+            sigma_tau=float(sigma_tau), stage_res=h, s2=s2,
+            cap=cap, tol=tol,
+            iters_plain_to_tol=it_tolc,
+            converged_within_cap=int(it_tolc <= cap),
+            rel_resid_at_cap=rel_cap,
+            err_at_cap=float((x_cap - ref).norm() / ref.norm()),
+            iters_jacobi_to_tol=it_pc,
+            rel_resid_jacobi=rel_pc,
+            err_jacobi=err_pc))
+        r = rows[-1]
+        print(f"  frame {frame:>2} st{si} res{h:>3} sigma={sigma_tau:.4f}  "
+              f"plain {it_tolc:>4} iters (cap {cap}{'' if r['converged_within_cap'] else ' EXCEEDED'})"
+              f"  err@cap {r['err_at_cap']:.2e}   jacobi {it_pc:>3} iters"
+              f"  err {err_pc:.2e}", flush=True)
+
+    path = os.path.join(out, "cg_audit.csv")
+    with open(path, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        w.writeheader(); w.writerows(rows)
+    bad = [r for r in rows if not r["converged_within_cap"]]
+    print(f"[cg_audit] {len(bad)}/{len(rows)} frames do NOT converge within "
+          f"cg_max_iter={cap}", flush=True)
+    if bad:
+        print(f"[cg_audit]   worst relative error of the truncated draw: "
+              f"{max(r['err_at_cap'] for r in bad):.3e}", flush=True)
+    print(f"[cg_audit] wrote {path}", flush=True)
+    return 0
+
+
 # ══════════════════════════════ mode: verify ═══════════════════════════════
 def run_verify(args):
     """CPU component audit A1-A7 (dense float64) of the ALGORITHM-4-SPECIFIC
@@ -1143,7 +1275,8 @@ def run_verify(args):
 # ═════════════════════════════ dispatcher ══════════════════════════════════
 RUNNERS = {"full_ip": run_full_ip, "measure_s2": run_measure_s2,
            "diagnose": run_diagnose, "diversity": run_diversity,
-           "contraction": run_contraction, "verify": run_verify}
+           "contraction": run_contraction, "cg_audit": run_cg_audit,
+           "verify": run_verify}
 
 # Exact key contract for config_alg4.json — same discipline as main.py.
 # "algorithm" deliberately has NO h0 and NO ridge_rel: Algorithm 4 has no step
@@ -1165,6 +1298,7 @@ CONFIG_SCHEMA = {
     "diagnose": {"out", "image", "sit_variants", "compare_to"},
     "diversity": {"out", "image", "arms", "seeds"},
     "contraction": {"out", "image", "frames", "deltas", "repeats", "replay_x1"},
+    "cg_audit": {"out", "image", "frames", "task", "max_probe"},
     "verify": {"res"},
 }
 TASK_KEYS = {"sigma_n", "operator", "terminal_replace_weight", "measurement_mode",
