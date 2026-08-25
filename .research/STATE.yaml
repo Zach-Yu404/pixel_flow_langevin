@@ -1,13 +1,17 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 37
-updated_at: "2026-08-21"
+memory_version: 39
+updated_at: "2026-08-25"
 updated_by: "claude"          # claude | codex | user
 
-# 2026-08-21：本机（挂载服务器，路径见 local.yaml external.mount_root / external.home）无 codex、无 gh、
-# 无 GitHub 网络。旧机上 codex v0.147.0 已装并登录（2026-08-14），所以这是**按机器**的降级，
-# 不是项目级决定。换回有 codex 的机器后改回 dual-agent。详见 context/facts.md。
-mode: single-agent-degraded      # dual-agent | single-agent-degraded
-unavailable_agent: codex         # mode 为 degraded 时填 claude | codex
+# 2026-08-25：dual-agent 恢复。codex 0.149.1 自行安装（npm --prefix ~/.local + release
+# 伴生二进制），用户设备码重登录；本机 userns 禁用 → bwrap 沙箱不可用，用户已授权
+# danger-full-access（~/.codex/config.toml sandbox_mode + ~/.bashrc RESEARCH_CODEX_SANDBOX）。
+# research-doctor 三级 handshake 全绿：①claude ②codex ③codex 读回 claude 写的共享文件。
+# 预检要求已上游化并传播：research-init 分支 agent/dual-agent-preflight（03082b4），
+# 本项目 policy bundle 已 research-upgrade-project（rules_version 8，research-peer 带
+# RESEARCH_CODEX_SANDBOX）。积压的 pending_review_by: codex 现在可以实际执行。
+mode: dual-agent                 # dual-agent | single-agent-degraded
+unavailable_agent: null          # mode 为 degraded 时填 claude | codex
 # 2026-08-21：用户原话"按照main.py调用utils.py的方式写main4.py并在utils.py补充
 # posterior_sampling的算法，把page4的algorithm实现出来，结果放在results/alg4"。
 # 本机 codex 不可用（见上），用户直接指定实现 → 记录单 agent 执行授权。

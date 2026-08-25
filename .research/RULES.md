@@ -1,6 +1,6 @@
 # Research OS 共享规则（Claude + Codex 共同遵守）
 
-rules_version: 7
+rules_version: 8
 
 本文件是 CLAUDE.md 与 AGENTS.md 共同引用的唯一规则源。两个 agent 必须完整遵守。
 冲突时优先级固定：**用户明确指令 > 本规则 > agent 自身默认行为**。
@@ -166,6 +166,24 @@ Handoff 必须可独立接手，但只写 delta 和必要证据，不复制 task
 - Worktree 绝对路径写 `local.yaml`（gitignored），不进 canonical memory。
 
 ## 12. Single-Agent Degraded Mode
+
+**进入 degraded 的前置条件（先自行修复，不是先降级）**：
+上来（onboard、新机器、每次发现对方 CLI 缺失/未登录）第一步是自行安装并验证：
+
+1. 安装：`npm install -g @openai/codex`；npm root 无写权限时
+   `npm install -g --prefix "$HOME/.local" @openai/codex`（确保 `~/.local/bin` 在 PATH）。
+   claude 侧：`curl -fsSL https://claude.ai/install.sh | bash`。
+2. 登录验证：`codex login status` / `claude auth status` 都必须通过。
+   共享 home 的机器上凭证（`~/.codex`、`~/.claude`）常已随家目录同步，装好 CLI 即可用——先验证再断言未登录。
+3. 互通验证：`research-doctor`（含 nonce 经共享文件的 claude→codex handshake），
+   确认两个 agent 真的在交流，而不只是都装了。
+
+**自行修复失败 → 找用户获取权限，不是静默降级**：安装失败（无写权限/无网络）、
+登录失败（无凭证）、或沙箱失败（如宿主机禁用 unprivileged user namespaces 导致
+bwrap 起不来，codex 需要用户授权 `danger-full-access` 才能访问文件）时，进入
+`needs-user`，向用户说明缺什么权限/凭证、为什么需要，由用户决定；不得自行绕过
+权限层。只有用户明确拒绝或确认无法修复后才允许进入 degraded mode，且必须把原因
+记入 STATE.yaml。
 
 一方因 token/quota/服务不可用时：
 

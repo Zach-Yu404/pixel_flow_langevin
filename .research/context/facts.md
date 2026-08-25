@@ -30,6 +30,24 @@
   HOME 见 `local.yaml` 的 `external.home`，不与旧机共享。
   ⟹ 本机事实上 **single-agent degraded**，且**记忆只能 commit，无法 push**。
   `git fetch` 报 `could not read Username for 'https://github.com'`。
+  - 【2026-08-25 更新】codex 0.149.1 已自行安装（`npm install -g --prefix ~/.local
+    @openai/codex`，/usr 前缀 root 所有装不进），伴生二进制 codex-code-mode-host +
+    codex-resources/bwrap 已从 GitHub release rust-v0.149.1 补装到 `~/.local/bin`。
+    登录有效（`codex login status` = ChatGPT；凭证 `~/.codex` 本就在此 home）。
+    ⟹ “HOME 不与旧机共享”对凭证不成立：`~/.codex`、`~/.claude` 都在且可用。
+  - 【2026-08-25】**本机 bwrap 沙箱不可用**：`unshare --user` 成功但
+    `--map-root-user`（uid_map 写入）被拒 ⟹ bwrap "setting up uid map: Permission
+    denied" ⟹ `codex exec` 在 read-only/workspace-write 任何沙箱模式下都无法读文件/
+    执行命令（纯 LLM 回复正常）。唯一出路 = `-s danger-full-access`。
+    **用户已授权（全局）**：`~/.codex/config.toml` `sandbox_mode = "danger-full-access"`
+    + `~/.bashrc` `export RESEARCH_CODEX_SANDBOX=danger-full-access`（research-peer/
+    orchestrator 显式 flag 用它，否则 workspace-write 会覆盖 config）。
+  - 【2026-08-25】codex ChatGPT 登录态曾在当天 ~14:32 失效（token 刷新失败被清，
+    VSCode ChatGPT 扩展侧同步掉线）；用 `codex login --device-auth`（设备码，无需
+    端口转发）由用户在浏览器授权恢复。再失效时同法处理。
+  - 【2026-08-25】research-doctor（新版 --agents-only）三级 handshake **全绿**：
+    ①claude -p 返 nonce ②codex exec 返 nonce ③codex 读回 claude 写入的共享文件。
+    ⟹ **dual-agent 恢复**（STATE.yaml memory_version 39）。
 - Shared Fact: `research-doctor`（2026-08-21）= **25 通过 / 2 警告 / 1 失败**。
   失败 = gh 未安装；警告 = gh 未登录、codex 未安装。项目侧 15 项全部 ✅。
 - Shared Fact: **`git status` 的 untracked 扫描在本机稳定失败**：

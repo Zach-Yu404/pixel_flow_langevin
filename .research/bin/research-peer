@@ -270,11 +270,14 @@ def copy_inputs(root: Path, worktree: Path, args: argparse.Namespace) -> None:
 def peer_command(agent: str, prompt: str) -> list[str]:
     if agent == "claude":
         return ["claude", "-p", prompt, "--permission-mode", "acceptEdits"]
+    # RESEARCH_CODEX_SANDBOX overrides for hosts where bwrap cannot start
+    # (unprivileged userns disabled) and the user authorized danger-full-access.
+    sandbox = os.environ.get("RESEARCH_CODEX_SANDBOX", "workspace-write")
     return [
         "codex",
         "exec",
         "--sandbox",
-        "workspace-write",
+        sandbox,
         "--skip-git-repo-check",
         prompt,
     ]
