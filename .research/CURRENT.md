@@ -1,6 +1,45 @@
 # 当前状态（人类可读，保持 ≤1 页）
 
-更新时间：2026-08-22
+更新时间：2026-08-25
+
+## 2026-08-25：S_it 程序 + τ≥0.78 全因审计 + S_prior 方法对比（当日全录）
+
+**基线配置变更（用户指令，均已生效）**：γ² 撤回 per-τ 表（gamma2_meas_alg4.json）；
+`num_langevin=2`（四档扫描定的）；sigma_min=1e-8 不变。当前最优（box/junco）：
+**spectral S + S_it=2 → hole 0.1491（seed42）/ 0.1411±0.005（4 种子）**，obs 0.0026；
+现行 pooled_junco 表 0.1495 / 0.1499±0.001。Alg2 参照 0.102。
+
+- **S_it 扫描（1/2/3/4/5/10）**：hole 0.154/**0.150**/0.162/0.175/0.183/0.219，V 形谷底=2
+  （1 混合不足，≥3 每多一次内循环喂一次棘轮）。obs 六档持平 ⟹ S_it 只影响 ker 方向。
+  逐 stage 分解：stage0/1（b≥1.15）迭代多有益（stage1 最好 0.109@S_it=10），
+  stage2/3（b<1）单调有害——分界恰在 b=1。**跨 stage 不可加**：10,10,2,2→0.164（毒在
+  stage1 的 10 次，其末段 b≈1.15 贴边界）；10,2,2,2→0.1485 微超均匀 2。
+  `num_langevin` 现支持 per-stage 列表（utils 复用 _per_stage，标量路径逐位不变）。
+- **τ≥0.78 噪声全因审计（4 独立审计线 + 对抗复核）**：判定**算法固有、实现忠实**。
+  机制三量赛跑：注入 C_ker=σ²s²/(h_ker²s²+σ²)（预测=实测 <2%）、移除权重
+  b=Nσ/(N²+γ²h²)（st0 3-4、st1 ≥1.15、st2 τ=0.44 破 1、st3 0.94→0.001）、
+  自增益 a→0.999（环路变单位增益随机游走）。铁证=S_it 消融单调。
+  **草稿级缺陷（可写论文）**：(19) 的 x̂₁ 无 S⁻¹ 收缩而 (12) 的 C 有——代理均值/协方差不自洽；
+  精确 Gibbs 应中心于 shrunk mean 且保 Var=s²。休眠隐患：γ² 查表静默 positional
+  fallback（utils 5 处，现无害）。数字带 ±20% 轨迹敏感度（readonly_check 18-19% gap）。
+- **S_prior 方法对比（results/alg4_box_s_prior_methods/，report.md 全录）**：
+  utils 新增 SOperator 接口（apply_S_inv/apply_S_inv_sqrt），Block-1 数学不变、标量路径
+  逐位回归通过。G 数值验证=精确正交投影（幂等误差 0，rank/D=0.25）。
+  六臂对比后按用户指令只留 **pooled_junco + spectral**（channel/two_band 等代码与结果已删，
+  report.md 存六臂数字为决策依据）。核心事实：**先验功率低/高带比 33–97×**，isotropic S
+  把 ker(G) 先验功率高估 5–27×；spectral（6 张非 junco 图校准，无 junco 泄漏）打平并反超
+  现行泄漏表，spread 不塌（0.247 vs 0.265）⟹ 是 covariance 改善不是 collapse。
+  crossover：先验越弱越早（upper f26 / pooled f28 / junco 表 f36 / spectral 逐频渐进）。
+  全部产物经数值复核（npy 端到端复算=CSV、Parseval=1.000000、恒等式逐行通过）。
+- **stage-3 残余恶化诊断**：spectral 注入-移除全程平衡（±0.0007），恶化≈全部来自 x̂₁
+  随 b 坍塌的漂移（0.121→0.149）；与 S 无关，调 S 不能根治。**关键发现：pooled_junco 的
+  x̂₁ 在 f31–f33 达 hole 0.083 / full 0.0236 / obs 0.003——超过 Alg2 的 0.102**，被 f34–f39
+  调度毁掉 0.065。**读出点改为 stage-3 b≈1 处的 x̂₁（纯 readout，不动采样数学）是当前
+  最大免费杠杆，待用户裁决。**
+- **基础设施**：codex 0.149.1 本机自装+设备码登录，userns 禁用→用户授权
+  danger-full-access（config.toml + RESEARCH_CODEX_SANDBOX）；research-doctor 三级
+  handshake 全绿，STATE dual-agent（v39）。预检上游化 research-init
+  `agent/dual-agent-preflight`。积压 codex 复审现可执行，**待定 code SHA**（大量改动未提交）。
 
 ## 2026-08-24（尾）：诊断实验产物按用户指令清理
 
@@ -313,9 +352,10 @@ config 现值即修复后参数：sigma_min=0.39、cg_max_iter=300、S_prior=实
 
 ## 阻塞 / 需要用户决定
 
-0. **（2026-08-21，本机）无 gh / 无 codex / 无 GitHub 网络**：记忆只能 commit 不能 push；
-   `IP_branch` 已积压 9 个未 push commit；dual-agent 回路在本机不可用。
-   需要用户在本机 `gh auth login` + 安装 codex，或换回有工具的机器。
+0. ~~（2026-08-21，本机）无 gh / 无 codex~~ **部分解决（2026-08-25）**：codex 0.149.1
+   已装并登录（danger-full-access 经用户授权，bwrap 在本机永久不可用），dual-agent
+   handshake 全绿；push 用用户提供的 token（env+askpass）可行。gh 仍未装（可选项）。
+   剩余：Alg4 大量改动未提交 → 定 SHA 后补 codex 复审。
 0b. **工作区 `utils.py` 的 baseline 污染**：`run_posterior_sampling_alg2` 带着一个
    HEAD 自述"无收益"的未提交改动（l.11 后重建 x_tau）。是否 revert 由用户定。
 
