@@ -1630,3 +1630,722 @@ x_\tau^-=2Hx_1-x_\tau,\qquad
 - 重复 montage、逐帧原始 CSV 和中间配置。
 
 最后修正一个统计措辞：你写的“跨种子方差 ×5–6”实际是**标准差**约 ×5.3–6.3；对应方差约 ×28–39。并明确 \(n=4\)、“±”是 sample std 不是置信区间，且当前只覆盖单图、单 mask、单任务。
+
+═══════════════ codex_round4（终态噪声归因 + (19') 推导）═══════════════
+
+结论先行：你的主机制判断基本成立——终态误差主要是早先 innovation 被逐步写入 \(\hat x_1\)，随后在 \(a\to1\) 的近单位根区冻结；不是 f39 新抽出的 conditional dispersion。但有三项必须修正：账本混用了 full/hole 口径；f21 的 \(\hat x_1=0.0866\) 不是 full-res；本次 Block‑1 PCG 有 22/40 帧未收敛，因此实际执行路径不能称为逐帧 exact legal draw。
+
+### 1. 终态分解与为什么仍净 \(+0.009\)
+
+首先，`+.0776/−.0814` 是全图 signed-MSE 账，不是 hole 账：
+
+| 口径 | Block‑1 增加 | endpoint 减少 | 净变化 |
+|---|---:|---:|---:|
+| hole stage 2 | \(+0.3264841\) | \(-0.3218639\) | \(+0.0046201\) |
+| hole stage 3 | \(+0.1147974\) | \(-0.1104037\) | \(+0.0043937\) |
+| hole 合计 | \(+0.4412815\) | \(-0.4322677\) | \(+0.0090138\) |
+| full 合计 | \(+0.0776469\) | \(-0.0814471\) | \(-0.0038002\) |
+
+hole 占 \(25\%\)，observed 区同期净改善 \(-0.0080715\)，所以两账严格相容：
+
+\[
+0.25(0.0090138)+0.75(-0.0080715)=-0.0038002.
+\]
+
+终态最有信息量的 full-res hole 恒等式是：
+
+\[
+R_{19}^{\hat{}}=0.07393577+0.01228582=0.08622159,
+\]
+
+\[
+R_{39}^{\hat{}}=0.13260919,\qquad
+R_{39}^{out}=0.13260950,
+\]
+
+因此
+
+\[
+\boxed{
+0.13260950
+=
+0.08622159
++0.04638760
++0.000000313
+}
+\]
+
+分别对应：
+
+- \(0.08622159\)：进入 stage 2 前已经存在的中心 bundle；
+- \(+0.04638760\)：随后写入中心的 realized-risk 增量；
+- \(+3.13\times10^{-7}\)：f39 尚留在 `out−hat` 中的末次 draw gap。
+
+其中中心上爬又精确满足
+
+\[
+0.04638760
+=
+\underbrace{0.03737409}_{R_{19}^{out}-R_{19}^{\hat{}}}
++
+\underbrace{0.00901382}_{\text{stage 2/3 新增 hole 风险}}
+-
+\underbrace{0.000000313}_{\text{终点未中心化部分}}.
+\]
+
+即约 \(81\%\) 的中心上爬是把 f19 已有 draw gap 写进中心，约 \(19\%\) 才是 stage 2/3 新增净风险。这正是“最终中心污染 \(+.046\)，但 stage 2/3 输出只净 \(+.009\)”的答案。
+
+若把确定性交替的 \(0.080\) 仅当 empirical floor proxy，还可写成：
+
+\[
+0.13260950
+=
+\underbrace{0.080}_{\text{确定性可达基线}}
++\underbrace{0.00622159}_{\text{不可识别的前期 excess}}
++\underbrace{0.04638760}_{\text{中心污染}}
++\underbrace{0.000000313}_{\text{末次 draw}}.
+\]
+
+这里 \(0.00622\) 不能再从单种子 MSE 分成“网络偏置”和“测量极限”；它还混有表示尺度误差、早期随机性和数值求解误差。\(0.080\) 也不是理论下界，Alg2 的 \(0.102\) 只是比较器。
+
+为什么 `[2,2,1,1]` 仍是 \(+0.009\)：
+
+- 它只删掉了末两 stage 的第二次 innovation；20 个末段 frame 仍各保留一次新 draw。
+- hole 中 gross injection 只需有 \(0.0090138/0.4412815=2.04\%\) 未被抵消，就得到最终 \(+0.009\)。
+- f20 入场冲击约 \(+0.02468\)，f21–29 回收约 \(-0.02006\)，留下 stage 2 的 \(+0.00462\)；f30 再冲击 \(+0.01220\)，之后只回收约 \(-0.00780\)，留下 stage 3 的 \(+0.00439\)。
+- 严格变成 `inj > removal` 是 f35；f36 是失衡变得可见的 crossover。因此“stage 2 中段预算已经耗尽”应改为“移除余量渐进不足，尾部塌缩”。
+- innovation 的精确存活权重是方差上的 \(\prod_j a_j^2\)，\(\sum_j(1-a_j)\) 只是 \(a\approx1\) 时的对数一阶近似。
+
+两个对抗性修正：
+
+1. f21 的 `0.0866` 是 stage-resolution。加 stage 2 固定表示项 `0.005516812` 后，full-res 为 \(0.09216152\)，不是 \(0.0866\)。全程最后-inner 最佳是 f7 约 \(0.079346\)；若含全部 inner，则 f4-inner0 约 \(0.077964\)。所以 f21 只能说明“末段窗口中该 seed 曾有更低的 oracle-GT 风险”，不能证明信息论意义上的“信息已获得”。
+
+2. Block‑1 PCG 在 f0–17、f20–23 未达 \(10^{-5}\) tolerance；f20 相对残差 \(6.55\times10^{-4}\)，且撞到 300 iter cap。故当前三桶之外还有未定的 solver bias，必须收敛重跑后才能作严格合法性归因。
+
+另外，\(C_{\rm final}\approx0\) 单独不足以证明中心里的随机性“不合法”：相容 Gibbs 中，末次 conditional 可以近乎确定，而其均值仍携带合法 marginal dispersion。这里“冻结污染”的结论来自 \(C^{-1}J\neq H^\top/\sigma^2\)、\(\mathcal B>0\)、中心追平台以及噪声消融的联合证据。
+
+### 2. 通道与频带分解
+
+单帧的 `MSE(out)−MSE(hat)` 不是方差：
+
+\[
+\Delta R
+=
+\frac{2}{n}\langle \hat x-x^\star,\delta\rangle
++\frac1n\|\delta\|^2.
+\]
+
+所以现有单次 `+.004~.006` 不能唯一、可加地拆成三路噪声；能严格分的是 conditional covariance。
+
+令
+
+\[
+M=\frac{A^\top A}{\eta^2}+\frac{H^\top H}{\sigma^2}+S^{-1}.
+\]
+
+Block‑1 两路 innovation 为
+
+\[
+\zeta_h=M^{-1}\frac{H^\top}{\sigma}\xi_h,\qquad
+\zeta_s=M^{-1}S^{-1/2}\xi_s,
+\]
+
+\[
+Q_h=M^{-1}\frac{H^\top H}{\sigma^2}M^{-1},\qquad
+Q_s=M^{-1}S^{-1}M^{-1}.
+\]
+
+连同 \(Q_y\)，有 \(Q_y+Q_h+Q_s=M^{-1}\)。
+
+代码顺序上，当前 \(x_1^{out}\) 生成以后才抽 \(\xi_0\)，因此当帧 `out−hat` 中 \(\xi_0\) 的直接贡献严格为零；它进入下一帧中心：
+
+\[
+e_{f+1}
+=
+a_fe_f+K_f\sigma_f\xi_{0,f}
++\zeta_{h,f}+\zeta_{s,f}+b_f\epsilon_f.
+\]
+
+共同谱模态近似下，令 \(P_\omega=S(\omega)\)、\(r_\omega=h^2P_\omega/\sigma^2\)，则
+
+\[
+C_\omega=\frac{P_\omega}{1+r_\omega},
+\quad
+q_{h,\omega}=\frac{P_\omega r_\omega}{(1+r_\omega)^2},
+\quad
+q_{s,\omega}=\frac{P_\omega}{(1+r_\omega)^2},
+\]
+
+\[
+\frac{q_h}{C}=\frac{r}{1+r},\qquad
+\frac{q_s}{C}=\frac1{1+r}.
+\]
+
+沿用现有 crossover 计算的统一 \(h_{\ker}\) proxy，由 spectral \(P_\omega\) 与 \(h/\sigma\) 直接得到：
+
+- f20→f29 的 \(\xi_h\%\)：  
+  \([0.0,24.0,26.6,29.0,30.6,31.8,32.9,34.5,36.7,39.7]\)
+- f30→f39 的 \(\xi_h\%\)：  
+  \([0.0,26.3,27.8,30.3,34.1,39.1,45.9,56.5,75.7,99.996]\)
+
+\(\xi_s\%=100-\xi_h\%\)。f20/f30 的 \(0\%\) 在精确 \(\ker(G)\) 上成立，因为 \(\tau=0\Rightarrow h_{\ker}=0\)；f39 虽形式上近乎全为 \(\xi_h\)，但总方差仅约 \(1.6\times10^{-7}\)，绝对注入等于零。
+
+上一帧 \(\xi_0\) 经中心的晚期方差近似为 \(q_0=K^2\sigma^2\approx\sigma^2/h^2\)，故
+
+\[
+\frac{q_0}{q_h}=\frac{(1+r)^2}{r^2}>1,\qquad
+\frac{q_0}{q_s}=\frac{(1+r)^2}{r}\ge4.
+\]
+
+所以理论排序是：
+
+\[
+r<1:\quad \xi_0>\xi_s>\xi_h,
+\]
+
+\[
+r\simeq1:\quad \xi_0> \xi_h\simeq\xi_s
+\quad(\xi_0\text{ 是每一路 Block‑1 的 }4\times),
+\]
+
+\[
+r\gg1:\quad \xi_0\simeq\xi_h\gg\xi_s.
+\]
+
+历史 spectral 消融也给出相同因果排序：关 \(\xi_0\) 时 \(0.1491\to0.0977\)，关 \(\xi_h\) 时 \(\to0.1116\)，关 \(\xi_s\) 时 \(\to0.1343\)。这些是另一配置下的非可加 counterfactual，不能当份额相加。
+
+频带方向也能确定：
+
+\[
+h_{\rm range}=(1-\tau)s+\tau e
+>
+h_{\ker}=\tau e,
+\]
+
+且实测低/高频 \(P_\omega\) 相差约 \(33\!-\!97\times\)。因此 \(r=h^2P/\sigma^2\) 必然是低频/range 先跨 1，再推进到高频/ker；若旧报告写成“高到低”，方向应反转。实测数据项占优的频率-bin 比例为 f35 6%、f36 13%、f37 31%、f38 79%，而能量加权在 f36 已接近 46/54，正说明少量大功率低频先跨点。
+
+终态 MSE 分带为
+
+\[
+0.1326=0.1180_{\rm low}\;(89\%)+0.0146_{\rm high/ker}\;(11\%).
+\]
+
+所以可见 speckle 虽可能来自高频，但总风险不是“主要由 ker 高频贡献”。
+
+最后，这些百分比仍是谱近似：FFT 对角的 \(S\) 与块投影 \(G\)、mask \(A\) 不共同对角。代码级精确分路需要计算
+
+\[
+\operatorname{tr}(P_{\rm band}Q_cP_{\rm band})
+\]
+
+或保存固定状态、分噪声源的 paired RTO solves。
+
+### 3. \(K^\*\) 与代码中的相容 (19′)
+
+逐模相容斜率是
+
+\[
+C=\left(\frac{h^2}{\sigma^2}+\frac1{s^2}\right)^{-1},
+\qquad
+\boxed{
+K^\*=\frac{Ch}{\sigma^2}
+=\frac{hs^2}{h^2s^2+\sigma^2}
+}.
+\]
+
+令 \(a^\*=hK^\*\)，则恰有 fluctuation–dissipation 恒等式：
+
+\[
+K^{*2}\sigma^2+C=(1-a^{*2})s^2.
+\]
+
+记 \(\Delta=e_k-s_k\)。把当前 [endpoint 方程与求解器](/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py:939) 换成带 prior contraction 的最小改动形式：
+
+\[
+\boxed{
+\begin{aligned}
+\big[
+N^\top N+\gamma^2H^\top H
++\gamma^2\sigma^2S^{-1}
+\big]\hat x_1
+={}&
+N^\top[\Delta x_\tau+\sigma v_\theta(x_\tau)]\\
+&+\gamma^2H^\top x_\tau
++\gamma^2\sigma^2S^{-1}m .
+\end{aligned}
+}
+\tag{19'}
+\]
+
+当前零均值 prior 取 \(m=0\)。它来自完整 Gaussian objective
+
+\[
+\frac{\|Nx-\Delta x_\tau-\sigma v_\theta\|^2}
+{2\gamma^2\sigma^2}
++
+\frac{\|Hx-x_\tau\|^2}{2\sigma^2}
++
+\frac12\|x-m\|_{S^{-1}}^2,
+\]
+
+因此新增项不是经验 ridge。
+
+逐模令
+
+\[
+D_\*=N^2+\gamma^2h^2+\gamma^2\sigma^2/s^2,
+\]
+
+则
+
+\[
+K_{19'}
+=
+\frac{N\Delta+\gamma^2h+N\sigma J_v}{D_\*}.
+\]
+
+定义相容网络斜率
+
+\[
+J_v^\*
+=
+\frac{D_\*K^\*-N\Delta-\gamma^2h}{N\sigma},
+\]
+
+便有精确关系
+
+\[
+K_{19'}-K^\*
+=
+\frac{N\sigma}{D_\*}(J_v-J_v^\*).
+\]
+
+因此 (19′) 消除了原式缺少 \(S^{-1}\) 造成的结构性 overslope；但对任意未校准网络，它并不保证有限帧上 \(K=K^\*\)。若
+
+\[
+\mathcal B
+=
+(h^2s^2+\sigma^2)(K^2-K^{*2})+b^2\gamma^2,
+\]
+
+则 (19′) 下 \(K-K^\*=b_A(J_v-J_v^\*)\)、\(b_A=N\sigma/D_\*\)。只要网络 Jacobian 误差不以 \(1/b_A\) 爆炸，晚期 \(b_A\to0\) 给出
+
+\[
+\boxed{\mathcal B_{19'}\to0}.
+\]
+
+预测签名不是“所有噪声消失”，而是 f19/f21 的低风险中心不再持续追逐 noisy draw 平台：`hat` 尾段上爬与 \(+0.009\) ratchet 应显著缩小，合法 conditional spread 仍保留。
+
+若要求定理意义上不依赖网络斜率的严格 \(K^\*\)，则必须用真正固定的 affine anchor：
+
+\[
+\boxed{
+C^{-1}\hat x_1
+=
+\frac{H^\top x_\tau}{\sigma^2}+S^{-1}m_\theta
+}
+\]
+
+即
+
+\[
+[H^\top H+\sigma^2S^{-1}]\hat x_1
+=
+H^\top x_\tau+\sigma^2S^{-1}m_\theta.
+\]
+
+只有当 \(m_\theta\) 对当前 Gibbs 状态真正固定时，
+
+\[
+J_{\hat x}=CH^\top/\sigma^2=K^\*
+\]
+
+才严格成立。若每 sweep 用同一个 \(x_\tau\) 重算 \(m_\theta(x_\tau)\)，则多出 \(CS^{-1}J_m\)；`stop_gradient` 不能改变这种概率依赖。
+
+实现上：
+
+- 在 `make_endpoint_operator` 的 matvec 中加入  
+  `gamma2 * sigma_tau**2 * s_op.apply_S_inv(u)`；
+- 零均值时 RHS 不变；非零 \(m\) 加对应的 `S_inv(m)` 项；
+- 把已有 [SOperator](/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py:993) 传入 `clean_endpoint_solve`，与 [Block‑1 的 \(C^{-1},M\)](/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py:1069) 使用同一个 spectral \(S\)，调用点在 [sampler](/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py:1364)；
+- 无额外 NFE、无额外线性系统；每个 endpoint-CG matvec 多一次 FFT/IFFT 对；
+- 当前 endpoint operator 是 \(G\) 的低阶多项式，通常 1–2 CG 步；加入不与 \(G\) 对易的 spectral \(S^{-1}\) 后，这个性质消失，迭代数可能明显增加，必须记录 residual/iteration，并用旧 range/ker 闭式逆作预条件器。
+
+合法性定位：是的，它改变代理均值，因此改变算法；与 antithetic 属于同一合法性层级。若线性系统收敛，它是“新 frozen Gaussian surrogate conditional”的 exact draw，但不是原 Algorithm 4 conditional 的无损重参数化。hat-readout 则只改变报告量，不修 sampler。
+
+它与 antithetic 不等价：
+
+- antithetic 用反射的 \(x_\tau\) 和第二次 NFE 消掉 \(\xi_0\) 的奇/一阶敏感，并不实现 Wiener \(K^\*\) 或上述 FDT；
+- (19′) 是 1 NFE 的 slope/calibration 修复；
+- antithetic 的 \(0.0875\) 同时伴随 spread \(0.247\to0.115\)，单样本 MSE 收益含欠散布成分。
+
+因此诚实预测是：相容 (19′) 在“每 NFE、spread、校准、自洽性”上更好；raw 单-GT MSE 未必低于 \(0.0875\)。理想 \(\mathcal B\to0\) 时它有机会落在 f19/f21 所示的 \(0.086\!-\!0.092\) 区间，但必须用收敛求解和多 seed 验证，不能直接从 \(0.1326\) 减去 \(0.0464\)。
+
+### 4. 另外值得汇报的修复
+
+- **先修 Block‑1 PCG 正确性**：更强预条件器、提高 cap 并记录 A-norm/relative residual；代价是更多 \(M\)-matvec，且不承诺 MSE 必然下降，但这是所有“合法 draw”结论的前置条件。
+- **跳过 f20/f30 的 \(\tau=0\) 首次 sweep**：直接针对两次最大入场冲击且节省 NFE；代价是改变调度并可能损失 range/observed refinement。
+- **保留 antithetic 为重建基准臂**：已有 \(0.0875\) 证据；代价是 2×NFE、改变均值且明显压缩 spread。
+- **按 spectral \(S\) 联合重训/校准 \(v_\theta,\gamma\)**：可让 \(J_v\approx J_v^\*\) 从经验条件变成训练目标；代价是需要重新训练并改变 surrogate target。
+- **Schur marginal refresh / 非中心化辅助变量**：可从同一 Gaussian joint 中切断跨帧反馈；代价是需要高维协方差开方或额外线性采样，非高斯网络代理下不再自动成立。
+
+不建议把“单独缩小或关闭 \(\xi_0,\xi_h,\xi_s\)”包装成修复：那些消融只适合归因，没有配套 fluctuation–dissipation 补偿时会直接篡改 conditional covariance。
+tokens used
+236,173
+结论先行：你的主机制判断基本成立——终态误差主要是早先 innovation 被逐步写入 \(\hat x_1\)，随后在 \(a\to1\) 的近单位根区冻结；不是 f39 新抽出的 conditional dispersion。但有三项必须修正：账本混用了 full/hole 口径；f21 的 \(\hat x_1=0.0866\) 不是 full-res；本次 Block‑1 PCG 有 22/40 帧未收敛，因此实际执行路径不能称为逐帧 exact legal draw。
+
+### 1. 终态分解与为什么仍净 \(+0.009\)
+
+首先，`+.0776/−.0814` 是全图 signed-MSE 账，不是 hole 账：
+
+| 口径 | Block‑1 增加 | endpoint 减少 | 净变化 |
+|---|---:|---:|---:|
+| hole stage 2 | \(+0.3264841\) | \(-0.3218639\) | \(+0.0046201\) |
+| hole stage 3 | \(+0.1147974\) | \(-0.1104037\) | \(+0.0043937\) |
+| hole 合计 | \(+0.4412815\) | \(-0.4322677\) | \(+0.0090138\) |
+| full 合计 | \(+0.0776469\) | \(-0.0814471\) | \(-0.0038002\) |
+
+hole 占 \(25\%\)，observed 区同期净改善 \(-0.0080715\)，所以两账严格相容：
+
+\[
+0.25(0.0090138)+0.75(-0.0080715)=-0.0038002.
+\]
+
+终态最有信息量的 full-res hole 恒等式是：
+
+\[
+R_{19}^{\hat{}}=0.07393577+0.01228582=0.08622159,
+\]
+
+\[
+R_{39}^{\hat{}}=0.13260919,\qquad
+R_{39}^{out}=0.13260950,
+\]
+
+因此
+
+\[
+\boxed{
+0.13260950
+=
+0.08622159
++0.04638760
++0.000000313
+}
+\]
+
+分别对应：
+
+- \(0.08622159\)：进入 stage 2 前已经存在的中心 bundle；
+- \(+0.04638760\)：随后写入中心的 realized-risk 增量；
+- \(+3.13\times10^{-7}\)：f39 尚留在 `out−hat` 中的末次 draw gap。
+
+其中中心上爬又精确满足
+
+\[
+0.04638760
+=
+\underbrace{0.03737409}_{R_{19}^{out}-R_{19}^{\hat{}}}
++
+\underbrace{0.00901382}_{\text{stage 2/3 新增 hole 风险}}
+-
+\underbrace{0.000000313}_{\text{终点未中心化部分}}.
+\]
+
+即约 \(81\%\) 的中心上爬是把 f19 已有 draw gap 写进中心，约 \(19\%\) 才是 stage 2/3 新增净风险。这正是“最终中心污染 \(+.046\)，但 stage 2/3 输出只净 \(+.009\)”的答案。
+
+若把确定性交替的 \(0.080\) 仅当 empirical floor proxy，还可写成：
+
+\[
+0.13260950
+=
+\underbrace{0.080}_{\text{确定性可达基线}}
++\underbrace{0.00622159}_{\text{不可识别的前期 excess}}
++\underbrace{0.04638760}_{\text{中心污染}}
++\underbrace{0.000000313}_{\text{末次 draw}}.
+\]
+
+这里 \(0.00622\) 不能再从单种子 MSE 分成“网络偏置”和“测量极限”；它还混有表示尺度误差、早期随机性和数值求解误差。\(0.080\) 也不是理论下界，Alg2 的 \(0.102\) 只是比较器。
+
+为什么 `[2,2,1,1]` 仍是 \(+0.009\)：
+
+- 它只删掉了末两 stage 的第二次 innovation；20 个末段 frame 仍各保留一次新 draw。
+- hole 中 gross injection 只需有 \(0.0090138/0.4412815=2.04\%\) 未被抵消，就得到最终 \(+0.009\)。
+- f20 入场冲击约 \(+0.02468\)，f21–29 回收约 \(-0.02006\)，留下 stage 2 的 \(+0.00462\)；f30 再冲击 \(+0.01220\)，之后只回收约 \(-0.00780\)，留下 stage 3 的 \(+0.00439\)。
+- 严格变成 `inj > removal` 是 f35；f36 是失衡变得可见的 crossover。因此“stage 2 中段预算已经耗尽”应改为“移除余量渐进不足，尾部塌缩”。
+- innovation 的精确存活权重是方差上的 \(\prod_j a_j^2\)，\(\sum_j(1-a_j)\) 只是 \(a\approx1\) 时的对数一阶近似。
+
+两个对抗性修正：
+
+1. f21 的 `0.0866` 是 stage-resolution。加 stage 2 固定表示项 `0.005516812` 后，full-res 为 \(0.09216152\)，不是 \(0.0866\)。全程最后-inner 最佳是 f7 约 \(0.079346\)；若含全部 inner，则 f4-inner0 约 \(0.077964\)。所以 f21 只能说明“末段窗口中该 seed 曾有更低的 oracle-GT 风险”，不能证明信息论意义上的“信息已获得”。
+
+2. Block‑1 PCG 在 f0–17、f20–23 未达 \(10^{-5}\) tolerance；f20 相对残差 \(6.55\times10^{-4}\)，且撞到 300 iter cap。故当前三桶之外还有未定的 solver bias，必须收敛重跑后才能作严格合法性归因。
+
+另外，\(C_{\rm final}\approx0\) 单独不足以证明中心里的随机性“不合法”：相容 Gibbs 中，末次 conditional 可以近乎确定，而其均值仍携带合法 marginal dispersion。这里“冻结污染”的结论来自 \(C^{-1}J\neq H^\top/\sigma^2\)、\(\mathcal B>0\)、中心追平台以及噪声消融的联合证据。
+
+### 2. 通道与频带分解
+
+单帧的 `MSE(out)−MSE(hat)` 不是方差：
+
+\[
+\Delta R
+=
+\frac{2}{n}\langle \hat x-x^\star,\delta\rangle
++\frac1n\|\delta\|^2.
+\]
+
+所以现有单次 `+.004~.006` 不能唯一、可加地拆成三路噪声；能严格分的是 conditional covariance。
+
+令
+
+\[
+M=\frac{A^\top A}{\eta^2}+\frac{H^\top H}{\sigma^2}+S^{-1}.
+\]
+
+Block‑1 两路 innovation 为
+
+\[
+\zeta_h=M^{-1}\frac{H^\top}{\sigma}\xi_h,\qquad
+\zeta_s=M^{-1}S^{-1/2}\xi_s,
+\]
+
+\[
+Q_h=M^{-1}\frac{H^\top H}{\sigma^2}M^{-1},\qquad
+Q_s=M^{-1}S^{-1}M^{-1}.
+\]
+
+连同 \(Q_y\)，有 \(Q_y+Q_h+Q_s=M^{-1}\)。
+
+代码顺序上，当前 \(x_1^{out}\) 生成以后才抽 \(\xi_0\)，因此当帧 `out−hat` 中 \(\xi_0\) 的直接贡献严格为零；它进入下一帧中心：
+
+\[
+e_{f+1}
+=
+a_fe_f+K_f\sigma_f\xi_{0,f}
++\zeta_{h,f}+\zeta_{s,f}+b_f\epsilon_f.
+\]
+
+共同谱模态近似下，令 \(P_\omega=S(\omega)\)、\(r_\omega=h^2P_\omega/\sigma^2\)，则
+
+\[
+C_\omega=\frac{P_\omega}{1+r_\omega},
+\quad
+q_{h,\omega}=\frac{P_\omega r_\omega}{(1+r_\omega)^2},
+\quad
+q_{s,\omega}=\frac{P_\omega}{(1+r_\omega)^2},
+\]
+
+\[
+\frac{q_h}{C}=\frac{r}{1+r},\qquad
+\frac{q_s}{C}=\frac1{1+r}.
+\]
+
+沿用现有 crossover 计算的统一 \(h_{\ker}\) proxy，由 spectral \(P_\omega\) 与 \(h/\sigma\) 直接得到：
+
+- f20→f29 的 \(\xi_h\%\)：  
+  \([0.0,24.0,26.6,29.0,30.6,31.8,32.9,34.5,36.7,39.7]\)
+- f30→f39 的 \(\xi_h\%\)：  
+  \([0.0,26.3,27.8,30.3,34.1,39.1,45.9,56.5,75.7,99.996]\)
+
+\(\xi_s\%=100-\xi_h\%\)。f20/f30 的 \(0\%\) 在精确 \(\ker(G)\) 上成立，因为 \(\tau=0\Rightarrow h_{\ker}=0\)；f39 虽形式上近乎全为 \(\xi_h\)，但总方差仅约 \(1.6\times10^{-7}\)，绝对注入等于零。
+
+上一帧 \(\xi_0\) 经中心的晚期方差近似为 \(q_0=K^2\sigma^2\approx\sigma^2/h^2\)，故
+
+\[
+\frac{q_0}{q_h}=\frac{(1+r)^2}{r^2}>1,\qquad
+\frac{q_0}{q_s}=\frac{(1+r)^2}{r}\ge4.
+\]
+
+所以理论排序是：
+
+\[
+r<1:\quad \xi_0>\xi_s>\xi_h,
+\]
+
+\[
+r\simeq1:\quad \xi_0> \xi_h\simeq\xi_s
+\quad(\xi_0\text{ 是每一路 Block‑1 的 }4\times),
+\]
+
+\[
+r\gg1:\quad \xi_0\simeq\xi_h\gg\xi_s.
+\]
+
+历史 spectral 消融也给出相同因果排序：关 \(\xi_0\) 时 \(0.1491\to0.0977\)，关 \(\xi_h\) 时 \(\to0.1116\)，关 \(\xi_s\) 时 \(\to0.1343\)。这些是另一配置下的非可加 counterfactual，不能当份额相加。
+
+频带方向也能确定：
+
+\[
+h_{\rm range}=(1-\tau)s+\tau e
+>
+h_{\ker}=\tau e,
+\]
+
+且实测低/高频 \(P_\omega\) 相差约 \(33\!-\!97\times\)。因此 \(r=h^2P/\sigma^2\) 必然是低频/range 先跨 1，再推进到高频/ker；若旧报告写成“高到低”，方向应反转。实测数据项占优的频率-bin 比例为 f35 6%、f36 13%、f37 31%、f38 79%，而能量加权在 f36 已接近 46/54，正说明少量大功率低频先跨点。
+
+终态 MSE 分带为
+
+\[
+0.1326=0.1180_{\rm low}\;(89\%)+0.0146_{\rm high/ker}\;(11\%).
+\]
+
+所以可见 speckle 虽可能来自高频，但总风险不是“主要由 ker 高频贡献”。
+
+最后，这些百分比仍是谱近似：FFT 对角的 \(S\) 与块投影 \(G\)、mask \(A\) 不共同对角。代码级精确分路需要计算
+
+\[
+\operatorname{tr}(P_{\rm band}Q_cP_{\rm band})
+\]
+
+或保存固定状态、分噪声源的 paired RTO solves。
+
+### 3. \(K^\*\) 与代码中的相容 (19′)
+
+逐模相容斜率是
+
+\[
+C=\left(\frac{h^2}{\sigma^2}+\frac1{s^2}\right)^{-1},
+\qquad
+\boxed{
+K^\*=\frac{Ch}{\sigma^2}
+=\frac{hs^2}{h^2s^2+\sigma^2}
+}.
+\]
+
+令 \(a^\*=hK^\*\)，则恰有 fluctuation–dissipation 恒等式：
+
+\[
+K^{*2}\sigma^2+C=(1-a^{*2})s^2.
+\]
+
+记 \(\Delta=e_k-s_k\)。把当前 [endpoint 方程与求解器](/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py:939) 换成带 prior contraction 的最小改动形式：
+
+\[
+\boxed{
+\begin{aligned}
+\big[
+N^\top N+\gamma^2H^\top H
++\gamma^2\sigma^2S^{-1}
+\big]\hat x_1
+={}&
+N^\top[\Delta x_\tau+\sigma v_\theta(x_\tau)]\\
+&+\gamma^2H^\top x_\tau
++\gamma^2\sigma^2S^{-1}m .
+\end{aligned}
+}
+\tag{19'}
+\]
+
+当前零均值 prior 取 \(m=0\)。它来自完整 Gaussian objective
+
+\[
+\frac{\|Nx-\Delta x_\tau-\sigma v_\theta\|^2}
+{2\gamma^2\sigma^2}
++
+\frac{\|Hx-x_\tau\|^2}{2\sigma^2}
++
+\frac12\|x-m\|_{S^{-1}}^2,
+\]
+
+因此新增项不是经验 ridge。
+
+逐模令
+
+\[
+D_\*=N^2+\gamma^2h^2+\gamma^2\sigma^2/s^2,
+\]
+
+则
+
+\[
+K_{19'}
+=
+\frac{N\Delta+\gamma^2h+N\sigma J_v}{D_\*}.
+\]
+
+定义相容网络斜率
+
+\[
+J_v^\*
+=
+\frac{D_\*K^\*-N\Delta-\gamma^2h}{N\sigma},
+\]
+
+便有精确关系
+
+\[
+K_{19'}-K^\*
+=
+\frac{N\sigma}{D_\*}(J_v-J_v^\*).
+\]
+
+因此 (19′) 消除了原式缺少 \(S^{-1}\) 造成的结构性 overslope；但对任意未校准网络，它并不保证有限帧上 \(K=K^\*\)。若
+
+\[
+\mathcal B
+=
+(h^2s^2+\sigma^2)(K^2-K^{*2})+b^2\gamma^2,
+\]
+
+则 (19′) 下 \(K-K^\*=b_A(J_v-J_v^\*)\)、\(b_A=N\sigma/D_\*\)。只要网络 Jacobian 误差不以 \(1/b_A\) 爆炸，晚期 \(b_A\to0\) 给出
+
+\[
+\boxed{\mathcal B_{19'}\to0}.
+\]
+
+预测签名不是“所有噪声消失”，而是 f19/f21 的低风险中心不再持续追逐 noisy draw 平台：`hat` 尾段上爬与 \(+0.009\) ratchet 应显著缩小，合法 conditional spread 仍保留。
+
+若要求定理意义上不依赖网络斜率的严格 \(K^\*\)，则必须用真正固定的 affine anchor：
+
+\[
+\boxed{
+C^{-1}\hat x_1
+=
+\frac{H^\top x_\tau}{\sigma^2}+S^{-1}m_\theta
+}
+\]
+
+即
+
+\[
+[H^\top H+\sigma^2S^{-1}]\hat x_1
+=
+H^\top x_\tau+\sigma^2S^{-1}m_\theta.
+\]
+
+只有当 \(m_\theta\) 对当前 Gibbs 状态真正固定时，
+
+\[
+J_{\hat x}=CH^\top/\sigma^2=K^\*
+\]
+
+才严格成立。若每 sweep 用同一个 \(x_\tau\) 重算 \(m_\theta(x_\tau)\)，则多出 \(CS^{-1}J_m\)；`stop_gradient` 不能改变这种概率依赖。
+
+实现上：
+
+- 在 `make_endpoint_operator` 的 matvec 中加入  
+  `gamma2 * sigma_tau**2 * s_op.apply_S_inv(u)`；
+- 零均值时 RHS 不变；非零 \(m\) 加对应的 `S_inv(m)` 项；
+- 把已有 [SOperator](/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py:993) 传入 `clean_endpoint_solve`，与 [Block‑1 的 \(C^{-1},M\)](/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py:1069) 使用同一个 spectral \(S\)，调用点在 [sampler](/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py:1364)；
+- 无额外 NFE、无额外线性系统；每个 endpoint-CG matvec 多一次 FFT/IFFT 对；
+- 当前 endpoint operator 是 \(G\) 的低阶多项式，通常 1–2 CG 步；加入不与 \(G\) 对易的 spectral \(S^{-1}\) 后，这个性质消失，迭代数可能明显增加，必须记录 residual/iteration，并用旧 range/ker 闭式逆作预条件器。
+
+合法性定位：是的，它改变代理均值，因此改变算法；与 antithetic 属于同一合法性层级。若线性系统收敛，它是“新 frozen Gaussian surrogate conditional”的 exact draw，但不是原 Algorithm 4 conditional 的无损重参数化。hat-readout 则只改变报告量，不修 sampler。
+
+它与 antithetic 不等价：
+
+- antithetic 用反射的 \(x_\tau\) 和第二次 NFE 消掉 \(\xi_0\) 的奇/一阶敏感，并不实现 Wiener \(K^\*\) 或上述 FDT；
+- (19′) 是 1 NFE 的 slope/calibration 修复；
+- antithetic 的 \(0.0875\) 同时伴随 spread \(0.247\to0.115\)，单样本 MSE 收益含欠散布成分。
+
+因此诚实预测是：相容 (19′) 在“每 NFE、spread、校准、自洽性”上更好；raw 单-GT MSE 未必低于 \(0.0875\)。理想 \(\mathcal B\to0\) 时它有机会落在 f19/f21 所示的 \(0.086\!-\!0.092\) 区间，但必须用收敛求解和多 seed 验证，不能直接从 \(0.1326\) 减去 \(0.0464\)。
+
+### 4. 另外值得汇报的修复
+
+- **先修 Block‑1 PCG 正确性**：更强预条件器、提高 cap 并记录 A-norm/relative residual；代价是更多 \(M\)-matvec，且不承诺 MSE 必然下降，但这是所有“合法 draw”结论的前置条件。
+- **跳过 f20/f30 的 \(\tau=0\) 首次 sweep**：直接针对两次最大入场冲击且节省 NFE；代价是改变调度并可能损失 range/observed refinement。
+- **保留 antithetic 为重建基准臂**：已有 \(0.0875\) 证据；代价是 2×NFE、改变均值且明显压缩 spread。
+- **按 spectral \(S\) 联合重训/校准 \(v_\theta,\gamma\)**：可让 \(J_v\approx J_v^\*\) 从经验条件变成训练目标；代价是需要重新训练并改变 surrogate target。
+- **Schur marginal refresh / 非中心化辅助变量**：可从同一 Gaussian joint 中切断跨帧反馈；代价是需要高维协方差开方或额外线性采样，非高斯网络代理下不再自动成立。
+
+不建议把“单独缩小或关闭 \(\xi_0,\xi_h,\xi_s\)”包装成修复：那些消融只适合归因，没有配套 fluctuation–dissipation 补偿时会直接篡改 conditional covariance。

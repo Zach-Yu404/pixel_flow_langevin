@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 47
+memory_version: 48
 updated_at: "2026-08-25"
 updated_by: "claude"          # claude | codex | user
 
@@ -26,7 +26,10 @@ execution_allowed: true
 active_tasks:
 - name: last2stages-12h-program
   type: experiment
-  state: done
+  state: done               # 12h 限制已解除；R4 追加：终态噪声恒等式分解、
+                            # spectral Jacobi 预条件 bug 修复（22/40 帧未收敛
+                            # →全收敛，数字复验不变）、(19') 相容化实测
+                            # 0.1227/0.1290（默认关闭待用户裁决）
   owner: claude
   branch: IP_branch
   depends_on: [attribute-late-noise-sources]
@@ -260,5 +263,5 @@ active_tasks:
 
 # 各 agent 最后一次 sync 看到的版本（stale 检测用）
 last_seen:
-  claude: { memory_version: 47, commit: "56bd921", github_event: "issue#3-review-request-changes" }
+  claude: { memory_version: 48, commit: "56bd921", github_event: "issue#3-review-request-changes" }
   codex:  { memory_version: 24, commit: "31ff0d4", github_event: "issue#3-rereview-request-changes" }
