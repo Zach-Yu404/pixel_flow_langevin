@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 43
+memory_version: 44
 updated_at: "2026-08-25"
 updated_by: "claude"          # claude | codex | user
 
@@ -33,7 +33,8 @@ active_tasks:
   execution_allowed: true    # 用户 2026-08-25 晚直接指令；首次实际 Codex 协同咨询
   issue: null
   pr: null
-  pending_review_by: null    # 诊断任务；utils 的 diag_noise_off 开关去留待用户定
+  pending_review_by: null    # 诊断任务；探针开关已按用户指令退回（2026-08-26），
+                             # 结论与 Codex 推导存 task 文件 + references
 - name: x0carry-ablation
   type: experiment
   state: done                # 负结果；用户裁决"都给退回"——代码/结果已全删，
@@ -238,5 +239,5 @@ active_tasks:
 
 # 各 agent 最后一次 sync 看到的版本（stale 检测用）
 last_seen:
-  claude: { memory_version: 43, commit: "56bd921", github_event: "issue#3-review-request-changes" }
+  claude: { memory_version: 44, commit: "56bd921", github_event: "issue#3-review-request-changes" }
   codex:  { memory_version: 24, commit: "31ff0d4", github_event: "issue#3-rereview-request-changes" }

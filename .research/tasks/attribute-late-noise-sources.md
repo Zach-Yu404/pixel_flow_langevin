@@ -53,7 +53,9 @@ stage 3 起选择性把单个噪声源置零（先照常抽取再乘零 → RNG 
 - **Rao-Blackwell 读出**（Claude）：链不动（仍是精确采样器），报告量换成条件
   均值类估计；0.071 的确定性不动点即其上限画像。代价：报告的不是 draw。
 
-## 产物
+## 产物与退回（2026-08-26 用户指令"把刚做的这个实验退回"）
 
-results/alg4_noise_attribution/{noise_attribution.csv, codex_consult_transcript.txt}。
-utils.py 新增 `diag_noise_off`（诊断开关，默认 None 逐位等价；去留待用户定）。
+utils.py 的 `diag_noise_off` 开关已完全移除（回归 2,2,2,2 逐位复现
+0.1447/0.1143/0.1291/0.1495）；results/alg4_noise_attribution/ 已删除。
+证据保全：归因表在本文件上方；Codex 完整推导存
+references/2026-08-25-codex-noise-consult.txt。

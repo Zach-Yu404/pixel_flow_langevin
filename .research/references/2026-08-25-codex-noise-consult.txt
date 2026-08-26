@@ -1,0 +1,814 @@
+Reading additional input from stdin...
+OpenAI Codex v0.149.1
+--------
+workdir: /tmp/claude-15544272/-CBIG-Standard-ECE-Zach/1a4cd917-cc44-48d4-92cf-70166098ec94/scratchpad
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 01a03c21-9c6f-76e0-ac60-04e77971e80f
+--------
+user
+PixelFlow Algorithm 4 peer review，纯推导任务，不要跑代码不要读 CSV，只允许读一个文件的一个区间：/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py 的 1290-1400 行（Block1/Block2 实现）。10 分钟内给出结论。
+
+已确立事实：Block1 精确抽样 x1~N(M⁻¹b, M⁻¹)，M=AᵀA/η²+H_τᵀH_τ/σ_τ²+S⁻¹，Lemma9 三路噪声 ξ_y/ξ_h/ξ_s；Block2 x_τ=Hx₁+σ_τξ₀；(19) 网络权重 b=Nσ/(N²+γ²h²) 在 stage3 从 0.94 塌到 0.001；hole∩ker(G) 内 A=0；标量 S 时 s²=0.055，ker 方向 h_k²/σ²·s² 在 stage3 第 6/10 帧跨 1；确定性交替（全部噪声置零）在 stage3 收缩到好的不动点（实测 hole 0.071-0.080，基线 0.149）。
+
+问题一：在 hole∩ker(G) 内，把 Block1 draw 方差 M⁻¹ 按三路噪声分解，并推导 ξ₀ 经 Block2→下一次 (19) 解→Block1 中心的传递增益；据此对『stage3 后期 hole 损伤的噪声源排序』给出理论预测：ξ_h vs ξ_s vs ξ₀ vs 确定性 b_τ 漂移，分别对标量 S 和谱形 S（谱形 S 的 ker 高频先验方差 ~0.011，即先验通道注入小 3 倍）。
+问题二：给 2-3 个修复方向，硬约束=每帧两个 conditional 仍是精确抽样（合法 posterior sampler），禁止调小噪声/截断内循环。对每个方向论证抽样性质为何保持、主要风险。已知候选之一是把 (19) 的 x̂₁ 换成含 S⁻¹ 收缩的自洽代理均值——请独立评估它并提出你自己的其他方向。
+中文，直接给推导和结论，不要过程叙述。
+codex
+我会严格只读指定文件的 1290–1400 行，不运行代码、不读取任何 CSV。由于这是采样算法的理论同行评审，我会按 investment-banking skill 不适用（无交易/估值语境），直接做概率与线性算子推导。
+exec
+/bin/bash -lc "sed -n '1290,1400p' /CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py" in /tmp/claude-15544272/-CBIG-Standard-ECE-Zach/1a4cd917-cc44-48d4-92cf-70166098ec94/scratchpad
+ succeeded in 0ms:
+        e_k = float(sc.end_t[si])
+        # G is the real projection up(down(x)) at every stage -- the former
+        # stage-3 identity bypass was removed from apply_G (2026-08-24), so
+        # stage_idx is a no-op and this value is inert; None states the intent.
+        # Prop. 4(a) keeps M_tau^den positive definite where H_tau = s_k G is
+        # rank deficient. The stage-3 gamma^2 entries were measured under this
+        # convention (gamma2_meas_alg4.json).
+        eff_si = None
+
+        if si > 0:                                                   # l.18: U^(1)
+            h *= 2
+            w *= 2
+            x1 = F.interpolate(x1, size=(h, w), mode="nearest")
+        x0 = randn_like_cpu(pyr[si])                                 # l.3 / l.18
+
+        Ak, ATk = make_Ak_fns_fn(operator, y, (B, 3, h, w), device)
+
+        size_tensor, rope_pos = base.rope_for(model, h, w, device)
+        gamma2_stage = gamma2_tab[str(si)]
+        # nearest, to keep the hole indicator 0/1 at the stage resolution
+        hole_k = None if hole_mask is None else F.interpolate(
+            hole_mask.to(device).float(), size=(h, w), mode="nearest")
+
+        for step_idx, T in enumerate(sc.Timesteps):                  # l.4
+            frame += 1
+            tau = float(sc.t[step_idx])
+            sigma_tau = compute_sigma_tau(tau, s_k, e_k)             # l.5
+            velocity_fn = make_velocity_fn(
+                model, T, prompt_embeds, size_tensor, rope_pos,
+                do_cfg, guidance_scale, si,
+            )
+            gamma2 = float(gamma2_stage.get(
+                f"{round(tau, 6)}", list(gamma2_stage.values())[step_idx]))
+            x1_hat = None
+            s2 = float("nan")
+            cg_iters, cg_resid = 0, 0.0
+            # sigma_tau == 0 exactly at tau=1 of the final stage (the draft
+            # notes this in Sec. 2.1), where 1/sigma_tau^2 does not exist. The
+            # threshold is the repo's existing one so the schedules stay
+            # comparable across samplers; it is NOT a "skip Langevin" test
+            # here, since Algorithm 4 has no Langevin step.
+            if sigma_tau >= sigma_min:
+                # s2_fn may return the isotropic variance (a float — the
+                # original path, bit-identical through ScalarSOp) or an
+                # SOperator for a structured S. Either way the (12)/(22)
+                # math below is unchanged; only who applies S^-1 differs.
+                s_ret = s2_fn(si, float(sigma_tau))
+                s_op = s_ret if isinstance(s_ret, SOperator) else ScalarSOp(float(s_ret))
+                s2 = float(s_op.scalar_equiv)
+                # l.6 / l.7 — built once per tau, shared by every inner iteration
+                M_den, Cinv, inv_e2, inv_s2, inv_S = make_M_tau_den(
+                    Ak, ATk, eta, sigma_tau, tau, s_k, e_k, eff_si, s_op)
+                # Line 13 is an exact draw only if its solve converges
+                # (Lemma 9). With A_k = A . U^(K-1-k) plain CG needs 57-76
+                # iterations at stages 0-2 and the inherited cap is 50, so it
+                # was silently truncating. Jacobi preconditioning solves the
+                # SAME system -- the draw is unchanged -- in 18-22.
+                M_inv = make_jacobi_precond(M_den, x1.shape, device)
+                if diag is not None:
+                    diag.on_frame_setup(
+                        frame=frame, stage=si, step=step_idx, tau=tau,
+                        s_k=s_k, e_k=e_k, sigma_tau=float(sigma_tau),
+                        gamma2=gamma2, s2=s2, eta=eta, eff_si=eff_si,
+                        A_fn=Ak, AT_fn=ATk, shape=x1.shape, device=device)
+
+                x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + sigma_tau * x0  # l.8
+
+                for s in range(S_it):                                # l.9
+                    x1_in = x1 if diag is None else x1.clone()
+                    with torch.no_grad():
+                        v = velocity_fn(x_tau)                       # l.10
+                    # l.11 (19): the clean endpoint, one solve
+                    x1_hat = clean_endpoint_solve(
+                        x_tau, v, sigma_tau, s_k, e_k, tau, gamma2, eff_si,
+                        cg_tol, cg_max_iter_endpoint, x1_warm=x1.clone())
+
+                    # ── Block 1: exact draw of x1 from pi(x1 | x_tau, y) ──
+                    xi_y = randn_like_cpu(y)                         # l.12
+                    xi_h = randn_like_cpu(x1)
+                    xi_s = randn_like_cpu(x1)
+                    if diag_noise_off and si >= diag_noise_off_from_stage:
+                        # DIAGNOSTIC PROBE ONLY — zeroing any xi breaks the
+                        # exact-draw property; noises are still DRAWN first so
+                        # the RNG stream (and every other arm) stays aligned.
+                        if "xi_y" in diag_noise_off:
+                            xi_y = torch.zeros_like(xi_y)
+                        if "xi_h" in diag_noise_off:
+                            xi_h = torch.zeros_like(xi_h)
+                        if "xi_s" in diag_noise_off:
+                            xi_s = torch.zeros_like(xi_s)
+                    # Lemma 9 with R1 = A/eta, R2 = H_tau/sigma_tau, R3 = S^-1/2:
+                    # zeta = R1^T xi_y + R2^T xi_h + R3^T xi_s has covariance
+                    # exactly M_tau^den, so the solve below IS a draw from
+                    # N(M^-1 b, M^-1). No ridge term is needed anywhere.
+                    b_tilde = (inv_e2 * ATk(y) + Cinv(x1_hat)
+                               + (1.0 / eta) * ATk(xi_y)
+                               + (1.0 / float(sigma_tau)) * apply_H_tau(
+                                   xi_h, tau, s_k, e_k, eff_si)
+                               + s_op.apply_S_inv_sqrt(xi_s))        # l.13 (22)
+                    x1, cg_it, cg_rel = pcg_solve(
+                        M_den, b_tilde, M_inv, x0=x1.clone(), tol=cg_tol,
+                        max_iter=L)
+                    cg_iters = max(cg_iters, cg_it)
+                    cg_resid = max(cg_resid, cg_rel)
+
+                    # ── Block 2: exact draw of x_tau, no solve, no step size ──
+                    xi_0 = randn_like_cpu(x0)                        # l.14
+                    if diag_noise_off and si >= diag_noise_off_from_stage \
+                            and "xi_0" in diag_noise_off:
+                        xi_0 = torch.zeros_like(xi_0)   # probe only, see above
+                    x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + \
+
+codex
+设 \(u\) 为 hole 内、数据不可见的单位方向，记
+
+\[
+Au=0,\qquad H_\tau u=h\,u,\qquad Su=q\,u,
+\]
+
+其中标量 \(S\) 时 \(q=s^2=0.055\)，谱形 \(S\) 的 ker 高频约 \(q=0.011\)。定义
+
+\[
+r\equiv \frac{h^2q}{\sigma_\tau^2},\qquad
+m\equiv \frac{h^2}{\sigma_\tau^2}+\frac1q=\frac{1+r}{q}.
+\]
+
+## 一、噪声分解与排序
+
+Block1 的随机部分为
+
+\[
+\delta x_1
+=M^{-1}\!\left(
+\frac{A^\top}{\eta}\xi_y+
+\frac{H_\tau^\top}{\sigma_\tau}\xi_h+
+S^{-1/2}\xi_s
+\right).
+\]
+
+对应协方差严格分解为
+
+\[
+\Sigma_y=M^{-1}\frac{A^\top A}{\eta^2}M^{-1},
+\]
+
+\[
+\Sigma_h=M^{-1}\frac{H_\tau^\top H_\tau}{\sigma_\tau^2}M^{-1},
+\]
+
+\[
+\Sigma_s=M^{-1}S^{-1}M^{-1},
+\]
+
+且
+
+\[
+\Sigma_y+\Sigma_h+\Sigma_s=M^{-1}.
+\]
+
+在 hole 方向 \(A=0\)，所以 \(\xi_y\) 的投影严格为零。单模态上：
+
+\[
+\delta x_{1,h}
+=\frac{h/\sigma_\tau}{m}\xi_h
+=\frac{\sqrt q\sqrt r}{1+r}\xi_h,
+\]
+
+\[
+\delta x_{1,s}
+=\frac{q^{-1/2}}{m}\xi_s
+=\frac{\sqrt q}{1+r}\xi_s.
+\]
+
+因此
+
+\[
+V_h=\frac{qr}{(1+r)^2},\qquad
+V_s=\frac{q}{(1+r)^2},
+\]
+
+\[
+V_h+V_s=\frac{q}{1+r}=m^{-1},\qquad
+\frac{V_h}{V_s}=r.
+\]
+
+结论很直接：
+
+- \(r<1\)：\(\xi_s\) 大于 \(\xi_h\)。
+- \(r=1\)：两者相等，各占 Block1 方差的一半。
+- \(r>1\)：\(\xi_h\) 大于 \(\xi_s\)。
+- \(r\gg1\)：\(V_h\simeq \sigma_\tau^2/h^2\)，而 \(V_s\simeq \sigma_\tau^4/(h^4q)\)，先验噪声被多压一个 \(1/r\)。
+
+### \(\xi_0\) 的跨 Block 传递
+
+沿该模态，将 (19) 写成
+
+\[
+\hat x_1=a_\tau x_\tau+b_\tau v_\theta(x_\tau),
+\]
+
+\[
+a_\tau=\frac{\gamma^2h-N\dot\sigma}{N^2+\gamma^2h^2},
+\qquad
+b_\tau=\frac{N\sigma}{N^2+\gamma^2h^2}.
+\]
+
+记网络局部 Jacobian 为
+
+\[
+j_\tau=u^\top Dv_\theta(x_\tau)u.
+\]
+
+Block2 给出
+
+\[
+\delta x_\tau=\sigma_\tau\xi_0.
+\]
+
+而 [Block1 中心项](/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py:1366) 使用
+
+\[
+C^{-1}\hat x_1,\qquad
+C^{-1}=\frac{H^\top H}{\sigma_\tau^2}+S^{-1}.
+\]
+
+在 \(A=0\) 的方向 \(M=C^{-1}\)，故 \(M^{-1}C^{-1}=I\)。于是
+
+\[
+\boxed{
+g_0\equiv
+\frac{\partial\mu_{1,\mathrm{next}}}{\partial\xi_0}
+=\sigma_\tau(a_\tau+b_\tau j_\tau)
+}
+\]
+
+是 \(\xi_0\) 到下一次 Block1 中心的传递增益。
+
+利用恒等式
+
+\[
+a_\tau h+b_\tau\dot h=1,
+\]
+
+可改写成
+
+\[
+\boxed{
+g_0=\frac{\sigma_\tau}{h}
++\sigma_\tau b_\tau
+\left(j_\tau-\frac{\dot h}{h}\right).
+}
+\]
+
+因此 \(b_\tau\) 从 \(0.94\) 塌到 \(0.001\) 并没有切断 \(\xi_0\)；它只是切掉网络修正，留下几乎纯粹的
+
+\[
+g_0\simeq \frac{\sigma_\tau}{h}.
+\]
+
+对应方差
+
+\[
+V_0\simeq\frac{\sigma_\tau^2}{h^2}=\frac q r.
+\]
+
+与 Block1 两路比较：
+
+\[
+\frac{V_0}{V_h}
+=\frac{(1+r)^2}{r^2}>1,
+\]
+
+\[
+\frac{V_0}{V_s}
+=\frac{(1+r)^2}{r}\ge 4.
+\]
+
+所以只要网络 Jacobian 残差没有大到 \(O(1/b_\tau)\)，\(\xi_0\) 是逐步创新中最大的来源；当 \(r\gg1\) 时它才渐近接近 \(\xi_h\)。
+
+更危险的是迭代增益
+
+\[
+\rho=h(a_\tau+b_\tau j_\tau)
+=1+b_\tau(hj_\tau-\dot h).
+\]
+
+当 \(b_\tau\simeq0.001\) 时，\(\rho\) 天然逼近 1：不是噪声突然增大，而是所有创新都失去阻尼、在内循环中长时间保留。
+
+### stage3 排序预测
+
+标量 \(S\)，已知第 \(6/10\) 帧 \(r\) 跨过 1：
+
+- 跨点前：\(\boxed{\xi_0>\xi_s>\xi_h>\text{确定性 }b_\tau\text{ 漂移}}\)。
+- 跨点附近：\(\boxed{\xi_0>\xi_h\simeq\xi_s>\text{确定性漂移}}\)；在 \(r=1\) 时 \(V_0\) 是每个 Block1 通道的 4 倍。
+- 跨点后：\(\boxed{\xi_0>\xi_h>\xi_s>\text{确定性漂移}}\)。
+- 很晚、\(r\gg1\)：\(\xi_0\simeq\xi_h\gg\xi_s\)。
+
+谱形 \(S\)：
+
+\[
+r_{\rm spec}
+=\frac{0.011}{0.055}r_{\rm scalar}
+\simeq0.2r_{\rm scalar}.
+\]
+
+因此 \(\xi_h/\xi_s\) 的交叉被推迟到标量 \(r\simeq5\)：
+
+- 在标量第 6 帧刚过交叉时，谱形方向仍有 \(r_{\rm spec}\simeq0.2\)，故排序为  
+  \[
+  \boxed{\xi_0>\xi_s>\xi_h>\text{确定性漂移}}.
+  \]
+- 只有当标量方向后来达到 \(r>5\)，谱形方向才转成  
+  \[
+  \boxed{\xi_0>\xi_h>\xi_s>\text{确定性漂移}}.
+  \]
+
+谱形 \(S\) 已把先验通道绝对注入约压低 3 倍，而 \(V_0=\sigma^2/h^2\) 基本不依赖 \(q\)，所以它会进一步凸显 \(\xi_0\) 的相对主导地位。
+
+确定性 \(b_\tau\) 漂移本身可写成
+
+\[
+\hat x_1=\frac{x_\tau}{h}
++b_\tau\left(v_\theta-\frac{\dot h}{h}x_\tau\right).
+\]
+
+它只乘网络残差；\(b_\tau=0.001\) 时是小的加性 forcing。零噪声实验仍收缩到好不动点，支持它排最后。但 \(b_\tau\) 塌缩通过 \(\rho\to1\) 间接削弱阻尼，是噪声放大的促成因素。
+
+严格术语上还需注意：若某帧确实有 \(H_\tau=s_kG\)，且讨论的是数学意义上的精确 \(\ker(G)\)，则 \(h=0\)、\(r=0\)，此时 \(\xi_h\) 投影严格为零，只有 \(\xi_s\)；上述 \(r\) 跨 1 的方向必然是近-kernel，或 \(H_\tau\) 在该帧还含非零 identity 分量。
+
+## 二、修复方向
+
+### 1. 含 \(S^{-1}\) 收缩的自洽代理：有条件推荐
+
+令 \(m_\theta\) 是在本帧两个 conditional 期间固定、且不依赖当前 \(x_\tau\) 的先验均值，定义
+
+\[
+\tilde x_1
+=C\left(
+\frac{H^\top x_\tau}{\sigma_\tau^2}
++S^{-1}m_\theta
+\right),
+\qquad
+C^{-1}=\frac{H^\top H}{\sigma_\tau^2}+S^{-1}.
+\]
+
+于是
+
+\[
+C^{-1}\tilde x_1
+=\frac{H^\top x_\tau}{\sigma_\tau^2}+S^{-1}m_\theta,
+\]
+
+两步正好是联合 posterior
+
+\[
+p(x_1,x_\tau\mid y,m_\theta)
+\propto
+p(y\mid x_1)
+\,\mathcal N(x_1;m_\theta,S)
+\,\mathcal N(x_\tau;Hx_1,\sigma_\tau^2I)
+\]
+
+的两个精确 Gaussian conditionals。
+
+此时 \(\xi_0\) 墣益变为
+
+\[
+g_{0,\rm coherent}
+=M^{-1}\frac{H^\top}{\sigma_\tau},
+\]
+
+即单模态
+
+\[
+g_{0,\rm coherent}
+=\frac{\sqrt q\sqrt r}{1+r}=g_h.
+\]
+
+相对当前 \(g_0\simeq\sqrt{q/r}\)，标准差缩减因子为
+
+\[
+\frac{g_{0,\rm coherent}}{g_0}
+=\frac r{1+r}.
+\]
+
+在 \(r=1\) 时减半；但 \(r\gg1\) 时改善趋近于零，因此不能单独解决最晚帧。
+
+关键限制：如果把 \(m_\theta\) 或 \(\tilde x_1\) 重新设成当前 \(x_\tau\) 的非线性网络函数，单纯替换 (19) 不再自动是合法 Gibbs sampler。与固定 Block2 相容所需的必要条件是
+
+\[
+C^{-1}D\tilde x_1(x_\tau)=\frac{H^\top}{\sigma_\tau^2}.
+\]
+
+一般网络代理不满足它。风险是先验偏置、ker 高频过度收缩，以及把当前辅助样本偷偷重复使用造成 conditional incompatibility。
+
+### 2. Working-parameter / 非中心化辅助变量
+
+固定希望保留的边缘 posterior \(\pi(x_1\mid y)\)，重新引入纯辅助变量
+
+\[
+z\mid x_1\sim\mathcal N(R_\tau x_1,\Omega_\tau),
+\]
+
+构造
+
+\[
+\tilde\pi(x_1,z\mid y)
+=\pi(x_1\mid y)\mathcal N(z;R_\tau x_1,\Omega_\tau).
+\]
+
+该高斯因子对 \(z\) 积分恒为 1，所以 \(x_1\) 的目标 posterior 完全不变。两个 conditional 都是精确抽样：
+
+\[
+z\mid x_1,y=\mathcal N(R_\tau x_1,\Omega_\tau),
+\]
+
+\[
+x_1\mid z,y:
+\quad Q_{\rm cond}
+=Q_\pi+R_\tau^\top\Omega_\tau^{-1}R_\tau.
+\]
+
+可按谱选择 \(R_\tau,\Omega_\tau\)，使 ker 高频的广义 \(r\) 保持在 \(O(1)\)，避免当前 \(b_\tau\to0,\rho\to1\) 的病态中心化参数化。
+
+主要风险：网络若直接消费 \(z\)，新的噪化分布可能离开训练分布；需要等价变换回网络熟悉的输入。它只改善混合和有限内循环的噪声滞留，不能改变真正的 posterior 边缘方差。
+
+### 3. Schur-complement 精确刷新，消除跨内循环反馈
+
+对同一联合高斯 posterior，先精确抽
+
+\[
+x_\tau\mid y
+\sim
+\mathcal N\!\left(
+H\bar m,\,
+\sigma_\tau^2I+HQ^{-1}H^\top
+\right),
+\]
+
+再精确抽原来的
+
+\[
+x_1\mid x_\tau,y.
+\]
+
+这是同一联合分布的另一种精确因子分解；每帧仍是两个精确 conditional，但 \(x_\tau\) 不再继承上一轮状态，因此不存在 \(\rho\simeq1\) 导致的噪声积累。
+
+主要风险是需要对 Schur 协方差做精确平方根采样或等价精确求解，计算和预条件难度较高；若网络诱导的目标并非真正高斯联合，则这个闭式分解不成立。
+
+总判断：stage3 后期的首要机制不是确定性不动点漂移，而是 \(b_\tau\) 塌缩后 \(x_\tau/h\) 的直接通路令 \(\xi_0\) 保持强注入，同时把迭代阻尼推到近单位根。标量 \(S\) 下随后由 \(\xi_h\) 接棒；谱形 \(S\) 推迟了 \(\xi_h/\xi_s\) 交叉，却使 \(\xi_0\) 的相对主导更加明显。
+tokens used
+27,376
+设 \(u\) 为 hole 内、数据不可见的单位方向，记
+
+\[
+Au=0,\qquad H_\tau u=h\,u,\qquad Su=q\,u,
+\]
+
+其中标量 \(S\) 时 \(q=s^2=0.055\)，谱形 \(S\) 的 ker 高频约 \(q=0.011\)。定义
+
+\[
+r\equiv \frac{h^2q}{\sigma_\tau^2},\qquad
+m\equiv \frac{h^2}{\sigma_\tau^2}+\frac1q=\frac{1+r}{q}.
+\]
+
+## 一、噪声分解与排序
+
+Block1 的随机部分为
+
+\[
+\delta x_1
+=M^{-1}\!\left(
+\frac{A^\top}{\eta}\xi_y+
+\frac{H_\tau^\top}{\sigma_\tau}\xi_h+
+S^{-1/2}\xi_s
+\right).
+\]
+
+对应协方差严格分解为
+
+\[
+\Sigma_y=M^{-1}\frac{A^\top A}{\eta^2}M^{-1},
+\]
+
+\[
+\Sigma_h=M^{-1}\frac{H_\tau^\top H_\tau}{\sigma_\tau^2}M^{-1},
+\]
+
+\[
+\Sigma_s=M^{-1}S^{-1}M^{-1},
+\]
+
+且
+
+\[
+\Sigma_y+\Sigma_h+\Sigma_s=M^{-1}.
+\]
+
+在 hole 方向 \(A=0\)，所以 \(\xi_y\) 的投影严格为零。单模态上：
+
+\[
+\delta x_{1,h}
+=\frac{h/\sigma_\tau}{m}\xi_h
+=\frac{\sqrt q\sqrt r}{1+r}\xi_h,
+\]
+
+\[
+\delta x_{1,s}
+=\frac{q^{-1/2}}{m}\xi_s
+=\frac{\sqrt q}{1+r}\xi_s.
+\]
+
+因此
+
+\[
+V_h=\frac{qr}{(1+r)^2},\qquad
+V_s=\frac{q}{(1+r)^2},
+\]
+
+\[
+V_h+V_s=\frac{q}{1+r}=m^{-1},\qquad
+\frac{V_h}{V_s}=r.
+\]
+
+结论很直接：
+
+- \(r<1\)：\(\xi_s\) 大于 \(\xi_h\)。
+- \(r=1\)：两者相等，各占 Block1 方差的一半。
+- \(r>1\)：\(\xi_h\) 大于 \(\xi_s\)。
+- \(r\gg1\)：\(V_h\simeq \sigma_\tau^2/h^2\)，而 \(V_s\simeq \sigma_\tau^4/(h^4q)\)，先验噪声被多压一个 \(1/r\)。
+
+### \(\xi_0\) 的跨 Block 传递
+
+沿该模态，将 (19) 写成
+
+\[
+\hat x_1=a_\tau x_\tau+b_\tau v_\theta(x_\tau),
+\]
+
+\[
+a_\tau=\frac{\gamma^2h-N\dot\sigma}{N^2+\gamma^2h^2},
+\qquad
+b_\tau=\frac{N\sigma}{N^2+\gamma^2h^2}.
+\]
+
+记网络局部 Jacobian 为
+
+\[
+j_\tau=u^\top Dv_\theta(x_\tau)u.
+\]
+
+Block2 给出
+
+\[
+\delta x_\tau=\sigma_\tau\xi_0.
+\]
+
+而 [Block1 中心项](/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py:1366) 使用
+
+\[
+C^{-1}\hat x_1,\qquad
+C^{-1}=\frac{H^\top H}{\sigma_\tau^2}+S^{-1}.
+\]
+
+在 \(A=0\) 的方向 \(M=C^{-1}\)，故 \(M^{-1}C^{-1}=I\)。于是
+
+\[
+\boxed{
+g_0\equiv
+\frac{\partial\mu_{1,\mathrm{next}}}{\partial\xi_0}
+=\sigma_\tau(a_\tau+b_\tau j_\tau)
+}
+\]
+
+是 \(\xi_0\) 到下一次 Block1 中心的传递增益。
+
+利用恒等式
+
+\[
+a_\tau h+b_\tau\dot h=1,
+\]
+
+可改写成
+
+\[
+\boxed{
+g_0=\frac{\sigma_\tau}{h}
++\sigma_\tau b_\tau
+\left(j_\tau-\frac{\dot h}{h}\right).
+}
+\]
+
+因此 \(b_\tau\) 从 \(0.94\) 塌到 \(0.001\) 并没有切断 \(\xi_0\)；它只是切掉网络修正，留下几乎纯粹的
+
+\[
+g_0\simeq \frac{\sigma_\tau}{h}.
+\]
+
+对应方差
+
+\[
+V_0\simeq\frac{\sigma_\tau^2}{h^2}=\frac q r.
+\]
+
+与 Block1 两路比较：
+
+\[
+\frac{V_0}{V_h}
+=\frac{(1+r)^2}{r^2}>1,
+\]
+
+\[
+\frac{V_0}{V_s}
+=\frac{(1+r)^2}{r}\ge 4.
+\]
+
+所以只要网络 Jacobian 残差没有大到 \(O(1/b_\tau)\)，\(\xi_0\) 是逐步创新中最大的来源；当 \(r\gg1\) 时它才渐近接近 \(\xi_h\)。
+
+更危险的是迭代增益
+
+\[
+\rho=h(a_\tau+b_\tau j_\tau)
+=1+b_\tau(hj_\tau-\dot h).
+\]
+
+当 \(b_\tau\simeq0.001\) 时，\(\rho\) 天然逼近 1：不是噪声突然增大，而是所有创新都失去阻尼、在内循环中长时间保留。
+
+### stage3 排序预测
+
+标量 \(S\)，已知第 \(6/10\) 帧 \(r\) 跨过 1：
+
+- 跨点前：\(\boxed{\xi_0>\xi_s>\xi_h>\text{确定性 }b_\tau\text{ 漂移}}\)。
+- 跨点附近：\(\boxed{\xi_0>\xi_h\simeq\xi_s>\text{确定性漂移}}\)；在 \(r=1\) 时 \(V_0\) 是每个 Block1 通道的 4 倍。
+- 跨点后：\(\boxed{\xi_0>\xi_h>\xi_s>\text{确定性漂移}}\)。
+- 很晚、\(r\gg1\)：\(\xi_0\simeq\xi_h\gg\xi_s\)。
+
+谱形 \(S\)：
+
+\[
+r_{\rm spec}
+=\frac{0.011}{0.055}r_{\rm scalar}
+\simeq0.2r_{\rm scalar}.
+\]
+
+因此 \(\xi_h/\xi_s\) 的交叉被推迟到标量 \(r\simeq5\)：
+
+- 在标量第 6 帧刚过交叉时，谱形方向仍有 \(r_{\rm spec}\simeq0.2\)，故排序为  
+  \[
+  \boxed{\xi_0>\xi_s>\xi_h>\text{确定性漂移}}.
+  \]
+- 只有当标量方向后来达到 \(r>5\)，谱形方向才转成  
+  \[
+  \boxed{\xi_0>\xi_h>\xi_s>\text{确定性漂移}}.
+  \]
+
+谱形 \(S\) 已把先验通道绝对注入约压低 3 倍，而 \(V_0=\sigma^2/h^2\) 基本不依赖 \(q\)，所以它会进一步凸显 \(\xi_0\) 的相对主导地位。
+
+确定性 \(b_\tau\) 漂移本身可写成
+
+\[
+\hat x_1=\frac{x_\tau}{h}
++b_\tau\left(v_\theta-\frac{\dot h}{h}x_\tau\right).
+\]
+
+它只乘网络残差；\(b_\tau=0.001\) 时是小的加性 forcing。零噪声实验仍收缩到好不动点，支持它排最后。但 \(b_\tau\) 塌缩通过 \(\rho\to1\) 间接削弱阻尼，是噪声放大的促成因素。
+
+严格术语上还需注意：若某帧确实有 \(H_\tau=s_kG\)，且讨论的是数学意义上的精确 \(\ker(G)\)，则 \(h=0\)、\(r=0\)，此时 \(\xi_h\) 投影严格为零，只有 \(\xi_s\)；上述 \(r\) 跨 1 的方向必然是近-kernel，或 \(H_\tau\) 在该帧还含非零 identity 分量。
+
+## 二、修复方向
+
+### 1. 含 \(S^{-1}\) 收缩的自洽代理：有条件推荐
+
+令 \(m_\theta\) 是在本帧两个 conditional 期间固定、且不依赖当前 \(x_\tau\) 的先验均值，定义
+
+\[
+\tilde x_1
+=C\left(
+\frac{H^\top x_\tau}{\sigma_\tau^2}
++S^{-1}m_\theta
+\right),
+\qquad
+C^{-1}=\frac{H^\top H}{\sigma_\tau^2}+S^{-1}.
+\]
+
+于是
+
+\[
+C^{-1}\tilde x_1
+=\frac{H^\top x_\tau}{\sigma_\tau^2}+S^{-1}m_\theta,
+\]
+
+两步正好是联合 posterior
+
+\[
+p(x_1,x_\tau\mid y,m_\theta)
+\propto
+p(y\mid x_1)
+\,\mathcal N(x_1;m_\theta,S)
+\,\mathcal N(x_\tau;Hx_1,\sigma_\tau^2I)
+\]
+
+的两个精确 Gaussian conditionals。
+
+此时 \(\xi_0\) 墣益变为
+
+\[
+g_{0,\rm coherent}
+=M^{-1}\frac{H^\top}{\sigma_\tau},
+\]
+
+即单模态
+
+\[
+g_{0,\rm coherent}
+=\frac{\sqrt q\sqrt r}{1+r}=g_h.
+\]
+
+相对当前 \(g_0\simeq\sqrt{q/r}\)，标准差缩减因子为
+
+\[
+\frac{g_{0,\rm coherent}}{g_0}
+=\frac r{1+r}.
+\]
+
+在 \(r=1\) 时减半；但 \(r\gg1\) 时改善趋近于零，因此不能单独解决最晚帧。
+
+关键限制：如果把 \(m_\theta\) 或 \(\tilde x_1\) 重新设成当前 \(x_\tau\) 的非线性网络函数，单纯替换 (19) 不再自动是合法 Gibbs sampler。与固定 Block2 相容所需的必要条件是
+
+\[
+C^{-1}D\tilde x_1(x_\tau)=\frac{H^\top}{\sigma_\tau^2}.
+\]
+
+一般网络代理不满足它。风险是先验偏置、ker 高频过度收缩，以及把当前辅助样本偷偷重复使用造成 conditional incompatibility。
+
+### 2. Working-parameter / 非中心化辅助变量
+
+固定希望保留的边缘 posterior \(\pi(x_1\mid y)\)，重新引入纯辅助变量
+
+\[
+z\mid x_1\sim\mathcal N(R_\tau x_1,\Omega_\tau),
+\]
+
+构造
+
+\[
+\tilde\pi(x_1,z\mid y)
+=\pi(x_1\mid y)\mathcal N(z;R_\tau x_1,\Omega_\tau).
+\]
+
+该高斯因子对 \(z\) 积分恒为 1，所以 \(x_1\) 的目标 posterior 完全不变。两个 conditional 都是精确抽样：
+
+\[
+z\mid x_1,y=\mathcal N(R_\tau x_1,\Omega_\tau),
+\]
+
+\[
+x_1\mid z,y:
+\quad Q_{\rm cond}
+=Q_\pi+R_\tau^\top\Omega_\tau^{-1}R_\tau.
+\]
+
+可按谱选择 \(R_\tau,\Omega_\tau\)，使 ker 高频的广义 \(r\) 保持在 \(O(1)\)，避免当前 \(b_\tau\to0,\rho\to1\) 的病态中心化参数化。
+
+主要风险：网络若直接消费 \(z\)，新的噪化分布可能离开训练分布；需要等价变换回网络熟悉的输入。它只改善混合和有限内循环的噪声滞留，不能改变真正的 posterior 边缘方差。
+
+### 3. Schur-complement 精确刷新，消除跨内循环反馈
+
+对同一联合高斯 posterior，先精确抽
+
+\[
+x_\tau\mid y
+\sim
+\mathcal N\!\left(
+H\bar m,\,
+\sigma_\tau^2I+HQ^{-1}H^\top
+\right),
+\]
+
+再精确抽原来的
+
+\[
+x_1\mid x_\tau,y.
+\]
+
+这是同一联合分布的另一种精确因子分解；每帧仍是两个精确 conditional，但 \(x_\tau\) 不再继承上一轮状态，因此不存在 \(\rho\simeq1\) 导致的噪声积累。
+
+主要风险是需要对 Schur 协方差做精确平方根采样或等价精确求解，计算和预条件难度较高；若网络诱导的目标并非真正高斯联合，则这个闭式分解不成立。
+
+总判断：stage3 后期的首要机制不是确定性不动点漂移，而是 \(b_\tau\) 塌缩后 \(x_\tau/h\) 的直接通路令 \(\xi_0\) 保持强注入，同时把迭代阻尼推到近单位根。标量 \(S\) 下随后由 \(\xi_h\) 接棒；谱形 \(S\) 推迟了 \(\xi_h/\xi_s\) 交叉，却使 \(\xi_0\) 的相对主导更加明显。
