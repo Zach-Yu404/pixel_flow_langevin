@@ -34,7 +34,12 @@
 
 ### 采样器纪律(来源:DESIGN.md、sampler_diff、debug_IP4)
 - 永不 fork `run_posterior_sampling` / 算子——import 之(fork 即失去对齐保证)
-- warm_restart=True 与 g_bypass_stage3=True 不关;λ_prox 与 λ_reg 同步动
+- warm_restart=True 不关;λ_prox 与 λ_reg 同步动
+- (2026-08-24 用户决定)apply_G 的 stage-3 恒等旁路已删除:G 在所有 stage 都是 down-up 投影;
+  g_bypass_stage3 开关成为无效 no-op,gamma2 表按新口径重测(junco 单图)
+- (2026-08-24 用户决定)gamma2 表分表:gamma2_meas.json = junco 单图/eps_for(Alg2/config.json 专用);
+  gamma2_meas_alg4.json = Alg4 专用(config_alg4.json 指向它,stage-3 为 7 图/随机噪声口径)。
+  两个会话不得写对方的表——此前 stage-3 行曾被两会话互相覆写
 - config 不跨任务迁移(ns/tr/fd/srs 全是任务相关;motion 伴随必须 flip(K))
 - inpainting tr=1;blur/SR tr=0(SR@tr=1 = bicubic,不是算法结果)
 - MMSE 类实验:y 跨 sampler seed 固定(测量后、采样前重播种)

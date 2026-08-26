@@ -19,3 +19,10 @@ endpoint_prior_shrink 已删（单开关原则）；要 12–14% 收益需恢复
 endpoint_mode="prior_zero"——用户裁决。
 产物：results/alg4_eq19_endpoint_prior/（report+6 CSV+trajectory.png+各臂
 montage/关键帧张量），39MB。
+
+## 回退（2026-08-26，用户「我认为没用，回退」）
+utils.py / alg4_diag.py 逐字还原（endpoint_mode / apply_N_inv / mu_tau /
+on_inner **extra 全部移除，grep 零残留）；eq19_prior.py 与
+results/alg4_eq19_endpoint_prior/ 删除。回归 4 帧基准 0.1447/0.1143/0.1291/
+0.1495 逐位一致。m=0 零锚变体（0.1227/0.1290）仍只存在于本文件记录，
+恢复与否待用户裁决。
