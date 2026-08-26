@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 46
+memory_version: 47
 updated_at: "2026-08-25"
 updated_by: "claude"          # claude | codex | user
 
@@ -24,6 +24,16 @@ authorized_scope: "implement-algorithm4：新增 PixelFlowICLR/Algorithm2/{main4
 execution_allowed: true
 
 active_tasks:
+- name: last2stages-12h-program
+  type: experiment
+  state: done
+  owner: claude
+  branch: IP_branch
+  depends_on: [attribute-late-noise-sources]
+  execution_allowed: true    # 用户 2026-08-26 12h 授权；Codex gpt-5.6-sol/ultra 三轮
+  issue: null
+  pr: null
+  pending_review_by: codex   # utils per-frame num_langevin + config [2,2,1,1]；待定 SHA
 - name: antithetic-endpoint-center
   type: experiment
   state: done                # 用户裁决「撤回修改，没有用」——代码/结果已全删；
@@ -250,5 +260,5 @@ active_tasks:
 
 # 各 agent 最后一次 sync 看到的版本（stale 检测用）
 last_seen:
-  claude: { memory_version: 46, commit: "56bd921", github_event: "issue#3-review-request-changes" }
+  claude: { memory_version: 47, commit: "56bd921", github_event: "issue#3-review-request-changes" }
   codex:  { memory_version: 24, commit: "31ff0d4", github_event: "issue#3-rereview-request-changes" }
