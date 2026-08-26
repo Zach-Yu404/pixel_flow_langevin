@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 45
+memory_version: 46
 updated_at: "2026-08-25"
 updated_by: "claude"          # claude | codex | user
 
@@ -26,15 +26,15 @@ execution_allowed: true
 active_tasks:
 - name: antithetic-endpoint-center
   type: experiment
-  state: done
+  state: done                # 用户裁决「撤回修改，没有用」——代码/结果已全删；
+                             # 数字与 Codex review 结论存 task 文件（勿重做）
   owner: claude
   branch: IP_branch
   depends_on: [attribute-late-noise-sources]
-  execution_allowed: true    # 用户 2026-08-26 详细规格直接指令
+  execution_allowed: true
   issue: null
   pr: null
-  pending_review_by: null    # Codex 已对工作区代码 review（A-E PASS，must-fix
-                             # 已修/记录）；正式 SHA 级复审仍待提交
+  pending_review_by: null
 - name: attribute-late-noise-sources
   type: debug
   state: done
@@ -250,5 +250,5 @@ active_tasks:
 
 # 各 agent 最后一次 sync 看到的版本（stale 检测用）
 last_seen:
-  claude: { memory_version: 45, commit: "56bd921", github_event: "issue#3-review-request-changes" }
+  claude: { memory_version: 46, commit: "56bd921", github_event: "issue#3-review-request-changes" }
   codex:  { memory_version: 24, commit: "31ff0d4", github_event: "issue#3-rereview-request-changes" }

@@ -1,4 +1,9 @@
-# antithetic-endpoint-center（2026-08-26，done；含 Codex review）
+# antithetic-endpoint-center（2026-08-26，done → 全部撤回）
+
+> **撤回记录**：用户裁决「撤回修改，没有用」。utils.py / alg4_diag.py 逐字还原
+> （回归 2,2,2,2 复现 0.1447/0.1143/0.1291/0.1495），antithetic_ablation.py 与
+> results/alg4_antithetic_center_ablation/ 已删除。本文件保留全部数字与 Codex
+> review 结论作为历史记录（含 0.0875 的结果与其代价/风险），避免重做。
 
 ## 用户原始要求（逐字摘录）
 
