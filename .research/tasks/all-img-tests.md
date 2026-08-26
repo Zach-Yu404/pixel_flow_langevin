@@ -33,5 +33,26 @@ PSNR(range2)、meas_resid、cg_bad、秒）。~60MB，≈6h。
   自动微分精确伴随（motion flip(K) 约束由工厂结构保证）。
 - 噪声条件均为诊断探针（draw-then-zero，非 exact draw）。
 
-## 结果
-待填。
+## 结果（300/300 格完成，CG 全收敛，产物 ~45MB）
+6 图均值。inpainting=hole MSE；blur/SR=full MSE/PSNR。
+
+box_inpainting（hole）：base spec .1686/pool .1752 → ξ_h=0 .1315/.1356 →
+3ξ=0 .1149/.1153；f20 与全程接近但不同（洞内无 pinning，早期噪声存活）。
+random_inpainting（hole）：base .0213/.0606 → ξ_h=0 .0161/.0314 → 3ξ=0
+.0113/.0188；f20≡全程（逐位量级 1e-5）。
+gaussian_blur（full/PSNR）：base .0309/21.4、.0652/18.0 → 3ξ=0 双臂同收敛
+.0147/25.6、.0148/25.5；f20≡全程。
+motion_blur：base .0330/21.0、.0644/18.0 → 3ξ=0 .0145/25.3、.0148/25.1；f20≡全程。
+superresolution：base .0294/21.5、.0646/18.0 → 3ξ=0 .0141/25.5、.0137/25.6；f20≡全程。
+
+**跨任务规律**：
+1. ξ_h 主导、3ξ 再加一截——junco box 上的结论在 5 task × 6 图全部复现
+   （3ξ=0 全 MSE −33% ~ −79%）。
+2. **空间 pinning 定律（新）**：早期噪声是否留存取决于测量 pinning 的空间
+   分布。box 大连续洞内无 pinning ⟹ 早期噪声存活到晚期（full≠f20）；
+   random/blur/SR 处处 pinning ⟹ 早期扰动指数遗忘（full 与 f20 差 ~1e-5，
+   位级对照 rand_bitcheck：|Δ(f0,f2)|max=1.3e-5 vs |Δ(base,f2)|max=0.33）。
+3. **两臂在 3ξ=0 后收敛到几乎同一水平**——基线差异（pooled 恒差 ~2 倍）
+   主要是 S 与噪声路径的相互作用，不是 S 的均值结构；pooled 在散布/全域
+   观测任务受噪声伤害远大于 spectral（PSNR 差 3.4-3.6dB，置零后追平）。
+4. 诊断定性不变：置零=篡改条件协方差的探针上界，非合法采样器。
