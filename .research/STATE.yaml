@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 51
+memory_version: 52
 updated_at: "2026-08-26"
 updated_by: "claude"          # claude | codex | user
 
@@ -38,9 +38,11 @@ active_tasks:
   pending_review_by: null
 - name: xih-zero-probe
   type: debug
-  state: in-progress        # 诊断探针（非 fix）：utils 常驻 diag_noise_off 开关；
-                            # f20 起版已按用户「回退」删除（数字存 task 文件）；
-                            # 全程 ξ_h=0 版运行中，产物 results/alg4_noise_probe_xih/
+  state: done               # 三版全完成：f20 起（回退留数）、全程（收益全在
+                            # stage≥2）、S_it×ξ_h=0 扫描（棘轮预测证实，最优
+                            # spectral [2,2,5,5] 0.0861 / pooled [2,2,10,10]
+                            # 0.0776）+ 12 格 seed42 轨迹回填；结果与结论全录
+                            # tasks/xih-zero-probe.md，产物 results/alg4_noise_probe_xih/
   owner: claude
   branch: IP_branch
   depends_on: [attribute-late-noise-sources]
