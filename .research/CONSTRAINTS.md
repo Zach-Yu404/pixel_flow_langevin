@@ -53,6 +53,14 @@
 
 ## 当前任务约束
 
+### 2026-08-26 · review-eq22-sigma2-rescaling
+
+【用户原始要求】
+> 你是独立理论审查方。请只依据下面给出的实现事实,独立推导并回答 6 个问题。给出推导或反例,不要只给结论。请用中文回答,输出为可直接存档的 markdown。
+
+生效动作：只做理论 review，不修改实现；`execution_allowed: false`。技术推导的证据边界限于
+用户题面所列实现事实；最终输出为中文、可直接存档的 Markdown，并逐问给出推导、条件或反例。
+
 ### 2026-08-15 · onestep-mse-vs-t（PixelFlowICLR 实验 1）
 【用户原始要求】（节选，全文见 tasks/onestep-mse-vs-t.md）
 > 只做 one-step prediction，不做 Langevin、迭代优化或 ODE rollout。

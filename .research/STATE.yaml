@@ -1,6 +1,6 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 53
-updated_at: "2026-08-26"
+memory_version: 56
+updated_at: "2026-08-27"
 updated_by: "claude"          # claude | codex | user
 
 # 2026-08-25：dual-agent 恢复。codex 0.149.1 自行安装（npm --prefix ~/.local + release
@@ -21,9 +21,41 @@ authorized_scope: "implement-algorithm4：新增 PixelFlowICLR/Algorithm2/{main4
   与 utils.py 的 Alg-4 纯新增函数；不得改动既有采样器、main.py、main2.py、config.json"
 
 # 全局执行开关（用户说"先不要实现"→ 立即置 false）
+# 2026-08-27 claude 纠正：codex 在 v55 把它自己"只审不实现"的任务级约束写到了
+# 全局开关。用户 2026-08-26 的 eq22 协作要求明确包含"形成共识后实现"，实现
+# 已按协议完成并通过 codex 逐行 review。恢复 true。
 execution_allowed: true
 
 active_tasks:
+- name: review-eq22-sigma2-rescaling
+  type: review
+  state: done             # Codex 独立理论稿完成；claude 已逐条对照（6/6 一致，
+                          # 对照表在 results/alg4_eq22_sigma2_scaling/
+                          # claude_codex_consensus.md）；review 闭环
+  owner: codex
+  branch: null
+  depends_on: [implement-algorithm4]
+  execution_allowed: false   # 该任务本身只审查；实现走 eq22-sigma2-scaling
+  issue: null
+  pr: null
+  pending_review_by: null
+- name: eq22-sigma2-scaling
+  type: implementation
+  state: done               # 双 agent 全协议闭合：理论 6/6 零分歧→实现→codex
+                            # 逐行 review（1 should-fix 已修：fallback K̃=I/c）
+                            # →两轮验证（稠密 fp64 恒等 5e-17、MC 协方差得证、
+                            # σ=1e-8 零 NaN、tol 扫描截断归因）→共同解释无实质
+                            # 分歧。定性 numerical rescaling；不改默认，opt-in
+                            # 开关 eq22_sigma2_scale 保留。4 协作记录 + 2 可复跑
+                            # 脚本在 results/alg4_eq22_sigma2_scaling/
+  owner: claude
+  branch: IP_branch
+  depends_on: [last2stages-12h-program]
+  execution_allowed: true   # 用户 2026-08-26 协作要求全文（见 task 文件）
+  issue: null
+  pr: null
+  pending_review_by: null   # codex 已对实现逐行 review（blob 47c57d1f 起、修复
+                            # 后经 [F]/[A2] 复验）；SHA 级绑定待大提交
 - name: all-img-tests
   type: experiment
   state: done               # 300/300 全收敛；跨任务规律与空间 pinning 定律见 task 文件

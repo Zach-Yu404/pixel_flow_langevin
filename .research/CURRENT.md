@@ -2,6 +2,20 @@
 
 更新时间：2026-08-26
 
+## 2026-08-26：Eq. (22) 乘 \(\sigma_\tau^2\) 的 Codex 独立理论审查
+
+- 正确等价式：\(\widetilde M=cM,\widetilde b=cb,\widetilde\zeta=c\zeta\)，
+  \(c=\sigma_\tau^2\)；关键是
+  \(\operatorname{Cov}(\widetilde\zeta)=c^2M=c\widetilde M\)，不是 \(\widetilde M\)。
+- 若误按 \(\operatorname{Cov}=\widetilde M\) 重建 RTO 噪声，输出协方差会成为
+  \(c^{-1}M^{-1}\)；\(\sigma=10^{-8}\) 时放大 \(10^{16}\) 倍。
+- 精确算术下样本与全部统计性质不变、条件数不变；定位为“数值重缩放”。fp32 可减少大数
+  reduction 溢出，但不修复相对吸收/病态；三个绝对 clamp、Jacobi floor 与 spectral 探针
+  必须尺度一致。完整稿见
+  references/2026-08-26-codex-eq22-sigma2-rescaling-review.md。
+- 双 agent 预检 10/10；结构化 research-peer 三次均因 Ceph worktree Remote I/O error
+  失败，任务暂为 review / pending Claude。
+
 ## 2026-08-26：eq19' 回退 + ξ_h=0 诊断探针（tasks/xih-zero-probe.md）
 
 - **eq19-endpoint-prior 已按用户「我认为没用，回退」全清**：代码逐字还原、结果目录删、
