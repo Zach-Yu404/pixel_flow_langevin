@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 56
+memory_version: 57
 updated_at: "2026-08-27"
 updated_by: "claude"          # claude | codex | user
 
@@ -41,7 +41,7 @@ active_tasks:
   pending_review_by: null
 - name: eq22-sigma2-scaling
   type: implementation
-  state: done               # 双 agent 全协议闭合：理论 6/6 零分歧→实现→codex
+  state: done               # 已按用户指令回退代码（回归逐位过，记录保留）；理论 6/6 零分歧→实现→codex
                             # 逐行 review（1 should-fix 已修：fallback K̃=I/c）
                             # →两轮验证（稠密 fp64 恒等 5e-17、MC 协方差得证、
                             # σ=1e-8 零 NaN、tol 扫描截断归因）→共同解释无实质

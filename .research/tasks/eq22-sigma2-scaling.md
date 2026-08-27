@@ -1,4 +1,13 @@
-# eq22-sigma2-scaling（2026-08-27，done——双 agent 共识闭合）
+# eq22-sigma2-scaling（2026-08-27，done——双 agent 共识闭合；代码已按用户指令回退）
+
+## 回退（2026-08-27，用户「那回退这个选项，不需要scale了」）
+utils.py 全部 eq22 代码撤除（kwarg、make_M_tau_den_sigma2、双分支、fallback、
+pcg_solve clamp_floor 参数还原为字面 1e-12），grep 零残留、语法过。回归逐位：
+哨兵 [2,2,2,2] 0.1447/0.1143/0.1291/0.1495；现行 [2,2,1,1] spectral
+0.2551/0.1228/0.1291/0.1334、pooled 0.1447/0.1143/0.1193/0.1331。
+**协作记录与验证产物按用户原要求保留**于 results/alg4_eq22_sigma2_scaling/
+（4 记录 + validation{,2}.md + 2 脚本 + 4 组轨迹对照）。如需恢复，最终实现
+经双 agent 逐行审定，本文件与 codex_code_review.md 含全部构造细节。
 
 ## 用户原始要求（逐字）
 「和Codex 协作要求
