@@ -1,0 +1,22 @@
+{
+ "arms": [
+  "pooled_junco",
+  "spectral"
+ ],
+ "onestep_frames": [
+  32,
+  35,
+  37,
+  38
+ ],
+ "onestep_draws": 16,
+ "onestep_seed0": 8000,
+ "spread_seeds": [
+  42,
+  43,
+  44,
+  45
+ ],
+ "spectral_floor_rel": 1e-08,
+ "eval_image": "junco"
+}

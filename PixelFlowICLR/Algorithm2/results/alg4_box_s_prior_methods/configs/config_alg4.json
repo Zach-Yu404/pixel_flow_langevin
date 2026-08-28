@@ -1,0 +1,195 @@
+{
+ "mode": "full_ip",
+ "paths": {
+  "model_dir": "{IP_PACKAGE}/pretrained_models/c2img",
+  "demo_dir": "{IP_PACKAGE}/demo",
+  "gamma2_table": "{HERE}/gamma2_meas_alg4.json"
+ },
+ "algorithm": {
+  "sigma_min": 1e-08,
+  "seed": 42,
+  "measurement_seed": 42,
+  "cg_max_iter_endpoint": 200
+ },
+ "sampler_kw": {
+  "num_langevin": 2,
+  "ode_steps_per_stage": 10,
+  "shift": 1.0,
+  "guidance_scale": 2.0,
+  "cg_tol": 1e-05,
+  "cg_max_iter": 300
+ },
+ "S_prior": {
+  "mode": "table",
+  "path": "results/alg4/s2_meas.json"
+ },
+ "tasks_setup": {
+  "box_inpainting": {
+   "sigma_n": 0.05,
+   "operator": {
+    "mask_len_range": [
+     128,
+     129
+    ],
+    "center": true
+   },
+   "terminal_replace_weight": 0.0,
+   "measurement_mode": "measure"
+  },
+  "random_inpainting": {
+   "sigma_n": 0.05,
+   "operator": {
+    "mask_prob": 0.7
+   },
+   "kw": {
+    "num_langevin": 15
+   },
+   "terminal_replace_weight": 0.0,
+   "measurement_mode": "measure"
+  },
+  "gaussian_blur": {
+   "sigma_n": 0.05,
+   "operator": {
+    "kernel_size": 61,
+    "kernel_std": 3.0
+   },
+   "terminal_replace_weight": 0.0,
+   "measurement_mode": "measure"
+  },
+  "motion_blur": {
+   "sigma_n": 0.05,
+   "operator": {
+    "kernel_size": 61,
+    "kernel_intensity": 0.5,
+    "kernel_seed": 42,
+    "use_daps_kernel": true
+   },
+   "terminal_replace_weight": 0.0,
+   "measurement_mode": "measure"
+  },
+  "superresolution": {
+   "sigma_n": 0.05,
+   "operator": {
+    "scale_factor": 4,
+    "antialias": true
+   },
+   "terminal_replace_weight": 0.0,
+   "measurement_mode": "measure"
+  }
+ },
+ "tasks": [
+  "box_inpainting",
+  "random_inpainting",
+  "gaussian_blur",
+  "motion_blur",
+  "superresolution"
+ ],
+ "images": [
+  "breastplate_armor",
+  "crane_structure",
+  "ibex_horns",
+  "junco",
+  "lakeside_beach",
+  "sea_anemone",
+  "shetland_sheepdog"
+ ],
+ "traj_image": "junco",
+ "full_ip": {
+  "out": "results/alg4",
+  "smoke": false
+ },
+ "measure_s2": {
+  "out": "results/alg4"
+ },
+ "diagnose": {
+  "out": "results/alg4_box_stage3_diagnosis",
+  "image": "junco",
+  "sit_variants": [
+   1,
+   2,
+   5
+  ],
+  "compare_to": "results/alg4/full_ip_final.csv"
+ },
+ "diversity": {
+  "out": "results/alg4_box_stage3_diagnosis",
+  "image": "junco",
+  "arms": [
+   {
+    "name": "measured",
+    "mode": "table",
+    "path": "results/alg4/s2_meas.json"
+   },
+   {
+    "name": "lam25",
+    "mode": "isotropic",
+    "s2": 0.04
+   },
+   {
+    "name": "lam100",
+    "mode": "isotropic",
+    "s2": 0.01
+   },
+   {
+    "name": "lam400",
+    "mode": "isotropic",
+    "s2": 0.0025
+   }
+  ],
+  "seeds": [
+   42,
+   43,
+   44,
+   45
+  ]
+ },
+ "contraction": {
+  "out": "results/alg4_box_stage3_diagnosis",
+  "image": "junco",
+  "frames": [
+   25,
+   29,
+   30,
+   31,
+   32,
+   34,
+   36,
+   38
+  ],
+  "deltas": [
+   0.02,
+   0.05,
+   0.1,
+   0.2,
+   0.4,
+   0.8,
+   1.6,
+   3.2
+  ],
+  "repeats": 1,
+  "replay_x1": "results/alg4_box_stage3_diagnosis/diversity/measured_seed42.npy"
+ },
+ "cg_audit": {
+  "out": "results/alg4_box_stage3_diagnosis",
+  "image": "junco",
+  "frames": [
+   0,
+   5,
+   9,
+   10,
+   15,
+   19,
+   20,
+   25,
+   29,
+   30,
+   34,
+   38
+  ],
+  "task": "box_inpainting",
+  "max_probe": 2000
+ },
+ "verify": {
+  "res": 16
+ }
+}
