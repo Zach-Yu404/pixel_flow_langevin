@@ -26,9 +26,9 @@ instead of leaving it built from the previously drawn x1. The prior therefore
 enters x_tau directly rather than only through x0.
 
 One consequence is structural: line 14 needs (H_tau)^-1, and H_0 = s_k G is
-singular wherever ker(G) is non-trivial, so Algorithm 3 cannot evaluate tau=0
-outside stage 3 (where g_bypass makes G = I). The grid starts at the first
-tau > 0 there, which is what 7.13 recommends anyway.
+singular (ker(G) is non-trivial at every stage since the stage-3 G = I bypass
+was removed), so Algorithm 3 cannot evaluate tau=0. The grid starts at the
+first tau > 0, which is what 7.13 recommends anyway.
 
     PYTHONHASHSEED=0 python main2.py --task box_inpainting --image junco
     PYTHONHASHSEED=0 python main2.py --compare          # Alg 2 vs Alg 3, same seed
@@ -138,8 +138,8 @@ def run_posterior_sampling_alg3(
             sigma_tau = compute_sigma_tau(tau, s_k, e_k)             # l.5
             if sigma_tau < sigma_min:
                 continue
-            # l.14 needs H_tau^-1; H_0 = s_k G is singular unless G = I.
-            if tau == 0.0 and eff_si != 3:
+            # l.14 needs H_tau^-1; H_0 = s_k G is singular at every stage.
+            if tau == 0.0:
                 skipped_tau0 += 1
                 continue
 

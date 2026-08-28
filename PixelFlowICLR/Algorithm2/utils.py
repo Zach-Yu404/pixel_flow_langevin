@@ -91,14 +91,12 @@ def apply_H_tau_inv(x, tau, s_k, e_k, stage_idx=None):
     """
     lam_range = (1.0 - tau) * s_k + tau * e_k
     lam_ker = tau * e_k
-    has_ker = stage_idx != 3                   # G = I at stage 3, so ker(G) = {0}
-    if lam_range <= 0 or (has_ker and lam_ker <= 0):
+    if lam_range <= 0 or lam_ker <= 0:
         raise ValueError(
             f"H_tau is singular at tau={tau}, s_k={s_k}: x1_hat is undefined. "
             "Start the grid at the first tau > 0.")
     Gx = apply_G(x, stage_idx=stage_idx)
-    out = Gx / lam_range
-    return out + (x - Gx) / lam_ker if has_ker else out
+    return Gx / lam_range + (x - Gx) / lam_ker
 
 
 def power_iter_norm(M_fn, shape, device, iters=20, seed=0):
@@ -194,6 +192,61 @@ def data_rhs(AT_fn, y, x_tau, inv_e2, inv_s2, tau, s_k, e_k, eff_si):
     return inv_e2 * AT_fn(y) + inv_s2 * apply_H_tau(x_tau, tau, s_k, e_k, eff_si)
 
 
+def make_M_tau_wv(A_fn, AT_fn, eta, sigma_tau, tau, s_k, e_k, eff_si, shape, device,
+                  ridge_rel, gamma2):
+    """make_M_tau plus the (x0, x1)-coupling precision N^T N / (sigma_tau^2 gamma^2).
+
+    x_tau = H_tau x1 + sigma_tau x0 and v_theta = B_k x1 - (e_k - s_k) x0 + eps_v
+    with eps_v ~ N(0, gamma^2 I). Eliminating x0 between them leaves
+        r_tau := (e_k - s_k) x_tau + sigma_tau v_theta = N_k x1 + sigma_tau eps_v
+    -- the identity (e_k - s_k) H_tau + sigma_tau B_k == N_k is exact, and
+    test/test_wv_alg2.py --check verifies it numerically. So r_tau is a second
+    Gaussian observation of x1 with precision N^T N / (sigma_tau^2 gamma^2).
+    gamma^2 is the same measured Cor.-8 table score_solve uses, so no hand-tuned
+    weight enters.
+
+    Returns (M_fn, inv_e2, inv_s2, inv_v2, epsilon) -- one scalar more than
+    make_M_tau: the coupling weight inv_v2 = 1/(sigma_tau^2 gamma^2)."""
+    inv_e2, inv_s2 = 1.0 / eta ** 2, 1.0 / float(sigma_tau) ** 2
+    inv_v2 = inv_s2 / float(gamma2)
+
+    def M0(x):
+        return (inv_e2 * AT_fn(A_fn(x))
+                + inv_s2 * apply_H_tau(
+                    apply_H_tau(x, tau, s_k, e_k, eff_si), tau, s_k, e_k, eff_si)
+                + inv_v2 * apply_N(
+                    apply_N(x, s_k, e_k, eff_si), s_k, e_k, eff_si))
+
+    epsilon = power_iter_norm(M0, shape, device) * ridge_rel if tau == 0.0 else 0.0
+    M_fn = (lambda x: M0(x) + epsilon * x) if epsilon else M0
+    return M_fn, inv_e2, inv_s2, inv_v2, epsilon
+
+
+def data_rhs_wv(AT_fn, y, x_tau, v, inv_e2, inv_s2, inv_v2, sigma_tau,
+                tau, s_k, e_k, eff_si):
+    """data_rhs plus the coupling term N^T r_tau / (sigma_tau^2 gamma^2), with
+    r_tau = (e_k - s_k) x_tau + sigma_tau v. The x_tau conditional term is kept
+    unchanged -- the coupling is added information, not a replacement. x_tau
+    must be the state v was evaluated at, or r_tau's identity does not hold."""
+    r_tau = (e_k - s_k) * x_tau + float(sigma_tau) * v
+    return (data_rhs(AT_fn, y, x_tau, inv_e2, inv_s2, tau, s_k, e_k, eff_si)
+            + inv_v2 * apply_N(r_tau, s_k, e_k, eff_si))
+
+
+def _x1_hat_diag(method, x_tau, v, x0_hat, sigma_tau, tau, s_k, e_k, eff_si):
+    """Reported clean endpoint estimate (diagnostic only; see
+    run_posterior_wv_sampling_alg2). None where (51) is not identifiable."""
+    if method == "direct":
+        return direct_estimate_x1(x_tau - tau * v, x_tau + (1.0 - tau) * v, s_k, e_k)
+    if method != "inverse":
+        raise ValueError(f"x1_hat_method {method!r} not in ('direct', 'inverse')")
+    try:
+        return apply_H_tau_inv(x_tau - float(sigma_tau) * x0_hat,
+                               tau, s_k, e_k, eff_si)
+    except ValueError:
+        return None                     # H_tau singular: (51) is undefined here
+
+
 def clean_image_solve(x_tau, A_fn, AT_fn, y, eta, sigma_tau, tau, s_k, e_k, eff_si,
                       x1_warm, cg_tol, ridge_rel=1e-6, max_iter=200):
     """line 14 (one-step, deterministic b): M x = b, warm-started CG.
@@ -223,6 +276,12 @@ def build_task_setups(task, demos, device, task_cfg):
                 return A_fn, make_exact_AT(A_fn, tuple(stage_shape))
         setups.append(dict(op=op, mask=mask.to(device).float(), y=y, mkA=mkA))
     return sigma_n, setups
+
+def direct_estimate_x1(x_start_hat, x_end_hat, s_k, e_k):
+    """Direct x1 estimate: x1 = ((1-s)*xe - (1-e)*xs) / (e-s).
+    Simpler than WLS, sometimes more accurate (see debug_IP TEST 8)."""
+    denom = max(e_k - s_k, 1e-8)
+    return ((1.0 - s_k) * x_end_hat - (1.0 - e_k) * x_start_hat) / denom
 
 
 def run_posterior_sampling_alg2(
@@ -378,6 +437,459 @@ def run_posterior_sampling_alg2(
     return x1, rows, traj
 
 
+def run_posterior_wv_sampling_alg2(
+    model, config, gt, y, operator, eta, device,
+    *,
+    # Per-stage schedules — same names/positions as run_posterior_sampling
+    num_langevin=10,                 # feeds S = paper's INNER iterations (l.8),
+                                     # not a count of Langevin steps
+    ode_steps_per_stage=10, shift=1.0,
+    # Structural / physical
+    guidance_scale=0.0, class_label=10,
+    g_bypass_stage3=True,
+    cg_tol=1e-5, cg_max_iter=50,     # paper: CG iterations L
+    make_Ak_fns_fn=None,
+    seed=42,
+    record_trajectory=False,
+    # Algorithm-2 specific
+    gamma2_tab=None,                 # measured gamma^2(k, tau) table (Cor. 8)
+    h0=H0,                           # paper: Block-2 step size h_0
+    sigma_min=SIGMA_MIN,             # skip threshold (config.json "algorithm")
+    ridge_rel=1e-6,                  # Prop.-4 ridge = ridge_rel * ||M|| at tau=0
+    cg_max_iter_l14=200,             # line-14 CG cap at tau=0 (config "algorithm")
+    x1_hat_method="direct",          # DIAGNOSTIC ONLY: "direct" | "inverse"
+    block1_noise=True,               # False -> l.14 returns the mean, not a draw
+    terminal_replace_weight=0.0,     # POST-sampling projection (pipeline convention,
+                                     # NOT a paper line): x1 <- w*(m*y+(1-m)*x1)+(1-w)*x1;
+                                     # inpainting tasks use 1.0, blur/SR 0.0 (config)
+    **unused_kw,                     # PRINCIPLE-only kw (h_x, lambda_reg, ...) ignored
+):
+    """Algorithm 2 with the (x0, x1)-coupling / velocity-uncertainty term.
+
+    Block 1's M_tau and b_tau are the only algorithmic change (make_M_tau_wv /
+    data_rhs_wv). Stage/time schedule, score solve, line-15 restore, Block-2
+    Langevin, stage transition, CG, terminal projection and trajectory
+    recording all run the same code as run_posterior_sampling_alg2:
+
+        M_tau^wv = A^T A / eta^2 + H^T H / sigma^2 + N^T N / (sigma^2 gamma^2)
+        b_tau^wv = A^T y / eta^2 + H^T x_tau / sigma^2
+                   + N^T [(e-s) x_tau + sigma v] / (sigma^2 gamma^2)
+
+    Lemma 5's draw needs noise matching the new precision, so it gains a third
+    term (1/(sigma_tau*gamma)) N^T xi_v beside (1/eta) A^T xi_y and
+    (1/sigma_tau) H^T xi_h.
+
+    This is built on the UNMODIFIED Algorithm 2 body: it does not rebuild x_tau
+    from a clean estimate before the draw. r_tau's identity needs the x_tau that
+    v was evaluated at, so the l.9 state is the one both terms use.
+
+    RNG: xi_v is drawn from a SECOND, independent CPU generator, leaving the
+    shared stream in the positional order run_posterior_sampling_alg2 consumes
+    (x0 -> xi_y -> xi_h -> ridge -> xi_0). Baseline and WV therefore see the
+    same x0/xi_y/xi_h/xi_0 and differ only through M_tau and b_tau.
+
+    ``x1_hat_method`` is DIAGNOSTIC ONLY -- the coupling RHS is built from
+    (x_tau, v) and never needs a clean endpoint estimate. It selects which
+    x1_hat is REPORTED in traj and changes nothing else: "direct" =
+    direct_estimate_x1, "inverse" = (51) H_tau^-1 (x_tau - sigma_tau x0_hat).
+    Where H_tau is singular (tau=0 outside stage 3) (51) is not identifiable
+    and x1_hat is reported as None rather than regularised.
+
+``block1_noise=False`` drops Lemma 5's noise from b_tau, so l.14 returns
+    the conditional MEAN M_tau^-1 b_tau instead of a draw. Block 1 then stops
+    being a posterior sample and the chain is no longer a Gibbs sampler for the
+    target -- it is an alternating conditional-mean scheme. The xi draws still
+    happen so the RNG stream stays positionally aligned with the sampling
+    version; they are simply not used.
+
+    Returns (x1, rows, traj). With ``record_trajectory`` the traj entries are
+    (x_tau, x1, x0_hat, x1_hat, mu, x_tau_solve, v): the first three are
+    Algorithm 2's, then the reported clean estimate, the Block-1 conditional
+    mean M_tau^-1 b_tau (noise-free RHS), and the l.9 state and velocity of the
+    LAST inner iteration -- the state mu was solved at, so a caller can rebuild
+    any competing right-hand side at exactly the same state offline.
+    """
+    if make_Ak_fns_fn is None:
+        make_Ak_fns_fn = make_Ak_fns
+
+    B = gt.shape[0]
+    S = int(float(num_langevin))         # paper symbol
+    L = int(cg_max_iter)                 # paper symbol
+
+    num_stages = int(config.scheduler.num_stages)
+    scheduler = PixelFlowScheduler(
+        config.scheduler.num_train_timesteps,
+        num_stages=num_stages, gamma=-1 / 3,
+    )
+
+    # CFG / class-label setup — identical to run_posterior_sampling
+    pe_labels = torch.tensor([int(class_label)] * B, dtype=torch.int32, device=device)
+    do_cfg = guidance_scale > 0
+    if do_cfg:
+        uncond_label = int(model.num_classes)
+        prompt_embeds = torch.cat([uncond_label * torch.ones_like(pe_labels),
+                                   pe_labels], dim=0)
+    else:
+        prompt_embeds = pe_labels
+
+    # Initial spatial size derives from gt — identical to run_posterior_sampling
+    target_h, target_w = int(gt.shape[-2]), int(gt.shape[-1])
+    init_factor = 2 ** (num_stages - 1)
+    h, w = target_h // init_factor, target_w // init_factor
+
+    # Deterministic CPU noise stream (all xi draws) + GT stage pyramid (metrics)
+    g = torch.Generator(device="cpu").manual_seed(int(seed))
+    # xi_v on its own stream keeps the shared one positionally identical to
+    # run_posterior_sampling_alg2's (see docstring, RNG).
+    g_v = torch.Generator(device="cpu").manual_seed(int(seed) + 104729)
+
+    def randn_like_cpu(x):
+        return torch.randn(x.shape, generator=g).to(x.device)
+
+    def randn_v(x):
+        return torch.randn(x.shape, generator=g_v).to(x.device)
+
+    pyr = base.gt_stage_pyramid(gt, num_stages)
+    x1 = torch.zeros((B, 3, h, w), device=device)                    # l.1
+    rows, traj = [], []
+
+    # ── main loop ──────────────────────────────────────────────────────
+    for si in range(num_stages):
+        sc = copy.deepcopy(scheduler)
+        ode_steps_si = int(float(_per_stage(ode_steps_per_stage, si, num_stages)))
+        sc.set_timesteps(ode_steps_si, si, device=device, shift=shift)
+        s_k = float(sc.start_t[si])
+        e_k = float(sc.end_t[si])
+        eff_si = si if g_bypass_stage3 else None
+
+        if si > 0:                                                   # l.20: U^(1)
+            h *= 2
+            w *= 2
+            x1 = F.interpolate(x1, size=(h, w), mode="nearest")
+        x0 = randn_like_cpu(pyr[si])                                 # l.3 / l.20 fresh x0
+
+        Ak, ATk = make_Ak_fns_fn(operator, y, (B, 3, h, w), device)
+
+        size_tensor, rope_pos = base.rope_for(model, h, w, device)
+        gamma2_stage = gamma2_tab[str(si)]
+
+        for step_idx, T in enumerate(sc.Timesteps):
+            tau = float(sc.t[step_idx])
+            sigma_tau = compute_sigma_tau(tau, s_k, e_k)             # l.5
+            velocity_fn = make_velocity_fn(
+                model, T, prompt_embeds, size_tensor, rope_pos,
+                do_cfg, guidance_scale, si,
+            )
+            gamma2 = float(gamma2_stage.get(
+                f"{round(tau, 6)}", list(gamma2_stage.values())[step_idx]))
+            x0_hat = None
+            mu_rec = x1_hat_rec = xt_rec = v_rec = None
+            if sigma_tau >= sigma_min:
+                # l.7 (+ Prop.-4 ridge at tau=0); shared with line 14's one-step
+                # solve and the GT diagnostic, so the operator is defined once.
+                M_tau, inv_e2, inv_s2, inv_v2, epsilon = make_M_tau_wv(
+                    Ak, ATk, eta, sigma_tau, tau, s_k, e_k, eff_si,
+                    x1.shape, device, ridge_rel, gamma2)
+
+                for s in range(S):                                   # l.8
+                    x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + sigma_tau * x0  # l.9
+                    with torch.no_grad():
+                        v = velocity_fn(x_tau)                       # l.10
+                    x0_hat = score_solve(x_tau, v, s_k, e_k, tau, gamma2,
+                                         eff_si, cg_tol, L)          # l.11
+                    b_det = data_rhs_wv(ATk, y, x_tau, v, inv_e2, inv_s2, inv_v2,
+                                        sigma_tau, tau, s_k, e_k, eff_si)
+                    if record_trajectory and s == S - 1:
+                        mu_rec = cg_solve(M_tau, b_det, x0=x1.clone(), tol=cg_tol,
+                                          max_iter=cg_max_iter_l14 if tau == 0.0 else L)
+                        x1_hat_rec = _x1_hat_diag(x1_hat_method, x_tau, v, x0_hat,
+                                                  sigma_tau, tau, s_k, e_k, eff_si)
+                        xt_rec, v_rec = x_tau, v
+                    xi_y = randn_like_cpu(y)                         # l.12
+                    xi_h = randn_like_cpu(x1)
+                    xi_v = randn_v(x1)                               # own stream
+                    b_tilde = b_det + \
+                        (1.0 / eta) * ATk(xi_y) + \
+                        (1.0 / float(sigma_tau)) * apply_H_tau(xi_h, tau, s_k, e_k, eff_si) + \
+                        (1.0 / (float(sigma_tau) * math.sqrt(float(gamma2)))) * \
+                        apply_N(xi_v, s_k, e_k, eff_si)              # l.13
+                    if not block1_noise:
+                        b_tilde = b_det
+                    if epsilon:
+                        # xi_y/xi_h give the RHS covariance M0; the tau=0 ridge
+                        # (Prop. 4) solves against M0 + epsilon*I, so without this
+                        # term the draw has covariance M^-1 M0 M^-1, not M^-1.
+                        xi_eps = randn_like_cpu(x1)          # drawn either way
+                        if block1_noise:
+                            b_tilde = b_tilde + math.sqrt(epsilon) * xi_eps
+                    x1 = cg_solve(M_tau, b_tilde, x0=x1.clone(), tol=cg_tol,
+                                  max_iter=cg_max_iter_l14 if tau == 0.0 else L)  # l.14
+                    x0 = (x_tau - apply_H_tau(x1, tau, s_k, e_k, eff_si)) / float(sigma_tau)  # l.15
+                    xi_0 = randn_like_cpu(x0)                    # l.16
+                    x0 = x0 - (h0 / 2.0) * (x0 + x0_hat) + math.sqrt(h0) * xi_0  # l.17
+
+            rows.append(dict(stage=si, step=step_idx, tau=tau,
+                             sigma_tau=float(sigma_tau),
+                             mse_x1=float(((x1 - pyr[si]) ** 2).mean())))
+            if record_trajectory:
+                x_tau_rec = apply_H_tau(x1, tau, s_k, e_k, eff_si) + float(sigma_tau) * x0
+                traj.append((x_tau_rec[0].cpu(), x1[0].cpu(),
+                             (x0_hat if x0_hat is not None else x0)[0].cpu(),
+                             None if x1_hat_rec is None else x1_hat_rec[0].cpu(),
+                             None if mu_rec is None else mu_rec[0].cpu(),
+                             None if xt_rec is None else xt_rec[0].cpu(),
+                             None if v_rec is None else v_rec[0].cpu()))
+
+
+    # POST-sampling terminal projection (inpainting: snap observed pixels to y).
+    # Pipeline convention (CONSTRAINTS: inpainting tr=1, blur/SR tr=0); applied
+    # AFTER the loop, so per-step rows/traj metrics above are unaffected.
+    if terminal_replace_weight > 0:
+        m = operator.get_mask(x=y).float().to(x1.device)
+        x1 = terminal_replace_weight * (m * y + (1.0 - m) * x1) + \
+            (1.0 - terminal_replace_weight) * x1
+    return x1, rows, traj
+
+
+def _make_anchor_P(operator, y, shape, device, mode):
+    """P for run_posterior_reg_sampling_alg2's anchor, plus the kind actually
+    used. "nullspace" is the hole indicator at the stage resolution (see that
+    function's docstring); operators with no hole fall back to identity."""
+    if mode == "identity":
+        return (lambda x: x), "identity"
+    if mode != "nullspace":
+        raise ValueError(f"anchor_P {mode!r} not in ('nullspace', 'identity')")
+    hole = 1.0 - operator.get_mask(x=y).float().to(device)
+    if float(hole.sum()) == 0.0:
+        return (lambda x: x), "identity(fallback: operator has no hole mask)"
+    m_k = F.interpolate(hole, size=tuple(shape[-2:]), mode="nearest")
+    return (lambda x: m_k * x), "nullspace"
+
+def run_posterior_reg_sampling_alg2(
+    model, config, gt, y, operator, eta, device,
+    *,
+    # Per-stage schedules — same names/positions as run_posterior_sampling
+    num_langevin=10,                 # feeds S = paper's INNER iterations (l.8),
+                                     # not a count of Langevin steps
+    ode_steps_per_stage=10, shift=1.0,
+    # Structural / physical
+    guidance_scale=0.0, class_label=10,
+    g_bypass_stage3=True,
+    cg_tol=1e-5, cg_max_iter=50,     # paper: CG iterations L
+    make_Ak_fns_fn=None,
+    seed=42,
+    record_trajectory=False,
+    # Algorithm-2 specific
+    gamma2_tab=None,                 # measured gamma^2(k, tau) table (Cor. 8)
+    h0=H0,                           # paper: Block-2 step size h_0
+    sigma_min=SIGMA_MIN,             # skip threshold (config.json "algorithm")
+    ridge_rel=1e-6,                  # Prop.-4 ridge = ridge_rel * ||M|| at tau=0
+    cg_max_iter_l14=200,             # line-14 CG cap at tau=0 (config "algorithm")
+    anchor_lambda=0.0,               # Tweedie pseudo-observation weight
+    anchor_P="identity",             # "identity" (the original) | "nullspace"
+    block1_noise=True,               # ablation: Lemma 5's xi_y / xi_h in b
+    block2_noise=True,               # ablation: sqrt(h0) xi_0 in l.17
+    terminal_replace_weight=0.0,     # POST-sampling projection (pipeline convention,
+                                     # NOT a paper line): x1 <- w*(m*y+(1-m)*x1)+(1-w)*x1;
+                                     # inpainting tasks use 1.0, blur/SR 0.0 (config)
+    **unused_kw,                     # PRINCIPLE-only kw (h_x, lambda_reg, ...) ignored
+):
+    """Algorithm 2 with a Tweedie pseudo-observation anchoring Block 1.
+
+    Treat the network's clean estimate as one more Gaussian observation,
+    x1_model = x1 + eps_a with eps_a ~ N(0, lambda^-1 P^+):
+
+        M_tau = M_tau^(0) + lambda P
+        b_tau = b_tau^(0) + lambda P x1_model
+
+    with M_tau^(0), b_tau^(0) Algorithm 2's own (make_M_tau / data_rhs, the
+    H^T x_tau form) and x1_model = direct_estimate_x1 of the l.10 velocity --
+    zero extra NFE, direct_estimate_x1 unmodified.
+
+    ``anchor_P="identity"`` (default) is the ORIGINAL formulation, restored from
+    commit 74a0c39 (`sample_alg2(anchor=lam)`, dropped again in 8ff8091):
+    M += lam*I, b += lam*x1_model + sqrt(lam)*xi_a. On junco it took the hole
+    from 0.969 to 0.086 at lam=25.
+
+    ``anchor_P="nullspace"`` is the alternative that anchors only the
+    measurement nullspace: for inpainting A_k = mask . U, so P is the hole
+    indicator at the stage resolution -- diagonal 0/1, hence P = P^T = P^2, and
+    the observed region gets no anchor at all. Because U interpolates, that P is
+    exactly inside ker(A_k) only at stage 3; at stages 0-2 it leaks 16-42% (see
+    test/test_reg_alg2.py --check). Operators whose get_mask has no hole (blur /
+    SR) fall back to P = I, reported in ``rows["anchor_P"]``, never silent.
+
+    Lemma 5's draw needs noise matching the added precision. P being an
+    orthogonal projection (identity included), sqrt(lambda) P xi_a has
+    covariance lambda P exactly, so the RHS gains that term.
+
+    ``block1_noise=False`` drops (1/eta) A^T xi_y + (1/sigma_tau) H^T xi_h from
+    b_tilde, so l.14 returns the conditional MEAN of the anchored Block 1
+    instead of a draw (the anchor's own sqrt(lambda) P xi_a stays).
+    ``block2_noise=False`` drops sqrt(h0) xi_0 from l.17, making Block 2 a
+    deterministic gradient step. Either one makes the chain stop being a Gibbs
+    sampler for the target. Both xi are still DRAWN so the RNG stream stays
+    positionally aligned with the full-noise version; they are just multiplied
+    out.
+
+    Two deliberate departures from 74a0c39, both later fixes rather than part of
+    the anchor:
+      * the tau=0 ridge keeps its sqrt(epsilon) xi_eps term (74a0c39 put epsilon
+        into M without the matching RHS noise, which drew from M^-1 M0 M^-1);
+      * xi_a is drawn at EVERY lambda, including 0, and multiplied by
+        sqrt(lambda). 74a0c39 drew it only when anchor > 0, which shifted the
+        stream so different lambdas were not comparable. Every lambda now
+        consumes the same count/shape/order of random numbers, making the sweep
+        a paired-noise comparison; the cost is one extra draw per inner
+        iteration relative to run_posterior_sampling_alg2, so lambda=0 is the
+        in-family baseline rather than a bit-exact reproduction of it.
+
+    Returns (x1, rows, traj). With ``record_trajectory`` traj entries are
+    (x_tau, x1, x0_hat, x1_model, mu, x_tau_solve): Algorithm 2's three, then
+    the Tweedie estimate, the Block-1 conditional mean M_tau^-1 b_tau
+    (noise-free RHS) and the l.9 state mu was solved at.
+    """
+    if make_Ak_fns_fn is None:
+        make_Ak_fns_fn = make_Ak_fns
+
+    B = gt.shape[0]
+    S = int(float(num_langevin))         # paper symbol
+    L = int(cg_max_iter)                 # paper symbol
+
+    num_stages = int(config.scheduler.num_stages)
+    scheduler = PixelFlowScheduler(
+        config.scheduler.num_train_timesteps,
+        num_stages=num_stages, gamma=-1 / 3,
+    )
+
+    # CFG / class-label setup — identical to run_posterior_sampling
+    pe_labels = torch.tensor([int(class_label)] * B, dtype=torch.int32, device=device)
+    do_cfg = guidance_scale > 0
+    if do_cfg:
+        uncond_label = int(model.num_classes)
+        prompt_embeds = torch.cat([uncond_label * torch.ones_like(pe_labels),
+                                   pe_labels], dim=0)
+    else:
+        prompt_embeds = pe_labels
+
+    # Initial spatial size derives from gt — identical to run_posterior_sampling
+    target_h, target_w = int(gt.shape[-2]), int(gt.shape[-1])
+    init_factor = 2 ** (num_stages - 1)
+    h, w = target_h // init_factor, target_w // init_factor
+
+    # Deterministic CPU noise stream (all xi draws) + GT stage pyramid (metrics)
+    g = torch.Generator(device="cpu").manual_seed(int(seed))
+
+    def randn_like_cpu(x):
+        return torch.randn(x.shape, generator=g).to(x.device)
+
+    pyr = base.gt_stage_pyramid(gt, num_stages)
+    x1 = torch.zeros((B, 3, h, w), device=device)                    # l.1
+    rows, traj = [], []
+
+    # ── main loop ──────────────────────────────────────────────────────
+    for si in range(num_stages):
+        sc = copy.deepcopy(scheduler)
+        ode_steps_si = int(float(_per_stage(ode_steps_per_stage, si, num_stages)))
+        sc.set_timesteps(ode_steps_si, si, device=device, shift=shift)
+        s_k = float(sc.start_t[si])
+        e_k = float(sc.end_t[si])
+        eff_si = si if g_bypass_stage3 else None
+
+        if si > 0:                                                   # l.20: U^(1)
+            h *= 2
+            w *= 2
+            x1 = F.interpolate(x1, size=(h, w), mode="nearest")
+        x0 = randn_like_cpu(pyr[si])                                 # l.3 / l.20 fresh x0
+        P_fn, P_kind = _make_anchor_P(operator, y, (B, 3, h, w), device, anchor_P)
+
+        Ak, ATk = make_Ak_fns_fn(operator, y, (B, 3, h, w), device)
+
+        size_tensor, rope_pos = base.rope_for(model, h, w, device)
+        gamma2_stage = gamma2_tab[str(si)]
+
+        for step_idx, T in enumerate(sc.Timesteps):
+            tau = float(sc.t[step_idx])
+            sigma_tau = compute_sigma_tau(tau, s_k, e_k)             # l.5
+            velocity_fn = make_velocity_fn(
+                model, T, prompt_embeds, size_tensor, rope_pos,
+                do_cfg, guidance_scale, si,
+            )
+            gamma2 = float(gamma2_stage.get(
+                f"{round(tau, 6)}", list(gamma2_stage.values())[step_idx]))
+            x0_hat = None
+            mu_rec = x1m_rec = xt_rec = None
+            if sigma_tau >= sigma_min:
+                # l.7 (+ Prop.-4 ridge at tau=0); shared with line 14's one-step
+                # solve and the GT diagnostic, so the operator is defined once.
+                M_base, inv_e2, inv_s2, epsilon = make_M_tau(
+                    Ak, ATk, eta, sigma_tau, tau, s_k, e_k, eff_si,
+                    x1.shape, device, ridge_rel)
+                M_tau = ((lambda x: M_base(x) + anchor_lambda * P_fn(x))
+                         if anchor_lambda else M_base)
+
+                for s in range(S):                                   # l.8
+                    x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + sigma_tau * x0  # l.9
+                    with torch.no_grad():
+                        v = velocity_fn(x_tau)                       # l.10
+                    x0_hat = score_solve(x_tau, v, s_k, e_k, tau, gamma2,
+                                         eff_si, cg_tol, L)          # l.11
+                    x_start_hat = x_tau - tau * v
+                    x_end_hat = x_tau + (1.0 - tau) * v
+                    x1_model = direct_estimate_x1(x_start_hat, x_end_hat, s_k, e_k)
+                    b_det = data_rhs(ATk, y, x_tau, inv_e2, inv_s2,
+                                     tau, s_k, e_k, eff_si)
+                    if anchor_lambda:
+                        b_det = b_det + anchor_lambda * P_fn(x1_model)
+                    if record_trajectory and s == S - 1:
+                        mu_rec = cg_solve(M_tau, b_det, x0=x1.clone(), tol=cg_tol,
+                                          max_iter=cg_max_iter_l14 if tau == 0.0 else L)
+                        x1m_rec, xt_rec = x1_model, x_tau
+                    xi_y = randn_like_cpu(y)                         # l.12
+                    xi_h = randn_like_cpu(x1)
+                    xi_a = randn_like_cpu(x1)   # drawn at EVERY lambda (paired noise)
+                    b_tilde = b_det + math.sqrt(anchor_lambda) * P_fn(xi_a)
+                    if block1_noise:                                 # l.13
+                        b_tilde = b_tilde + (1.0 / eta) * ATk(xi_y) + \
+                            (1.0 / float(sigma_tau)) * apply_H_tau(
+                                xi_h, tau, s_k, e_k, eff_si)
+                    if epsilon:
+                        # xi_y/xi_h give the RHS covariance M0; the tau=0 ridge
+                        # (Prop. 4) solves against M0 + epsilon*I, so without this
+                        # term the draw has covariance M^-1 M0 M^-1, not M^-1.
+                        b_tilde = b_tilde + math.sqrt(epsilon) * randn_like_cpu(x1)
+                    x1 = cg_solve(M_tau, b_tilde, x0=x1.clone(), tol=cg_tol,
+                                  max_iter=cg_max_iter_l14 if tau == 0.0 else L)  # l.14
+                    x0 = (x_tau - apply_H_tau(x1, tau, s_k, e_k, eff_si)) / float(sigma_tau)  # l.15
+                    xi_0 = randn_like_cpu(x0)                    # l.16
+                    x0 = x0 - (h0 / 2.0) * (x0 + x0_hat)             # l.17
+                    if block2_noise:
+                        x0 = x0 + math.sqrt(h0) * xi_0
+
+            rows.append(dict(stage=si, step=step_idx, tau=tau,
+                             sigma_tau=float(sigma_tau), anchor_P=P_kind,
+                             mse_x1=float(((x1 - pyr[si]) ** 2).mean())))
+            if record_trajectory:
+                x_tau_rec = apply_H_tau(x1, tau, s_k, e_k, eff_si) + float(sigma_tau) * x0
+                traj.append((x_tau_rec[0].cpu(), x1[0].cpu(),
+                             (x0_hat if x0_hat is not None else x0)[0].cpu(),
+                             None if x1m_rec is None else x1m_rec[0].cpu(),
+                             None if mu_rec is None else mu_rec[0].cpu(),
+                             None if xt_rec is None else xt_rec[0].cpu()))
+
+
+    # POST-sampling terminal projection (inpainting: snap observed pixels to y).
+    # Pipeline convention (CONSTRAINTS: inpainting tr=1, blur/SR tr=0); applied
+    # AFTER the loop, so per-step rows/traj metrics above are unaffected.
+    if terminal_replace_weight > 0:
+        m = operator.get_mask(x=y).float().to(x1.device)
+        x1 = terminal_replace_weight * (m * y + (1.0 - m) * x1) + \
+            (1.0 - terminal_replace_weight) * x1
+    return x1, rows, traj
+
+
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 # Algorithm 4 — "A clean-endpoint posterior sampler for cascaded flow priors"
 # (results/algorithm.4pdf.pdf; the note numbers its own listing "Algorithm 1")
@@ -467,15 +979,106 @@ def clean_endpoint_solve(x_tau, v, sigma_tau, s_k, e_k, tau, gamma2, eff_si,
     return cg_solve(op, rhs, x0=x1_warm, tol=cg_tol, max_iter=L)
 
 
+class SOperator:
+    """Prior covariance surrogate S of (12)/(22), reduced to the ONLY two
+    applications Block 1 needs. Instances are per-stage (none of the
+    implemented constructions depends on tau).
+
+        apply_S_inv(x)      = S^-1 x        (the (12) precision term)
+        apply_S_inv_sqrt(x) = S^-1/2 x      (the Lemma-9 R3^T factor)
+
+    S must be symmetric positive definite and apply_S_inv_sqrt must satisfy
+    S^-1/2 S^-1/2 = S^-1 (all implementations below are diagonal in some
+    orthonormal basis, so this is exact). `scalar_equiv` = Tr(S)/D is what
+    the trajectory row records as s2 and what the diagnostics' scalar
+    precision columns use; `meta` is a JSON-able description.
+    """
+    scalar_equiv = float("nan")
+    meta = {}
+
+    def apply_S_inv(self, x):
+        raise NotImplementedError
+
+    def apply_S_inv_sqrt(self, x):
+        raise NotImplementedError
+
+
+class ScalarSOp(SOperator):
+    """S = s2 * I — the isotropic surrogate (Sec. 4.2). Bit-identical to the
+    pre-SOperator scalar code path: same 1/s2 and 1/sqrt(s2) constants."""
+
+    def __init__(self, s2):
+        if not (s2 > 0):
+            raise ValueError(f"S_prior s2 must be > 0 (got {s2!r}); "
+                             "S^-1 is what makes M_tau^den positive definite at tau=0")
+        self.s2 = float(s2)
+        self.scalar_equiv = float(s2)
+        self._inv = 1.0 / float(s2)
+        self._inv_half = 1.0 / math.sqrt(float(s2))
+        self.meta = {"mode": "scalar", "s2": float(s2)}
+
+    def apply_S_inv(self, x):
+        return self._inv * x
+
+    def apply_S_inv_sqrt(self, x):
+        return self._inv_half * x
+
+    def inv_diag_mean(self):
+        # exact constant diagonal of S^-1 for the isotropic case
+        return self._inv
+
+
+class SpectralSOp(SOperator):
+    """S diagonal in the (orthonormal) 2-D Fourier basis: S(w) = power[w].
+
+    `power` is the floored mean power spectrum of the centered calibration
+    images at this stage's resolution, shape (H, W), real, symmetric under
+    w -> -w (automatic for power spectra of real fields), shared across the
+    three channels. Then S^-1 x = F^H diag(1/power) F x is real, symmetric
+    and positive definite; the .real below only strips float round-off.
+    """
+
+    def __init__(self, power, meta=None):
+        if not torch.is_tensor(power) or power.dim() != 2:
+            raise ValueError("spectral power must be a 2-D tensor (H, W)")
+        if not bool((power > 0).all()):
+            raise ValueError("spectral power must be strictly positive (floor it first)")
+        self.power = power.detach().to(torch.float32)
+        self.scalar_equiv = float(power.mean())
+        self.meta = dict(meta or {}, mode="spectral",
+                         scalar_equiv=self.scalar_equiv)
+
+    def _apply(self, x, p):
+        X = torch.fft.fft2(x, norm="ortho")
+        return torch.fft.ifft2(X / p.to(x.device), norm="ortho").real
+
+    def apply_S_inv(self, x):
+        return self._apply(x, self.power)
+
+    def apply_S_inv_sqrt(self, x):
+        return self._apply(x, self.power.sqrt())
+
+    def inv_diag_mean(self):
+        # S^-1 = F^H diag(1/P) F has CONSTANT diagonal mean_w 1/P(w). The
+        # all-ones Jacobi probe instead sees only the DC response 1/P(0),
+        # which under-estimates it by orders of magnitude (image DC power is
+        # huge) and cripples the preconditioner exactly where S^-1 dominates
+        # M — the 2026-08-26 non-converged-PCG bug. Use this for the probe.
+        return float(self.power.reciprocal().mean())
+
+
 def make_M_tau_den(A_fn, AT_fn, eta, sigma_tau, tau, s_k, e_k, eff_si, s2):
     """draft l.7 / (12) + (21). Returns (M_fn, Cinv_fn, inv_e2, inv_s2, inv_S).
 
         C^-1     = H_tau^T H_tau / sigma_tau^2 + S^-1          (12)
         M_tau^den = A_k^T A_k / eta^2 + C^-1                    (21)
 
-    with the isotropic surrogate S = s2 * I, so S^-1 x = x / s2 and the
-    Lemma-9 factor S^-1/2 is a division by sqrt(s2) -- no square root of a
-    matrix is formed (draft Sec. 6.1).
+    `s2` is either the isotropic variance (S = s2 * I, so S^-1 x = x / s2 and
+    the Lemma-9 factor S^-1/2 is a division by sqrt(s2) -- no square root of
+    a matrix is formed, draft Sec. 6.1) or an SOperator, whose apply_S_inv
+    supplies the S^-1 term instead. The mathematical form of (12)/(21) is the
+    same either way. The returned inv_S stays a FLOAT (1/scalar-equivalent
+    of S) so existing scalar consumers are untouched.
 
     NO RIDGE and no power iteration, unlike make_M_tau: by Prop. 4(a),
     C^-1 >= S^-1 > 0 for every tau in [0,1] including tau=0, where the first
@@ -483,15 +1086,14 @@ def make_M_tau_den(A_fn, AT_fn, eta, sigma_tau, tau, s_k, e_k, eff_si, s2):
     surrogate supplies the entire precision in exactly the directions the
     interpolant does not constrain.
     """
-    if not (s2 > 0):
-        raise ValueError(f"S_prior s2 must be > 0 (got {s2!r}); "
-                         "S^-1 is what makes M_tau^den positive definite at tau=0")
+    s_op = s2 if isinstance(s2, SOperator) else ScalarSOp(float(s2))
     inv_e2, inv_s2 = 1.0 / eta ** 2, 1.0 / float(sigma_tau) ** 2
-    inv_S = 1.0 / float(s2)
+    inv_S = 1.0 / float(s_op.scalar_equiv)
 
     def Cinv(x):
         return inv_s2 * apply_H_tau(
-            apply_H_tau(x, tau, s_k, e_k, eff_si), tau, s_k, e_k, eff_si) + inv_S * x
+            apply_H_tau(x, tau, s_k, e_k, eff_si), tau, s_k, e_k, eff_si) \
+            + s_op.apply_S_inv(x)
 
     def M(x):
         return inv_e2 * AT_fn(A_fn(x)) + Cinv(x)
@@ -512,7 +1114,9 @@ def run_posterior_sampling_alg4(
     model, config, gt, y, operator, eta, device,
     *,
     # Per-stage schedules — same names/positions as run_posterior_sampling_alg2
-    num_langevin=10,                 # draft S_it: INNER iterations (l.9).
+    num_langevin=10,                 # draft S_it: INNER iterations (l.9);
+                                     # scalar or per-stage list, like
+                                     # ode_steps_per_stage
                                      # The name is kept so task_kw/config keys
                                      # stay shared with the other samplers; it
                                      # is not a count of Langevin steps here
@@ -538,6 +1142,16 @@ def run_posterior_sampling_alg4(
     cg_max_iter_endpoint=200,        # CG cap for the (19) solve
     terminal_replace_weight=0.0,     # POST-sampling projection (pipeline
                                      # convention, NOT a draft line)
+    diag_noise_off=None,             # DIAGNOSTIC PROBE ONLY: iterable of
+                                     # noise names ("xi_y","xi_h","xi_s",
+                                     # "xi_0") to ZERO from
+                                     # diag_noise_off_from_stage on. Noises
+                                     # are still DRAWN first so the RNG
+                                     # stream stays aligned across arms.
+                                     # Breaks the exact-draw property — never
+                                     # a production setting. None = exact
+                                     # sampler, bit-identical path.
+    diag_noise_off_from_stage=2,
     **unused_kw,
 ):
     """Algorithm 4 (draft Sec. 7) with the SAME section layout as
@@ -626,13 +1240,15 @@ def run_posterior_sampling_alg4(
             "would change nothing, so they are refused rather than ignored.")
     if "g_bypass_stage3" in unused_kw:
         raise TypeError(
-            "run_posterior_sampling_alg4 got g_bypass_stage3: it is not a "
-            "variable here. The stage-3 bypass is the repo's normal flow and is "
-            "fixed on (eff_si = si), so there is nothing to pass; CONSTRAINTS "
-            "forbids turning it off in any case.")
+            "run_posterior_sampling_alg4 got g_bypass_stage3: no such thing "
+            "exists any more. The stage-3 identity bypass was removed from "
+            "apply_G (2026-08-24); G is the same real projection at every "
+            "stage, so there is nothing to toggle.")
 
     B = gt.shape[0]
-    S_it = int(float(num_langevin))      # draft symbol S (inner iterations)
+    # num_langevin (draft symbol S, inner iterations) is a scalar or a
+    # length-num_stages list; resolved per stage below via _per_stage,
+    # the same convention ode_steps_per_stage already follows.
     L = int(cg_max_iter)                 # draft symbol L
 
     num_stages = int(config.scheduler.num_stages)
@@ -667,19 +1283,28 @@ def run_posterior_sampling_alg4(
     rows, traj = [], []
     frame = -1          # global step index across all stages; the "frame id"
                         # the trajectory frames are numbered by
-
     # ── main loop ──────────────────────────────────────────────────────
     for si in range(num_stages):                                     # l.2
         sc = copy.deepcopy(scheduler)
         ode_steps_si = int(float(_per_stage(ode_steps_per_stage, si, num_stages)))
+        # l.9 count: scalar, per-stage entry, or a per-stage LIST of per-frame
+        # counts (len == that stage's ode steps) — pure schedule either way.
+        S_it_entry = _per_stage(num_langevin, si, num_stages)
+        if isinstance(S_it_entry, (list, tuple)) and \
+                len(S_it_entry) != ode_steps_si:
+            raise ValueError(
+                f"per-frame num_langevin for stage {si} has "
+                f"{len(S_it_entry)} entries, stage has {ode_steps_si} steps")
         sc.set_timesteps(ode_steps_si, si, device=device, shift=shift)
         s_k = float(sc.start_t[si])
         e_k = float(sc.end_t[si])
-        # Fixed, not configurable. Passing the stage index is the repo's normal
-        # flow: apply_G returns the identity at stage 3, so there G = I, H_tau
-        # and N_k are scalars, and ker(G) is trivial. CONSTRAINTS forbids
-        # turning this off, so Algorithm 4 does not carry it as a knob.
-        eff_si = si
+        # G is the real projection up(down(x)) at every stage -- the former
+        # stage-3 identity bypass was removed from apply_G (2026-08-24), so
+        # stage_idx is a no-op and this value is inert; None states the intent.
+        # Prop. 4(a) keeps M_tau^den positive definite where H_tau = s_k G is
+        # rank deficient. The stage-3 gamma^2 entries were measured under this
+        # convention (gamma2_meas_alg4.json).
+        eff_si = None
 
         if si > 0:                                                   # l.18: U^(1)
             h *= 2
@@ -697,6 +1322,9 @@ def run_posterior_sampling_alg4(
 
         for step_idx, T in enumerate(sc.Timesteps):                  # l.4
             frame += 1
+            S_it = int(float(S_it_entry[step_idx])) \
+                if isinstance(S_it_entry, (list, tuple)) \
+                else int(float(S_it_entry))
             tau = float(sc.t[step_idx])
             sigma_tau = compute_sigma_tau(tau, s_k, e_k)             # l.5
             velocity_fn = make_velocity_fn(
@@ -714,17 +1342,37 @@ def run_posterior_sampling_alg4(
             # comparable across samplers; it is NOT a "skip Langevin" test
             # here, since Algorithm 4 has no Langevin step.
             if sigma_tau >= sigma_min:
-                s2 = float(s2_fn(si, float(sigma_tau)))
+                # s2_fn may return the isotropic variance (a float — the
+                # original path, bit-identical through ScalarSOp) or an
+                # SOperator for a structured S. Either way the (12)/(22)
+                # math below is unchanged; only who applies S^-1 differs.
+                s_ret = s2_fn(si, float(sigma_tau))
+                s_op = s_ret if isinstance(s_ret, SOperator) else ScalarSOp(float(s_ret))
+                s2 = float(s_op.scalar_equiv)
                 # l.6 / l.7 — built once per tau, shared by every inner iteration
                 M_den, Cinv, inv_e2, inv_s2, inv_S = make_M_tau_den(
-                    Ak, ATk, eta, sigma_tau, tau, s_k, e_k, eff_si, s2)
-                inv_S_half = 1.0 / math.sqrt(s2)
+                    Ak, ATk, eta, sigma_tau, tau, s_k, e_k, eff_si, s_op)
                 # Line 13 is an exact draw only if its solve converges
                 # (Lemma 9). With A_k = A . U^(K-1-k) plain CG needs 57-76
                 # iterations at stages 0-2 and the inherited cap is 50, so it
                 # was silently truncating. Jacobi preconditioning solves the
                 # SAME system -- the draw is unchanged -- in 18-22.
-                M_inv = make_jacobi_precond(M_den, x1.shape, device)
+                if isinstance(s_op, SpectralSOp):
+                    # The all-ones probe reads S^-1's DC response 1/P(0)
+                    # instead of its true constant diagonal mean_w 1/P(w),
+                    # which broke the preconditioner wherever S^-1 dominates
+                    # M (early frames) and left PCG truncated at the cap.
+                    # Rebuild the probe with the exact S^-1 diagonal.
+                    _ones = torch.ones_like(x1)
+                    _d = (M_den(_ones) - s_op.apply_S_inv(_ones)
+                          + s_op.inv_diag_mean() * _ones)
+                    if bool(torch.isfinite(_d).all()) and float(_d.min()) > 1e-12:
+                        _inv_d = 1.0 / _d
+                        M_inv = (lambda r, _inv_d=_inv_d: _inv_d * r)
+                    else:
+                        M_inv = None
+                else:
+                    M_inv = make_jacobi_precond(M_den, x1.shape, device)
                 if diag is not None:
                     diag.on_frame_setup(
                         frame=frame, stage=si, step=step_idx, tau=tau,
@@ -747,6 +1395,13 @@ def run_posterior_sampling_alg4(
                     xi_y = randn_like_cpu(y)                         # l.12
                     xi_h = randn_like_cpu(x1)
                     xi_s = randn_like_cpu(x1)
+                    if diag_noise_off and si >= diag_noise_off_from_stage:
+                        if "xi_y" in diag_noise_off:
+                            xi_y = torch.zeros_like(xi_y)
+                        if "xi_h" in diag_noise_off:
+                            xi_h = torch.zeros_like(xi_h)
+                        if "xi_s" in diag_noise_off:
+                            xi_s = torch.zeros_like(xi_s)
                     # Lemma 9 with R1 = A/eta, R2 = H_tau/sigma_tau, R3 = S^-1/2:
                     # zeta = R1^T xi_y + R2^T xi_h + R3^T xi_s has covariance
                     # exactly M_tau^den, so the solve below IS a draw from
@@ -755,7 +1410,7 @@ def run_posterior_sampling_alg4(
                                + (1.0 / eta) * ATk(xi_y)
                                + (1.0 / float(sigma_tau)) * apply_H_tau(
                                    xi_h, tau, s_k, e_k, eff_si)
-                               + inv_S_half * xi_s)                  # l.13 (22)
+                               + s_op.apply_S_inv_sqrt(xi_s))        # l.13 (22)
                     x1, cg_it, cg_rel = pcg_solve(
                         M_den, b_tilde, M_inv, x0=x1.clone(), tol=cg_tol,
                         max_iter=L)
@@ -764,6 +1419,9 @@ def run_posterior_sampling_alg4(
 
                     # ── Block 2: exact draw of x_tau, no solve, no step size ──
                     xi_0 = randn_like_cpu(x0)                        # l.14
+                    if diag_noise_off and si >= diag_noise_off_from_stage \
+                            and "xi_0" in diag_noise_off:
+                        xi_0 = torch.zeros_like(xi_0)   # probe only
                     x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + \
                         float(sigma_tau) * xi_0                      # (23)
                     if diag is not None:

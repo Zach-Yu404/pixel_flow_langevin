@@ -1,0 +1,5 @@
+arm,config,hole_seed42,hole_seed43,hole_seed44,hole_seed45,hole_mean4,hole_std4,obs,spread,cg_bad_max,baseline_mean4,note
+spectral,xi_h=0 all stages + num_langevin[2211],0.1063,0.0778,0.0995,0.0926,0.0940,0.0105,0.0023,0.1643,0,0.1339,diagnostic probe not exact draw
+pooled_junco,xi_h=0 all stages + num_langevin[2211],0.0900,0.0974,0.1027,0.0964,0.0966,0.0045,0.0027,0.1548,0,0.1382,diagnostic probe not exact draw
+spectral,reverted-reference: xi_h=0 from f20 only,0.0890,0.0880,0.1067,0.0855,0.0923,0.0084,0.0023,0.1576,0,0.1339,reverted per user
+pooled_junco,reverted-reference: xi_h=0 from f20 only,0.0903,0.0963,0.1034,0.0960,0.0965,0.0047,0.0027,0.1546,0,0.1382,reverted per user

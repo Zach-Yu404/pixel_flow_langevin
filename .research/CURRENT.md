@@ -1,6 +1,46 @@
 # 当前状态（人类可读，保持 ≤1 页）
 
-更新时间：2026-08-26
+更新时间：2026-08-27
+
+## 2026-08-27：Block-2 pCN 终审与共同解释（request changes）
+
+- 已在 `results/alg4_weighted_sigma_tau/codex_code_review.md` 末尾追加指定终审节，71 行；
+  完整报告 SHA-256 `05cc71aa629ffa7f8696861249918ce0550d7832d28994ac17b1cfdf4b0959c9`。
+- 当前工作树 B1/S3/N1 均技术销项：precision 全调度预检在首个 RNG 前、`1e-7` fail-closed；
+  XCHK 接口与 dtype provenance 正确；stationary null、dense `_meta`、N1 注释正确。
+- 六臂/机制原始文件独立复算一致。解释红线：收益最符合 finite-step 非平衡路径效应；pooled
+  terminal spread 的确降 9.8–11.5%，须报告为有限时 diversity/mixing trade-off，不能称
+  target covariance 缩小或“更好的 posterior 采样”。推荐 independent 默认、precision opt-in。
+- Formal `request changes`：正式 metrics 早于入口预检修复，缺“新预检下四种子重跑”收据；
+  `utils.py` 未提交/push，尚无远端精确 code SHA。`research-peer plan` 仍被 Ceph worktree EIO
+  阻断，结果级 Claude compare 未生成；未伪造 artifact。
+
+## 2026-08-27：Block-2 自适应 pCN/OU 的 Codex 独立代码审查（request changes）
+
+- 完整报告已覆盖写入 `results/alg4_weighted_sigma_tau/codex_code_review.md`（SHA-256
+  `9de412da5117611ba718e94e1d743096cfe443f746a56a614b403f07dbbda7c5`）。绑定 base HEAD `d8abd9a`、工作树
+  `utils.py` blob `e5b0663` / SHA-256 `b0b6dc49…`；实现仍未成为正式 code commit。
+- **通过**：更新后 x1 上的 z_old、sqrt 权重、三模式 RNG 顺序、independent legacy + l.16、
+  scalar/spectral trace、q0、只读诊断、指定边界；真实 80 行 q/λ 闭式复算通过。
+- **Request changes / B1**：`precision_pcn` 传入即启用，未实现共识要求的 runtime-vs-table
+  fail-closed 门、失败停用/诊断；CSV 本身又缺 floor/precision sqrt+fresh/gate 字段且精度不足。
+  在修复并绑定正式 code SHA 重审前不得启用 precision arm。另有未知 mode 静默接受、共识 e_k
+  更正仍写错、stationary 未收敛行 rho 无效等 should-fix。
+- `research-doctor --agents-only` 10/10；结构化 `research-peer review` 对精确无分支快照
+  `3d769e5` 重试三次，均被 Ceph worktree Remote I/O error 阻断，未伪造 artifact。
+
+## 2026-08-27：Block-2 自适应 pCN/OU 的 Codex 独立理论审查
+
+- 任务级 `execution_allowed: false`：只做独立推导、真实 trace/调度数值审计与验证标准，
+  不读取 Claude 推导，不修改采样器。
+- 题面指定的 `s_statistics.json` 未保存所需的 `mean(1/P)`，不能以
+  `1/mean(P)` 代替；同目录原始谱复算为 110.66/132.04/162.16/261.76。题面也未列 exact
+  10 点 tau grid，故 precision 按 fail-closed 暂停启用，只保留诊断。
+- 完整稿已写入 `references/2026-08-27-codex-block2-pcn-theory.md`（SHA-256
+  `c32d18a7f1ac6baab280590af8cb268dcf0ed7390f2e2e70eb784003b6098270`）；条件性双表共
+  80 行均由闭式机器复算通过。关键实现约束：independent 要逐位，必须保留 legacy l.16。
+- `research-peer plan --agent codex` 三次均因 Ceph `.git/.../worktrees` Remote I/O error
+  失败；未伪造 plan artifact，完整失败证据记入任务文件。
 
 ## 2026-08-26：Eq. (22) 乘 \(\sigma_\tau^2\) 的 Codex 独立理论审查
 

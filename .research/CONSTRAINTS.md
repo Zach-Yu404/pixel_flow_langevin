@@ -53,6 +53,62 @@
 
 ## 当前任务约束
 
+### 2026-08-27 · block2-pcn-final-review
+
+【用户原始要求】
+> Block-2 pCN 最终轮:①残项销项确认;②结果共同解释。请把两部分都追加写入 /CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/results/alg4_weighted_sigma_tau/codex_code_review.md 末尾新节「## 终审与共同解释(2026-08-27)」,给最终 verdict(approve / request changes),≤80 行。
+>
+> ①残项修复(读码/读文件核验):
+> - B1 残:utils.py 现已在**首个 RNG 抽样前**做全表预检(precision_pcn 分支内 RNG-free 重放整个 per-stage schedule,逐帧闭式 λ vs 表,tol 1e-7,失败即 raise);configs/pcn_verify.py 已换成当前版(XCHK 传 block2_lambda_table,可复现);lambda_schedule.csv dtype 溯源列改为 float32(numpy mean of reciprocal)/python-float(1/s2)。
+> - S3 残:stationary JSON 未收敛行 ess_fraction=null;dense_invariance_verify.json 已加 _meta(N/dim/seed/dtype/estimator/script)。
+> - N1 残:diag_noise_off 注释已改。
+> - 验证重跑:两模式 XCHK 仍 0.00e+00;precision 正式 4-seed run 在新预检下全部通过。
+>
+> ②六臂结果(summary_metrics.csv;hole mean4±std4 / spread):
+> independent: pooled 0.1499±0.0007/0.2646, spectral 0.1400±0.0052/0.2469
+> sigma_pcn:   pooled 0.1250±0.0146/0.2341, spectral 0.1297±0.0100/0.2436
+> precision:   pooled 0.1337±0.0014/0.2388, spectral 0.1376±0.0070/0.2469
+> 机制诊断(inner/frame CSV 聚合,late=f30-39):x0_rms²≈1.00-1.04;resid 恒等 ≤1.5e-4(fp32);Block-1 injection 各模式几乎不变(pooled ~+0.032/inner);corr(z_new,z_old) late:0 / 0.75 / 0.55(pooled);fresh_scale f38:0.045 / 0.005 / 0.009;stage-end holes f19/f29/f39:independent/pooled 0.1101/0.1260/0.1499,sigma_pcn/pooled 0.1211/0.1295/0.1250(早中期更差、stage3 大幅better),precision/pooled 0.1098/0.1168/0.1337。
+>
+> 请就规格十个机制问题给出你的判断(与我共同解释;不一致处标明),特别是:改善是否为有限步非平衡效应而非 covariance 缩小(spread 数据:sigma_pcn pooled −11.5%,如何解读?);sigma_pcn 高种子方差(±0.0146)的定性;precision_pcn 低方差稳定 −11% 的定性;推荐保留哪种模式(或 needs-user);结论措辞红线(不得称更好的 posterior 采样)。
+
+生效动作：任务级 `execution_allowed: false`；只读核验源码/产物，不改采样器或追加 GPU
+实验；仅追加指定报告节及 Research OS 记录。终审节不超过 80 行，且不得称“更好的 posterior 采样”。
+
+### 2026-08-27 · review-block2-pcn-code
+
+【用户原始要求】
+> 你是独立代码审查方。Claude 已按共识实现 Block-2 自适应 pCN/OU refresh。请直接读源码与产物,独立完成审查,用中文把完整报告写入 /CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/results/alg4_weighted_sigma_tau/codex_code_review.md(覆盖写,首行日期+模型名;发现按 blocker/should-fix/nit 分级,末尾明确"无 blocker"或列出 blocker)。
+>
+> ## 待审对象
+> - 实现:/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/utils.py 中 run_posterior_sampling_alg4 的:①kwarg block2_refresh_mode(默认 independent);②frame-setup 的 λ 计算块(_lam/_sqrt_lam/_sqrt_fresh/_blk2_extra,precision 用闭式 trace:a=τe_k,b=(1−τ)s_k,Tr[HᵀH]/n=a²+(2ab+b²)/4,Tr[S⁻¹]/n=1/s² 或 inv_diag_mean());③Block-2 分支(independent 逐字 legacy;pCN:z_old=(x_τ−m)/σ 相对当次 x1,z_new=√λ z_old+√(1−λ)ξ0);④l.16 分支(independent legacy;pCN carry z_new);⑤_blk2_q0 每 stage 首帧记录;⑥row.update(_blk2_extra) 仅 pCN 模式。
+> - 产物(同目录 results/alg4_weighted_sigma_tau/):claude_codex_consensus.md(含**事实纠错节**:Claude 之前给你的理论题面把 stage 边界写成均匀四分——错误;真实 σ stage 起点 = 1.0/0.857/0.667/0.4,你的条件表数值因此失效但单调性定理不受影响)、lambda_schedule.csv(按你要求的全列从运行时持久化,含谱 hash/floor dtype)、dense_invariance_verify.json、stationary_chain_verify.json。
+> - 已有验证数字:independent 逐位复现哨兵 0.1447/0.1143/0.1291/0.1495(pooled,S_it=2,seed42);运行时 λ vs 持久化表 max 差 4.4e-9/4.9e-9(两模式);B:fp64 20 万样本 mean/cov/kurt/corr 全部 MC 噪声级;C:λ∈{0,.5,.9,.99} ρ/IACT/ESS 与理论吻合,λ=0.9999983 如实记录不收敛(恒等核病理)。冒烟:sigma_pcn pooled seed42 hole 0.1495→0.1047。
+>
+> ## 审查清单(规格 §9,逐项结论+证据)
+> 1. z_old 是否相对更新后的 x1_new 计算(而非复用旧 x0)?
+> 2. square-root 权重是否正确(√λ、√(1−λ);fresh scale=σ√(1−λ))?
+> 3. random stream 是否公平(三模式 ξ0 抽样次数/顺序/形状一致;λ 计算无 RNG)?
+> 4. baseline(independent)是否逐位不变(逐字 legacy 分支,含 l.16)?
+> 5. scalar/spectral S 的 trace 是否正确(闭式 vs SpectralSOp.inv_diag_mean;rank(G)/n=1/4 的使用)?
+> 6. diagnostics 是否只读、无 RNG side effect(_blk2_extra、row.update)?
+> 7. 结论表述是否夸大"exact posterior"(检查 kwarg docstring 与共识文件表述)?
+> 8. 另:precision_pcn 启用门(运行时 λ≡持久化表)是否满足你理论稿的 fail-closed 恢复条件?对照 lambda_schedule.csv 用真实边界抽查复算若干帧的 q/λ。
+> 9. 任何其他问题(边界:τ=0 端点、σ=σ_min、与 diag_noise_off 组合、S_it=1 时 _z_new 定义)。
+
+生效动作：任务级 `execution_allowed: false`；只读源码与指定产物，可运行无状态副作用的
+针对性验证；只覆盖用户指定的审查报告，不修改采样器实现。
+
+### 2026-08-27 · review-block2-pcn-theory
+
+【用户原始要求】
+> 你是独立理论审查方。用户要在 PixelFlow Algorithm 4 上实现"自适应 pCN/OU Block-2 refresh"。请只依据下面的题面事实独立推导,不要看 Claude 的推导。用中文,输出存档级 markdown,并将完整稿写入 /CBIG-Standard-ECE/Zach/MSFlow/.research/references/2026-08-27-codex-block2-pcn-theory.md(你有文件系统权限;同时正常 stdout 输出)。
+
+完整逐字题面与 8 项问题见 `tasks/review-block2-pcn-theory.md`。
+
+生效动作：任务级 `execution_allowed: false`；不读取 Claude 推导，不修改采样器；仅作独立
+理论与数值审查。完整中文稿必须写入用户指定 reference，并将同一稿正常输出到 stdout。
+
 ### 2026-08-26 · review-eq22-sigma2-rescaling
 
 【用户原始要求】

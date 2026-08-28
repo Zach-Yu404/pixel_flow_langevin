@@ -1,0 +1,13 @@
+arm,sit,hole_seed42,hole_seed43,hole_seed44,hole_seed45,hole_mean4,hole_std4,obs,spread,cg_bad_max,secs,note
+spectral,2,0.1143,0.0757,0.0958,0.0881,0.0935,0.0140,0.0021,0.1617,0,251,xi_h=0 all stages; probe not exact draw
+pooled_junco,2,0.0874,0.0885,0.0848,0.0854,0.0865,0.0015,0.0024,0.1243,0,174,xi_h=0 all stages; probe not exact draw
+spectral,1,0.1028,0.1451,0.0856,0.1616,0.1238,0.0308,0.0022,0.1887,0,127,xi_h=0 all stages; probe not exact draw
+pooled_junco,1,0.1119,0.1251,0.0916,0.0971,0.1065,0.0131,0.0027,0.1879,0,88,xi_h=0 all stages; probe not exact draw
+spectral,2-2-5-5,0.1015,0.0724,0.0890,0.0817,0.0861,0.0107,0.0019,0.1452,0,536,xi_h=0 all stages; probe not exact draw
+pooled_junco,2-2-5-5,0.0823,0.0657,0.0806,0.0869,0.0788,0.0080,0.0022,0.0750,0,381,xi_h=0 all stages; probe not exact draw
+spectral,5,0.1435,0.1014,0.1336,0.0859,0.1161,0.0234,0.0019,0.1651,0,556,xi_h=0 all stages; probe not exact draw
+pooled_junco,5,0.0975,0.0831,0.0830,0.0646,0.0820,0.0117,0.0022,0.1136,0,405,xi_h=0 all stages; probe not exact draw
+spectral,2-2-10-10,0.1024,0.0921,0.0847,0.1134,0.0982,0.0108,0.0019,0.1422,0,940,xi_h=0 all stages; probe not exact draw
+pooled_junco,2-2-10-10,0.0746,0.0710,0.0819,0.0827,0.0776,0.0049,0.0022,0.0760,0,746,xi_h=0 all stages; probe not exact draw
+spectral,10,0.1158,0.1293,0.0959,0.1188,0.1149,0.0121,0.0019,0.1304,0,1212,xi_h=0 all stages; probe not exact draw
+pooled_junco,10,0.0981,0.0833,0.0845,0.0790,0.0862,0.0072,0.0022,0.0929,0,864,xi_h=0 all stages; probe not exact draw

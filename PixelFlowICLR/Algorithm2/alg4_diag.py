@@ -74,12 +74,11 @@ def h_tau_eigenvalues(tau, s_k, e_k, eff_si):
         h_range = (1-tau) s_k + tau e_k
         h_ker   = tau e_k
 
-    At stage 3 apply_G is the identity, so ker(G) is trivial and H_tau =
-    h_range * I is a genuine scalar. Returns (h_range, h_ker_or_None).
+    ker(G) is non-trivial at every stage (the former stage-3 G = I bypass was
+    removed 2026-08-24). Returns (h_range, h_ker); eff_si is kept for
+    signature compatibility.
     """
     h_range = (1.0 - tau) * s_k + tau * e_k
-    if eff_si == 3:                      # G = I: no kernel
-        return h_range, None
     return h_range, tau * e_k
 
 
@@ -110,15 +109,13 @@ class Alg4Diagnostics:
         rec = dict(
             frame=frame, stage=stage, step=step, tau=tau,
             sigma_tau=sigma_tau, gamma2=gamma2, s2=s2,
-            h_range=h_range, h_ker=("" if h_ker is None else h_ker),
-            H_is_scalar=int(h_ker is None),
+            h_range=h_range, h_ker=h_ker,
             h_over_sigma=h_range / sigma_tau,
             h2_over_sigma2=h_range ** 2 * inv_s2,
             inv_s2_prior=inv_S,
             # C^-1 = H^T H / sigma^2 + S^-1, eigenvalue by eigenvalue (12)
             prec_prior_range=h_range ** 2 * inv_s2 + inv_S,
-            prec_prior_ker=("" if h_ker is None
-                            else h_ker ** 2 * inv_s2 + inv_S),
+            prec_prior_ker=h_ker ** 2 * inv_s2 + inv_S,
         )
         if self.measure_precision:
             # ||A^T A|| / eta^2, matrix-free. power_iter_norm carries its own
@@ -330,7 +327,7 @@ def plot_h_sigma(precision, frames, critical, path):
 
     ax = axes[0]
     ax.plot(fr, [r["h_range"] for r in precision], "-o", ms=3,
-            label=r"$h_\tau$ (range$(G)$; $=h_\tau$ scalar at stage 3)")
+            label=r"$h_\tau$ on range$(G)$")
     ax.plot(fr, [r["sigma_tau"] for r in precision], "-s", ms=3,
             label=r"$\sigma_\tau$")
     ax.set_ylabel("schedule"); ax.grid(alpha=0.3); ax.legend(fontsize=8)

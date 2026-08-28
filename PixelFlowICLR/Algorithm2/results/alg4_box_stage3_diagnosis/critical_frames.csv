@@ -1,0 +1,6 @@
+kind,stage,frame,tau,value,note
+stage_start,0,0,0.0,0.05406167730689049,first frame of stage 0
+stage_start,1,10,0.0,0.05124140903353691,first frame of stage 1
+stage_start,2,20,0.0,0.04610080644488335,first frame of stage 2
+stage_start,3,30,0.0,0.04301183670759201,first frame of stage 3
+max_jump,0,5,0.555,0.07069838047027588,largest single-frame ratio 1.43

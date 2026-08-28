@@ -929,8 +929,9 @@ def run_contraction(args):
         h, w = gt_k.shape[-2:]
         hole_k = F.interpolate(S["hole"], size=(h, w), mode="nearest")
         Ak, ATk = S["mkA"](S["op"], S["y"], (1, 3, h, w), device)
+        # eff_si=None: real G at every stage (user decision 2026-08-24)
         M_den, Cinv, inv_e2, inv_s2, inv_S = make_M_tau_den(
-            Ak, ATk, S["sigma_n"], sigma_tau, tau, s_k, e_k, si, s2)
+            Ak, ATk, S["sigma_n"], sigma_tau, tau, s_k, e_k, None, s2)
         inv_S_half = 1.0 / math.sqrt(s2)
         pe = torch.tensor([int(S["demo"]["class_idx"])], dtype=torch.int32, device=device)
         do_cfg = float(kw["guidance_scale"]) > 0
@@ -967,11 +968,11 @@ def run_contraction(args):
                     x1 = gt_k + math.sqrt(delta) * n * hole_k
                 d_in = mse_masked(x1, gt_k, hole_k)
                 xi0 = torch.randn(gt_k.shape, generator=gen).to(device)
-                x_tau = apply_H_tau(x1, tau, s_k, e_k, si) + sigma_tau * xi0
+                x_tau = apply_H_tau(x1, tau, s_k, e_k, None) + sigma_tau * xi0
                 with torch.no_grad():
                     v = vfn(x_tau)
                 x1_hat = clean_endpoint_solve(x_tau, v, sigma_tau, s_k, e_k, tau,
-                                              gamma2, si, float(kw["cg_tol"]),
+                                              gamma2, None, float(kw["cg_tol"]),
                                               ALG["cg_max_iter_endpoint"],
                                               x1_warm=x1.clone())
                 d_hat = mse_masked(x1_hat, gt_k, hole_k)
@@ -980,7 +981,7 @@ def run_contraction(args):
                 xi_s = torch.randn(gt_k.shape, generator=gen).to(device)
                 b_t = (inv_e2 * ATk(S["y"]) + Cinv(x1_hat)
                        + (1.0 / S["sigma_n"]) * ATk(xi_y)
-                       + (1.0 / float(sigma_tau)) * apply_H_tau(xi_h, tau, s_k, e_k, si)
+                       + (1.0 / float(sigma_tau)) * apply_H_tau(xi_h, tau, s_k, e_k, None)
                        + inv_S_half * xi_s)
                 x1_out = cg_solve(M_den, b_t, x0=x1.clone(),
                                   tol=float(kw["cg_tol"]),
@@ -1049,8 +1050,9 @@ def run_cg_audit(args):
         s2 = float(s2_fn(si, float(sigma_tau)))
         h, w = pyr[si].shape[-2:]
         Ak, ATk = S["mkA"](S["op"], S["y"], (1, 3, h, w), device)
+        # eff_si=None: real G at every stage (user decision 2026-08-24)
         M_den, Cinv, inv_e2, inv_s2, inv_S = make_M_tau_den(
-            Ak, ATk, S["sigma_n"], sigma_tau, tau, s_k, e_k, si, s2)
+            Ak, ATk, S["sigma_n"], sigma_tau, tau, s_k, e_k, None, s2)
         # a right-hand side with the same structure line 13 builds
         xi_y = torch.randn(S["y"].shape, generator=g).to(device)
         xi_h = torch.randn(pyr[si].shape, generator=g).to(device)
@@ -1261,9 +1263,9 @@ def run_verify(args):
         sig3 = compute_sigma_tau(tau3, s3, e3)
         xt = torch.randn(SHAPE, generator=g)
         g2 = 0.02
-        a1 = clean_endpoint_solve(xt, v1, sig3, s3, e3, tau3, g2, 3, 1e-13, 6000)
-        a2 = clean_endpoint_solve(xt, v2, sig3, s3, e3, tau3, g2, 3, 1e-13, 6000)
-        ref = apply_H_tau_inv(xt, tau3, s3, e3, 3)
+        a1 = clean_endpoint_solve(xt, v1, sig3, s3, e3, tau3, g2, None, 1e-13, 6000)
+        a2 = clean_endpoint_solve(xt, v2, sig3, s3, e3, tau3, g2, None, 1e-13, 6000)
+        ref = apply_H_tau_inv(xt, tau3, s3, e3, None)
         gap = float((a1 - ref).abs().max())
         bcoef = float((a1 - a2).norm()) / dv
         print(f"  {tau3:>7.4f}{sig3:>11.6f}{gap:>21.3e}{bcoef:>20.6f}")
@@ -1289,9 +1291,10 @@ CONFIG_SCHEMA = {
     "mode": None,
     "paths": {"model_dir", "demo_dir", "gamma2_table"},
     "algorithm": {"sigma_min", "seed", "measurement_seed", "cg_max_iter_endpoint"},
-    # g_bypass_stage3 is deliberately absent: the stage-3 bypass is the repo's
-    # normal flow and is fixed on inside run_posterior_sampling_alg4, so it is
-    # not a variable here and a config that sets it fails loudly.
+    # g_bypass_stage3 is deliberately absent: the stage-3 identity bypass was
+    # removed from apply_G (2026-08-24) — G is the same projection at every
+    # stage — so it is not a variable here and a config that sets it fails
+    # loudly.
     "sampler_kw": {"num_langevin", "ode_steps_per_stage", "shift", "guidance_scale",
                    "cg_tol", "cg_max_iter"},
     "S_prior": None,          # mode-dependent, checked by _check_s_prior

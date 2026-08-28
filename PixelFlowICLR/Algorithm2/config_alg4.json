@@ -3,16 +3,16 @@
  "paths": {
   "model_dir": "{IP_PACKAGE}/pretrained_models/c2img",
   "demo_dir": "{IP_PACKAGE}/demo",
-  "gamma2_table": "{HERE}/gamma2_meas.json"
+  "gamma2_table": "{HERE}/gamma2_meas_alg4.json"
  },
  "algorithm": {
-  "sigma_min": 0.39,
+  "sigma_min": 1e-08,
   "seed": 42,
   "measurement_seed": 42,
   "cg_max_iter_endpoint": 200
  },
  "sampler_kw": {
-  "num_langevin": 10,
+  "num_langevin": [2, 2, 1, 1],
   "ode_steps_per_stage": 10,
   "shift": 1.0,
   "guidance_scale": 2.0,
@@ -106,7 +106,8 @@
   "image": "junco",
   "sit_variants": [
    1,
-   2
+   2,
+   5
   ],
   "compare_to": "results/alg4/full_ip_final.csv"
  },

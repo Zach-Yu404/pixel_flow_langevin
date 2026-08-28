@@ -1,0 +1,84 @@
+{
+ "CAVEAT": "DEMO_ONLY / LEAKAGE: spectral measured on the 6 non-junco demo images (eval family, not a training set); pooled_junco is the junco-only incumbent (maximal leakage).",
+ "calibration_images": [
+  "kite_eagle",
+  "sea_anemone",
+  "ruddy_turnstone",
+  "boston_terrier",
+  "shetland_sheepdog",
+  "timber_wolf",
+  "leopard",
+  "ibex_horns",
+  "black_footed_ferret",
+  "gorilla",
+  "breastplate_armor",
+  "crane_structure",
+  "lakeside_beach",
+  "gyromitra_mushroom"
+ ],
+ "n_images": 14,
+ "formulas": {
+  "pooled_junco": "incumbent: junco-only pooled E[x^2]-E[x]^2 (results/alg4/s2_meas.json)",
+  "spectral": "S_k(w) = mean_{i,c} |F z_{i,c}(w)|^2 (fft2 norm=ortho), floored at 1e-08 * max(S_k)"
+ },
+ "pooled_junco": {
+  "0": 0.03969954352354733,
+  "1": 0.04718059426719991,
+  "2": 0.05210772396874556,
+  "3": 0.05543326541794339
+ },
+ "per_stage": {
+  "0": {
+   "resolution": [
+    32,
+    32
+   ],
+   "spectral": {
+    "mean_power": 0.24318520724773407,
+    "max_power": 83.07232666015625,
+    "floor": 8.307232666015625e-07,
+    "n_floored_bins": 0,
+    "consistency_vs_centered_trace": 0.9999999644390024
+   }
+  },
+  "1": {
+   "resolution": [
+    64,
+    64
+   ],
+   "spectral": {
+    "mean_power": 0.25738808512687683,
+    "max_power": 332.289306640625,
+    "floor": 3.32289306640625e-06,
+    "n_floored_bins": 0,
+    "consistency_vs_centered_trace": 1.000000076496245
+   }
+  },
+  "2": {
+   "resolution": [
+    128,
+    128
+   ],
+   "spectral": {
+    "mean_power": 0.2672794461250305,
+    "max_power": 1329.1572265625,
+    "floor": 1.3291572265625e-05,
+    "n_floored_bins": 0,
+    "consistency_vs_centered_trace": 0.999999924499363
+   }
+  },
+  "3": {
+   "resolution": [
+    256,
+    256
+   ],
+   "spectral": {
+    "mean_power": 0.2755221128463745,
+    "max_power": 5316.62939453125,
+    "floor": 5.31662939453125e-05,
+    "n_floored_bins": 0,
+    "consistency_vs_centered_trace": 1.000000003699072
+   }
+  }
+ }
+}

@@ -1,4 +1,4 @@
-# block2-adaptive-pcn（2026-08-27，implementation review 阶段）
+# block2-adaptive-pcn（2026-08-27，done → 用户裁决「没有用，最后噪声还是很大，撤回」已回退）
 
 结果目录：**results/alg4_weighted_sigma_tau/**（用户修订，替代规格 §10 的
 alg4_block2_adaptive_pcn；根目录必须有六臂同帧总对比 trajectory.png）。
@@ -103,3 +103,13 @@ x0_rms²≈1、恒等 ≤1.5e-4、CG 全收敛、NFE 不变；ESS 末段大降�
   的全精度/provenance/status 列，故 precision arm 必须保持停用。
 - 其余 should-fix：mode 枚举 fail-fast；共识 e_k 事实更正；未收敛 stationary rho 字段；
   S_it/sigma_min 输入边界；泛型 SOperator trace 契约。完整分级与复算表见用户指定报告。
+
+## 回退（2026-08-27，用户「没有用，最后噪声还是很大，撤回」）
+utils.py 全部 Block-2 pCN 代码撤除（kwarg、入口校验/预检、λ 块、Block-2 与
+l.16 分支、row.update、注释），grep 零残留；results/alg4_weighted_sigma_tau/
+整目录删除（数字与共识结论保留于本文件；codex 理论稿留 references/）。
+回归：哨兵 [2,2,2,2] 与现行 [2,2,1,1] 双臂逐位复现（见对话记录）。
+定论归档：pCN Block-2 refresh 降低 stage-3 末段 hole 均值（sigma −17%/−7%）
+但终态噪声在用户视觉判定下仍大，且代价为 ESS 崩塌与 pooled spread −11.5%；
+与此前 Block-1 pCN（12h 程序）同一结论——**不变核不改变终态边缘质量的
+本质**，有限步效应不足以解决 frozen-center。勿重做。

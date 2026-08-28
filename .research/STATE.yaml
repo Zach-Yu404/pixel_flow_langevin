@@ -1,7 +1,7 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 66
+memory_version: 68
 updated_at: "2026-08-27"
-updated_by: "codex"           # claude | codex | user
+updated_by: "claude"          # claude | codex | user
 
 # 2026-08-25：dual-agent 恢复。codex 0.149.1 自行安装（npm --prefix ~/.local + release
 # 伴生二进制），用户设备码重登录；本机 userns 禁用 → bwrap 沙箱不可用，用户已授权
@@ -27,9 +27,23 @@ authorized_scope: "implement-algorithm4：新增 PixelFlowICLR/Algorithm2/{main4
 execution_allowed: true
 
 active_tasks:
+- name: cg-maxiter-test
+  type: experiment
+  state: done               # Block-1 (27)/(22) PCG cg_max_iter 5/10/20/50 vs 300：
+                            # hole 随 L 单调（L=5 0.1115 vs 0.1340，−17%），截断=少注入
+                            # RTO 噪声，非 exact draw、诊断性质；results/alg4_box_cgtest/
+  owner: claude
+  branch: IP_branch
+  depends_on: [xih-zero-probe]
+  execution_allowed: true   # 用户 2026-08-27 直接指令
+  issue: null
+  pr: null
+  pending_review_by: null
 - name: block2-adaptive-pcn
   type: implementation
-  state: done               # 全协议闭合：双独立推导零分歧→实现→codex 逐行
+  state: done               # 用户裁决「没有用，最后噪声还是很大，撤回」：代码零残留
+                            # 回退、结果目录删除、回归逐位过（记录见 task 文件）。
+                            # 原全协议闭合：双独立推导零分歧→实现→codex 逐行
                             # review（B1 门 + 5 should-fix 全修）→复审→终审
                             # 技术残项全销；六臂 4seeds：sigma_pcn −16.6%/−7.4%
                             # （种子彩票±0.0146）、precision −10.8%/−1.7%
@@ -47,14 +61,15 @@ active_tasks:
   pending_review_by: null   # codex 终审：技术销项；approve 的 SHA 绑定待大提交
 - name: block2-pcn-final-review
   type: review
-  state: review              # 71 行终审节已追加；技术残项销完，formal verdict 仍 request changes
+  state: done                # 终审节已追加；技术残项销完；claude 已读并补重跑收据；
+                             # 随后用户裁决整体撤回（SHA 绑定随之失去对象）
   owner: codex
   branch: null
   depends_on: [review-block2-pcn-code, block2-adaptive-pcn]
   execution_allowed: false   # 只读终审与共同解释；仅追加指定报告节及 Research OS 记录
   issue: null
   pr: null
-  pending_review_by: claude
+  pending_review_by: null
 - name: review-block2-pcn-code
   type: review
   state: done               # 报告完成；request changes：precision fail-closed 门缺失（B1）
@@ -65,16 +80,6 @@ active_tasks:
   issue: null
   pr: null
   pending_review_by: null
-- name: block2-adaptive-pcn
-  type: implementation
-  state: working            # B1/S3/N1 当前工作树技术通过；待新预检重跑收据、commit/push 与 exact-SHA review
-  owner: claude
-  branch: IP_branch
-  depends_on: [review-block2-pcn-theory]
-  execution_allowed: true
-  issue: null
-  pr: null
-  pending_review_by: codex
 - name: review-block2-pcn-theory
   type: review
   state: done               # 独立中文理论稿完成；80 行 q/lambda 表已由闭式机器复算
