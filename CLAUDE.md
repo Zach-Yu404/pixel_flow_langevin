@@ -6,9 +6,6 @@
 - 只在本 repo 工作，不读 sibling 项目。会话 hook 会注入紧凑 L1；开始 meaningful work
   时只读 `.research/STATE.yaml`、`CURRENT.md`、`CONSTRAINTS.md`，再按需读相关
   task/decision/handoff、源码符号或 diff，不默认通读 `.research/RULES.md`。
-- 上来先确认双 agent：claude 与 codex 都已安装、已登录、互通（`research-doctor`）。
-  发现缺失先自行安装（npm 无全局写权限时用 `--prefix "$HOME/.local"`），安装/登录
-  确实失败才按 RULES §12 记录 degraded；不得静默单 agent 干活。
 - 先判定任务类型；用户说“不要实现”时立即记录 `execution_allowed: false`。
 - 用户原始要求逐字写入 task。重要 implementation、architecture、methodology 任务先独立
   出【Claude｜方案】，不得先看 Codex 方案；只交换结论和证据，不交换隐藏推理。
