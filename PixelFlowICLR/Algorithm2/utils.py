@@ -1152,6 +1152,16 @@ def run_posterior_sampling_alg4(
                                      # a production setting. None = exact
                                      # sampler, bit-identical path.
     diag_noise_off_from_stage=2,
+    diag_xi0_use_xih=False,          # DIAGNOSTIC PROBE ONLY: Block 2 uses the
+                                     # xi_h REALISATION drawn for (22) this
+                                     # inner (pre-zeroing) as xi_0 in (23).
+                                     # xi_0 is still drawn (RNG aligned) and
+                                     # discarded. False = bit-identical.
+    diag_xi0_off_from_frame=None,    # DIAGNOSTIC PROBE ONLY: from this global
+                                     # frame index on, use x0 = 0 in l.8
+                                     # (x_tau = H x1) and zero Block-2 xi_0
+                                     # (drawn first, RNG stays aligned). Breaks
+                                     # the exact draw. None = bit-identical.
     **unused_kw,
 ):
     """Algorithm 4 (draft Sec. 7) with the SAME section layout as
@@ -1380,6 +1390,9 @@ def run_posterior_sampling_alg4(
                         gamma2=gamma2, s2=s2, eta=eta, eff_si=eff_si,
                         A_fn=Ak, AT_fn=ATk, shape=x1.shape, device=device)
 
+                if diag_xi0_off_from_frame is not None \
+                        and frame >= int(diag_xi0_off_from_frame):
+                    x0 = torch.zeros_like(x0)          # probe only
                 x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + sigma_tau * x0  # l.8
 
                 for s in range(S_it):                                # l.9
@@ -1395,6 +1408,7 @@ def run_posterior_sampling_alg4(
                     xi_y = randn_like_cpu(y)                         # l.12
                     xi_h = randn_like_cpu(x1)
                     xi_s = randn_like_cpu(x1)
+                    xi_h_drawn = xi_h if diag_xi0_use_xih else None
                     if diag_noise_off and si >= diag_noise_off_from_stage:
                         if "xi_y" in diag_noise_off:
                             xi_y = torch.zeros_like(xi_y)
@@ -1419,8 +1433,13 @@ def run_posterior_sampling_alg4(
 
                     # ── Block 2: exact draw of x_tau, no solve, no step size ──
                     xi_0 = randn_like_cpu(x0)                        # l.14
+                    if diag_xi0_use_xih:
+                        xi_0 = xi_h_drawn               # probe only
                     if diag_noise_off and si >= diag_noise_off_from_stage \
                             and "xi_0" in diag_noise_off:
+                        xi_0 = torch.zeros_like(xi_0)   # probe only
+                    if diag_xi0_off_from_frame is not None \
+                            and frame >= int(diag_xi0_off_from_frame):
                         xi_0 = torch.zeros_like(xi_0)   # probe only
                     x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + \
                         float(sigma_tau) * xi_0                      # (23)

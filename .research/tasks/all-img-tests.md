@@ -56,3 +56,23 @@ superresolution：base .0294/21.5、.0646/18.0 → 3ξ=0 .0141/25.5、.0137/25.6
    主要是 S 与噪声路径的相互作用，不是 S 的均值结构；pooled 在散布/全域
    观测任务受噪声伤害远大于 spectral（PSNR 差 3.4-3.6dB，置零后追平）。
 4. 诊断定性不变：置零=篡改条件协方差的探针上界，非合法采样器。
+
+## MMSE 评测（用户 2026-08-31；results/all_img_tests/MMSE_results/）
+全噪声 baseline（[2,2,1,1]）、10 seeds(42-51)/格、60 格；MMSE5=前5平均、
+MMSE10=全10平均；指标复用 rerun_imageNet/metrics.py（PSNR/SSIM piq
+data_range=1；LPIPS 双口径：piq-VGG 历史 + 官方 alex 论文可比）。
+MMSE10 vs 单样本（6 图均值 PSNR）：spectral box 19.95→22.60、random
+24.28→27.47、gblur 21.49→24.87、motion 21.11→24.45、SR 21.54→24.83
+（+2.6~3.3dB，MSE 近减半）；pooled 增益更大（+2.9~5.7dB，blur/SR 追平
+spectral）。SSIM 同步大涨（如 blur 0.30→0.56），LPIPS 降 0.05-0.10。
+对照文章版单样本（box 21.93/random 34.88/gblur 24.09/motion 23.35/SR 22.67）：
+MMSE10-spectral 在 box/gblur/motion/SR 全部反超（+0.7/+0.8/+1.1/+2.2dB），
+random 仍差 7.4dB。产物：mmse_summary.csv（逐格三行）、mmse_per_task.csv、
+每格 MMSE10 PNG。
+
+### MMSE vs 无噪条件合并对比（用户 2026-08-31；MMSE_results/mmse_vs_noiseoff_per_task.csv）
+无噪行(ξ_h=0/3ξ=0 全程)为 seed42 单跑、指标从已存 PNG 复算（8-bit 量化级偏差，
+交叉验证 0.0163 vs 0.0160）+ SSIM/LPIPS 补算。核心发现：**3ξ=0 单趟 ≈ MMSE10 的
+MSE/PSNR，但 SSIM/LPIPS 显著更优**（如 spectral random：SSIM 0.783 vs 0.743、
+LPIPS-alex 0.127 vs 0.180；box 0.763/0.217 vs 0.736/0.251）——确定性中心没有
+MMSE 平均带来的模糊，且成本 1/10。ξ_h=0 介于两者之间。

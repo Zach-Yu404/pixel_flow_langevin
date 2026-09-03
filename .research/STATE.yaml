@@ -1,6 +1,6 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 68
-updated_at: "2026-08-27"
+memory_version: 83
+updated_at: "2026-09-03"
 updated_by: "claude"          # claude | codex | user
 
 # 2026-08-25：dual-agent 恢复。codex 0.149.1 自行安装（npm --prefix ~/.local + release
@@ -27,6 +27,31 @@ authorized_scope: "implement-algorithm4：新增 PixelFlowICLR/Algorithm2/{main4
 execution_allowed: true
 
 active_tasks:
+- name: s4-valset-s-test
+  type: experiment
+  state: done               # 1440 行。标量 val-set S 带噪灾难（单 14.5 vs junco 18.8 dB）
+                            # 但 no_noise 持平 25.2；spectral_all ≈ 旧 14 图 spectral（干净
+                            # 替代）；spectral_class+2222 最佳（MMSE10 24.86，no_noise 25.46）；
+                            # schedule 对 spectral 无差。tasks/s4-valset-s-test.md
+  owner: claude
+  branch: IP_branch
+  depends_on: [compute-s-stats-valset, all-img-tests]
+  execution_allowed: true   # 用户 2026-09-02 直接指令
+  issue: null
+  pr: null
+  pending_review_by: null
+- name: compute-s-stats-valset
+  type: experiment
+  state: done               # 全 50k val 单遍统计（无 inference，433s）：ALL pooled
+                            # s2={0.267..0.308}；junco 表低 5.5×（先验严重过强）；
+                            # per-class stage3 s2 0.137-0.487；4 文件在 s_stats/
+  owner: claude
+  branch: IP_branch
+  depends_on: [compare-s-prior-methods]
+  execution_allowed: true   # 用户 2026-08-31 直接指令
+  issue: null
+  pr: null
+  pending_review_by: null
 - name: cg-maxiter-test
   type: experiment
   state: done               # Block-1 (27)/(22) PCG cg_max_iter 5/10/20/50 vs 300：
@@ -134,7 +159,7 @@ active_tasks:
   pending_review_by: null
 - name: xih-zero-probe
   type: debug
-  state: done               # 三版全完成：f20 起（回退留数）、全程（收益全在
+  state: done               # 四版（+末两步 x₀=0：obs −35%，全图噪声=σ_τξ₀ 经近恒等端点透传）；三版：f20 起（回退留数）、全程（收益全在
                             # stage≥2）、S_it×ξ_h=0 扫描（棘轮预测证实，最优
                             # spectral [2,2,5,5] 0.0861 / pooled [2,2,10,10]
                             # 0.0776）+ 12 格 seed42 轨迹回填；结果与结论全录

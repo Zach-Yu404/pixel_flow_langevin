@@ -1,0 +1,31 @@
+{
+ "meta": {
+  "source": "/CBIG-Standard-ECE/Zach_dataset/Zach_dataset/imageNet256/ILSVRC/Data/CLS-LOC/val",
+  "n_images": 50000,
+  "n_classes": 1000,
+  "preprocessing": "evaluate.cca (BOX-halving + BICUBIC + center-crop 256) + Normalize(0.5,0.5) -> [-1,1]",
+  "pyramid": "chain-of-bilinear-halving (gt_stage_pyramid), stages 32/64/128/256",
+  "pooled_formula": "per stage: flatten pixels x channels x images, s2 = E[x^2] - E[x]^2 (float64 accumulation)",
+  "spectral_formula": "P_k(w) = mean_{i,c} |fft2(x_i - mu_group, norm='ortho')|^2, computed one-pass via (1/N)sum|Fx|^2 - |F mu|^2 (exact); floor = 1e-08 * max(P_k); channels shared",
+  "script": "s_stats/compute_s_stats.py",
+  "elapsed_s": 424
+ },
+ "pooled_s2": {
+  "0": 0.2673815745134424,
+  "1": 0.2843583712238733,
+  "2": 0.29746677187508413,
+  "3": 0.3074922382474713
+ },
+ "spectral_floor": {
+  "0": 8.391631030933763e-07,
+  "1": 3.3566524113846028e-06,
+  "2": 1.3426609641923036e-05,
+  "3": 5.3706438563363e-05
+ },
+ "spectral_floored_bins": {
+  "0": 0,
+  "1": 0,
+  "2": 0,
+  "3": 0
+ }
+}
