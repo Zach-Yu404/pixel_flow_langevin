@@ -19,10 +19,6 @@
   "cg_tol": 1e-05,
   "cg_max_iter": 300
  },
- "S_prior": {
-  "mode": "table",
-  "path": "results/alg4/s2_meas.json"
- },
  "tasks_setup": {
   "box_inpainting": {
    "sigma_n": 0.05,

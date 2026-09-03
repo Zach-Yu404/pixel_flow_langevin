@@ -2,7 +2,12 @@
 
 更新时间：2026-09-03
 
-## 刚完成：s4-valset-s-test（tasks/s4-valset-s-test.md，2026-09-03）
+## 刚完成：S 固定为 spectral_class（tasks/default-spectral-class-s.md，2026-09-03）
+- main4 硬编码 s_stats per-class 谱 S（S_STATS/default_s2_fn/_bind_s2），config 删除 S_prior 段；
+  与 S4 构造逐位一致（功率谱 torch.equal），完整采样差=GPU 运行噪声（~1e-3），CLI smoke 通过。
+- 后续跑的所有 main4 结果默认都是这个 S；旧 junco 表只剩 diversity 消融臂。
+
+## 已完成：s4-valset-s-test（tasks/s4-valset-s-test.md，2026-09-03）
 - （已完成 09-03，见下）4 种 val-set S（pooled_all/pooled_class/spectral_all/spectral_class）× schedule
   {2222,2211,2221} × all_img_tests 网格（5 task × 6 图）× 估计量 {single_avg10, MMSE5,
   MMSE10, no_noise}；PSNR/SSIM/LPIPS(piq-VGG+alex)/MSE。四 GPU claim 工作窃取
@@ -26,5 +31,5 @@
 - drop-(1/σ²)HᵀH from C⁻¹ 探针。
 
 ## 阻塞 / 待用户决定
-- m=0（19′）是否恢复；S 采用 junco 表还是 val-set（等 S4 结果）。
+- m=0（19′）是否恢复。
 - 记忆 v58+ 未提交/推送（v57 已在 IP_branch）；S4 结束后统一 commit+push。

@@ -134,3 +134,15 @@
 > 先不要实现
 生效动作：STATE.yaml execution_allowed: false
 -->
+
+## 用户约束（2026-09-03）：handbook / 复现说明必须包含 S_stats 的计算步骤
+原文：「这个记住（计算S_stats)，之后如果写handbook要计算，记得给这个加进去」
+- Algorithm 4 的先验协方差 S 固定为 s_stats 的 per-class 谱统计
+  （decisions/2026-09-03-fixed-spectral-class-S.md）。其数据文件
+  `PixelFlowICLR/Algorithm2/s_stats/spectral_power_labelled.npz`（334MB）按 .gitignore 不入库，
+  `main4.py` 在任何 sampling 模式下都硬性依赖它。
+- 因此任何 handbook / README / 复现流程写到「运行 main4」之前，**必须**列出一步：
+  `cd PixelFlowICLR/Algorithm2 && python s_stats/compute_s_stats.py`
+  （单文件、一遍 50k ImageNet val、无 inference、~7 分钟；输出 4 个文件：
+  s_pooled_statistics_{labelled,all}.json、spectral_power_{labelled,all}.npz），
+  并注明数据路径依赖（ImageNet val + LOC_synset_mapping.txt，见 main4.S_STATS）。

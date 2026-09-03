@@ -37,9 +37,13 @@ step is provably network-free (verify A8) and measured to only add error. Two of
 config copied over from Algorithm 2 fails loudly instead of silently passing a
 step size that Algorithm 4 would ignore.
 
-The one input Algorithm 2 does not have is ``S_prior``, the prior covariance
-surrogate S of (12). It is a measured quantity, not a searched one; see
-``--mode measure_s2``. Note that the Tweedie anchor ``lambda`` in
+The one input Algorithm 2 does not have is the prior covariance surrogate S
+of (12). It is FIXED, not a config option: the per-class spectral S from
+s_stats/ (``S_STATS`` / ``default_s2_fn`` below; ImageNet-val statistics,
+s_stats/compute_s_stats.py), designated on 2026-09-03 after the S4 test
+(s_stats/test/s4_per_task.md). ``--mode measure_s2`` and the scalar
+``make_s2_fn`` prescriptions remain only as ablation arms for ``--mode
+diversity``. Note that the Tweedie anchor ``lambda`` in
 ``run_posterior_reg_sampling_alg2`` is the same object: ``lambda*I == S^-1``,
 i.e. ``s2 == 1/lambda``, so the lambda sweep in
 ``test/results_reg_alg2/`` is directly comparable (its best lambda=100 is
@@ -55,7 +59,7 @@ Modes:
                per-frame trajectory metrics, Block-1/Block-2 error
                decomposition, schedule and precision terms, critical-frame
                detection, S_it comparison, plots and a montage
-  diversity  : repeated posterior samples at fixed y across S_prior arms, so a
+  diversity  : repeated posterior samples at fixed y across S arms, so a
                reconstruction gain can be told apart from Block 1 collapsing
                onto x1_hat (draft Sec. 8.2 / 8.6)
   verify     : CPU component audit A1-A7 (dense float64) of the claims that are
@@ -87,12 +91,13 @@ from utils import (  # noqa: E402  (import first: sets IP_package sys.path + chd
     apply_B, apply_N, apply_H_tau_inv, make_exact_AT, score_solve,
     make_endpoint_operator, clean_endpoint_solve, make_M_tau_den,
     measurement_residual, mse_masked, run_posterior_sampling_alg4,
-    make_jacobi_precond, pcg_solve,
+    make_jacobi_precond, pcg_solve, SOperator, SpectralSOp,
 )
 import onestep_mse_vs_t as base  # noqa: E402
 import alg4_diag  # noqa: E402
 
 import numpy as np                                             # noqa: E402
+import copy                                                    # noqa: E402
 import torch                                                   # noqa: E402
 from omegaconf import OmegaConf                                # noqa: E402
 import matplotlib                                              # noqa: E402
@@ -116,7 +121,21 @@ PATHS = {}         # resolved "paths" section ({IP_PACKAGE}/{HERE} substituted)
 ALG = {}           # "algorithm" section
 SAMPLER_KW = {}    # shared "sampler_kw" section
 TASKS_SETUP = {}   # per-task {"sigma_n", "operator", optional "kw" overrides}
-S_PRIOR = {}       # "S_prior" section — the surrogate S of (12)
+# The sampler's prior covariance S of (12)/(22) — FIXED, not a config option.
+# S_k = F^H diag(P_k) F (utils.SpectralSOp), P_k = floored (1e-8 max), centred
+# mean power spectrum of the image's own ImageNet synset at stage k (1000
+# classes x 50 val images, s_stats/compute_s_stats.py). Designated by the user
+# on 2026-09-03 after the S4 test (s_stats/test/s4_per_task.md): best of the four
+# val-set S (MMSE10 24.86 dB vs 24.72 spectral_all; the scalar val-set tables
+# collapse to 14.5 dB on noisy single samples) and on par with the old leaked
+# 14-image spectral S. Class-dependent, so the s2_fn is bound per image
+# (_bind_s2) once the demo's class_idx is known.
+S_STATS = {
+    "spectral_npz": os.path.join(HERE, "s_stats", "spectral_power_labelled.npz"),
+    "synset_map": "/CBIG-Standard-ECE/Zach_dataset/Zach_dataset/imageNet256/"
+                  "LOC_synset_mapping.txt",
+}
+S_DESC = "spectral_class(s_stats/spectral_power_labelled.npz)"
 TRAJ_IMAGE = None  # "traj_image": which image gets trajectory frames (full_ip)
 
 # Same share-root re-rooting main.py uses; see its resolve_path docstring.
@@ -132,7 +151,7 @@ SHARE_ROOTS = [
 # os.path.exists() swallows OSError and answers False, so a transient EIO
 # reads as "the checkpoint is missing" and resolve_path then raises
 # FileNotFoundError listing paths that DO exist. Four of five arms of the
-# first S_prior sweep died exactly this way. Retry instead, and only treat a
+# first S sweep died exactly this way. Retry instead, and only treat a
 # genuine ENOENT as absence.
 _RETRYABLE_ERRNO = frozenset(
     e for e in (getattr(errno, n, None) for n in ("EIO", "ESTALE", "EBUSY"))
@@ -198,9 +217,11 @@ def _load_model(config, device):
 
 # ════════════════════════ the surrogate S of (12) ══════════════════════════
 def make_s2_fn(spec, num_stages):
-    """Build ``s2_fn(stage_idx, sigma_tau) -> float`` from config "S_prior".
+    """Build a SCALAR ``s2_fn(stage_idx, sigma_tau) -> float`` from an arm
+    spec -- ablation arms for ``--mode diversity`` only. The sampler's S is
+    fixed: ``default_s2_fn`` (per-class spectral S from s_stats/).
 
-    Four prescriptions, all from the draft, none of them a free parameter:
+    Four scalar prescriptions, all from the draft, none of them a free parameter:
 
       isotropic     s2 = s2                      Sec. 4.2, the reduction of (13)
                     One number for every scale. ``s2 = 1.0`` is the
@@ -242,8 +263,101 @@ def make_s2_fn(spec, num_stages):
         # tau-dependence is wrong (the exact ridge sigma^2/s2 shrinks with
         # sigma_tau, c^-2 does not); (24) bounds the resulting error.
         return lambda k, sig: (c * float(sig)) ** 2
-    raise KeyError(f'S_prior.mode {mode!r} not in '
+    raise KeyError(f'S arm mode {mode!r} not in '
                    '("isotropic", "per_stage", "table", "sigma_scaled")')
+
+
+def default_s2_fn(num_stages):
+    """The sampler's S (see S_STATS): per-class spectral S from s_stats/,
+    UNBOUND until ``_bind_s2(s2_fn, class_idx)`` (done inside _run_once and
+    the full_ip loop once the demo's class is known)."""
+    with open(resolve_path(S_STATS["synset_map"])) as f:
+        synsets = [ln.split()[0] for ln in f if ln.strip()]
+    if len(synsets) != 1000:
+        raise ValueError(f'{S_STATS["synset_map"]}: expected 1000 synsets, '
+                         f"got {len(synsets)}")
+    return _SpectralS2(resolve_path(S_STATS["spectral_npz"]), num_stages, synsets)
+
+
+class _SpectralS2:
+    """The fixed S as an s2_fn: one utils.SpectralSOp per stage (S diagonal in
+    the orthonormal 2-D Fourier basis, power P_k as stored in the npz --
+    already floored at 1e-8 max). With ``synsets`` the power is the image's
+    own class's, so the object starts UNBOUND; ``_bind_s2(s2_fn, class_idx)``
+    returns a cheap bound view (shared npz handle + operator cache) that the
+    sampler can call. ``synsets=None`` selects the all-classes spectrum
+    (keys ``stage{k}``). Same construction as s_stats/test/run_s4_test.py::
+    make_s2fn (validated 2026-09-03: identical power tensors at all stages;
+    full runs agree to the GPU's own run-to-run noise, max|dx| ~1e-3)."""
+
+    def __init__(self, npz_path, num_stages, synsets=None):
+        self.npz_path, self.K, self.synsets = npz_path, int(num_stages), synsets
+        self.npz = np.load(npz_path)     # lazy per key: only this class's 4 arrays are read
+        self._cache = {}
+        self.class_idx = None
+
+    def _prefix(self):
+        if self.synsets is None:
+            return ""
+        if self.class_idx is None:
+            raise RuntimeError("the per-class spectral S needs the image's class: "
+                               "call _bind_s2(s2_fn, class_idx) after task setup")
+        return f"{self.synsets[self.class_idx]}_"
+
+    def _ops(self, prefix):
+        if prefix not in self._cache:
+            miss = [k for k in range(self.K) if f"{prefix}stage{k}" not in self.npz.files]
+            if miss:
+                raise KeyError(f"{self.npz_path}: no '{prefix}stage{{k}}' for stages {miss}")
+            self._cache[prefix] = {
+                k: SpectralSOp(torch.from_numpy(self.npz[f"{prefix}stage{k}"]),
+                               meta=dict(source=os.path.basename(self.npz_path),
+                                         key=f"{prefix}stage{k}"))
+                for k in range(self.K)}
+        return self._cache[prefix]
+
+    def for_class(self, class_idx):
+        if self.synsets is None:
+            return self
+        class_idx = int(class_idx)
+        if not 0 <= class_idx < len(self.synsets):
+            raise ValueError(f"class_idx {class_idx} outside 0..{len(self.synsets)-1}")
+        b = copy.copy(self)
+        b.class_idx = class_idx
+        return b
+
+    def __call__(self, k, sig):
+        return self._ops(self._prefix())[int(k)]
+
+    def describe(self):
+        if self.synsets is None:
+            tag = "all"
+        elif self.class_idx is None:
+            return "spectral[class=<unbound until task setup>]"
+        else:
+            tag = f"class={self.synsets[self.class_idx]}"
+        ops = self._ops(self._prefix())
+        return (f"spectral[{tag}] Tr(S_k)/D = "
+                f"{[round(float(ops[k].scalar_equiv), 6) for k in range(self.K)]}")
+
+
+def _bind_s2(s2_fn, class_idx):
+    """Bind a class-dependent s2_fn (spectral_class) to the image's ImageNet
+    class index; every other s2_fn is returned unchanged."""
+    return s2_fn.for_class(int(class_idx)) if hasattr(s2_fn, "for_class") else s2_fn
+
+
+def _describe_s2(s2_fn, num_stages):
+    if hasattr(s2_fn, "describe"):
+        return s2_fn.describe()
+    return (f"s2(k=0..{num_stages - 1}, sigma=0.5) = "
+            f"{[round(float(s2_fn(k, 0.5)), 6) for k in range(num_stages)]}")
+
+
+def _S_inv_sqrt(s_op, x):
+    """S^-1/2 x for a scalar s2 or an SOperator (the Lemma-9 R3^T factor)."""
+    return (s_op.apply_S_inv_sqrt(x) if isinstance(s_op, SOperator)
+            else x / math.sqrt(float(s_op)))
 
 
 # ═══════════════════════════ mode: measure_s2 ══════════════════════════════
@@ -413,11 +527,9 @@ def run_full_ip(args):
         "read gamma2 table",
         lambda: json.load(open(PATHS["gamma2_table"]))["table"])
     s2_fn = _with_retries(
-        "build s2_fn", lambda: make_s2_fn(S_PRIOR, int(config.scheduler.num_stages)))
-    print(f"[setup] S_prior={S_PRIOR} -> "
-          f"s2(k=0..3, sigma=0.5) = "
-          f"{[round(s2_fn(k, 0.5), 6) for k in range(int(config.scheduler.num_stages))]}",
-          flush=True)
+        "build s2_fn", lambda: default_s2_fn(int(config.scheduler.num_stages)))
+    print(f"[setup] S={S_DESC} -> "
+          f"{_describe_s2(s2_fn, int(config.scheduler.num_stages))}", flush=True)
 
     num_stages = int(config.scheduler.num_stages)
     metrics_path = os.path.join(out, "full_ip_metrics.csv")
@@ -468,7 +580,8 @@ def run_full_ip(args):
                 f"{task}/{name} sampling",
                 lambda: run_posterior_sampling_alg4(
                     model, config, gt, y, op, sigma_n, device,
-                    gamma2_tab=gamma2_tab, s2_fn=s2_fn, hole_mask=hole_mask,
+                    gamma2_tab=gamma2_tab, s2_fn=_bind_s2(s2_fn, d["class_idx"]),
+                    hole_mask=hole_mask,
                     make_Ak_fns_fn=make_Ak_fns_fn,
                     seed=int(kw.get("seed", ALG["seed"])), record_trajectory=record,
                     sigma_min=ALG["sigma_min"],
@@ -570,7 +683,7 @@ def run_full_ip(args):
                     ax.set_ylabel(lab)
                     ax.legend(fontsize=8)
         fig.suptitle("Algorithm 4 (clean-endpoint) full sampling — "
-                     f"no step size, no ridge; S_prior={S_PRIOR}", fontsize=11)
+                     f"no step size, no ridge; S={S_DESC}", fontsize=11)
         fig.tight_layout(rect=[0, 0, 1, 0.95])
         fig.savefig(os.path.join(out, "loss_curves.png"), dpi=160)
         plt.close(fig)
@@ -639,6 +752,7 @@ def _box_setup(image, device, config):
 
 def _run_once(model, config, S, device, *, s2_fn, gamma2_tab, seed,
               num_langevin=None, diag=None, record_trajectory=False):
+    s2_fn = _bind_s2(s2_fn, S["demo"]["class_idx"])   # spectral_class: per-image S
     kw = dict(S["kw"])
     if num_langevin is not None:
         kw["num_langevin"] = int(num_langevin)
@@ -666,9 +780,9 @@ def run_diagnose(args):
     gamma2_tab = _with_retries(
         "read gamma2 table",
         lambda: json.load(open(PATHS["gamma2_table"]))["table"])
-    s2_fn = make_s2_fn(S_PRIOR, int(config.scheduler.num_stages))
+    s2_fn = default_s2_fn(int(config.scheduler.num_stages))
     S = _box_setup(args.image, device, config)
-    print(f"[diagnose] box_inpainting/{args.image}  S_prior={S_PRIOR}  "
+    print(f"[diagnose] box_inpainting/{args.image}  S={S_DESC}  "
           f"S_it={S['kw']['num_langevin']}", flush=True)
 
     # ── the instrumented run ───────────────────────────────────────────────
@@ -779,7 +893,7 @@ def run_diagnose(args):
     return 0
 
 
-# ═════════════ mode: diversity (S_prior arms x seeds, fixed y) ═════════════
+# ═════════════ mode: diversity (scalar S arms x seeds, fixed y) ═════════════
 def run_diversity(args):
     """Sec. 8.2 / 8.6: a smaller s2 improves reconstruction, but the draft says
     that is also what collapsing Block 1 onto x1_hat looks like. The two are
@@ -908,8 +1022,9 @@ def run_contraction(args):
     gamma2_tab = _with_retries("read gamma2 table",
                                lambda: json.load(open(PATHS["gamma2_table"]))["table"])
     num_stages = int(config.scheduler.num_stages)
-    s2_fn = make_s2_fn(S_PRIOR, num_stages)
+    s2_fn = default_s2_fn(num_stages)
     S = _box_setup(args.image, device, config)
+    s2_fn = _bind_s2(s2_fn, S["demo"]["class_idx"])
     kw = S["kw"]
     ode_steps = int(kw["ode_steps_per_stage"])
     pyr = base.gt_stage_pyramid(S["gt"], num_stages)
@@ -924,14 +1039,15 @@ def run_contraction(args):
         sigma_tau = compute_sigma_tau(tau, s_k, e_k)
         gamma2 = float(gamma2_tab[str(si)].get(
             f"{round(tau, 6)}", list(gamma2_tab[str(si)].values())[step]))
-        s2 = float(s2_fn(si, float(sigma_tau)))
+        s_op = s2_fn(si, float(sigma_tau))
+        s2 = float(s_op.scalar_equiv) if isinstance(s_op, SOperator) else float(s_op)
         gt_k = pyr[si]
         h, w = gt_k.shape[-2:]
         hole_k = F.interpolate(S["hole"], size=(h, w), mode="nearest")
         Ak, ATk = S["mkA"](S["op"], S["y"], (1, 3, h, w), device)
         # eff_si=None: real G at every stage (user decision 2026-08-24)
         M_den, Cinv, inv_e2, inv_s2, inv_S = make_M_tau_den(
-            Ak, ATk, S["sigma_n"], sigma_tau, tau, s_k, e_k, None, s2)
+            Ak, ATk, S["sigma_n"], sigma_tau, tau, s_k, e_k, None, s_op)
         inv_S_half = 1.0 / math.sqrt(s2)
         pe = torch.tensor([int(S["demo"]["class_idx"])], dtype=torch.int32, device=device)
         do_cfg = float(kw["guidance_scale"]) > 0
@@ -982,7 +1098,7 @@ def run_contraction(args):
                 b_t = (inv_e2 * ATk(S["y"]) + Cinv(x1_hat)
                        + (1.0 / S["sigma_n"]) * ATk(xi_y)
                        + (1.0 / float(sigma_tau)) * apply_H_tau(xi_h, tau, s_k, e_k, None)
-                       + inv_S_half * xi_s)
+                       + _S_inv_sqrt(s_op, xi_s))
                 x1_out = cg_solve(M_den, b_t, x0=x1.clone(),
                                   tol=float(kw["cg_tol"]),
                                   max_iter=int(kw["cg_max_iter"]))
@@ -1027,9 +1143,10 @@ def run_cg_audit(args):
     config = _with_retries("load model config", lambda: OmegaConf.load(
         os.path.join(PATHS["model_dir"], "config.yaml")))
     num_stages = int(config.scheduler.num_stages)
-    s2_fn = make_s2_fn(S_PRIOR, num_stages)
+    s2_fn = default_s2_fn(num_stages)
     S = _task_setup(getattr(args, "task", "box_inpainting"), args.image,
                     device, config)
+    s2_fn = _bind_s2(s2_fn, S["demo"]["class_idx"])
     kw = S["kw"]
     ode_steps = int(kw["ode_steps_per_stage"])
     cap = int(kw["cg_max_iter"])
@@ -1047,12 +1164,13 @@ def run_cg_audit(args):
         sigma_tau = compute_sigma_tau(tau, s_k, e_k)
         if sigma_tau < ALG["sigma_min"]:
             continue
-        s2 = float(s2_fn(si, float(sigma_tau)))
+        s_op = s2_fn(si, float(sigma_tau))
+        s2 = float(s_op.scalar_equiv) if isinstance(s_op, SOperator) else float(s_op)
         h, w = pyr[si].shape[-2:]
         Ak, ATk = S["mkA"](S["op"], S["y"], (1, 3, h, w), device)
         # eff_si=None: real G at every stage (user decision 2026-08-24)
         M_den, Cinv, inv_e2, inv_s2, inv_S = make_M_tau_den(
-            Ak, ATk, S["sigma_n"], sigma_tau, tau, s_k, e_k, None, s2)
+            Ak, ATk, S["sigma_n"], sigma_tau, tau, s_k, e_k, None, s_op)
         # a right-hand side with the same structure line 13 builds
         xi_y = torch.randn(S["y"].shape, generator=g).to(device)
         xi_h = torch.randn(pyr[si].shape, generator=g).to(device)
@@ -1060,7 +1178,7 @@ def run_cg_audit(args):
         b = (inv_e2 * ATk(S["y"]) + Cinv(pyr[si])
              + (1.0 / S["sigma_n"]) * ATk(xi_y)
              + (1.0 / float(sigma_tau)) * apply_H_tau(xi_h, tau, s_k, e_k, si)
-             + (1.0 / math.sqrt(s2)) * xi_s)
+             + _S_inv_sqrt(s_op, xi_s))
         warm = pyr[si].clone()
 
         probe = int(getattr(args, "max_probe", 4000))
@@ -1297,7 +1415,6 @@ CONFIG_SCHEMA = {
     # loudly.
     "sampler_kw": {"num_langevin", "ode_steps_per_stage", "shift", "guidance_scale",
                    "cg_tol", "cg_max_iter"},
-    "S_prior": None,          # mode-dependent, checked by _check_s_prior
     "tasks_setup": None, "tasks": None, "images": None, "traj_image": None,
     "full_ip": {"out", "smoke"},
     "measure_s2": {"out"},
@@ -1330,15 +1447,15 @@ DEAD_ALG2_KEYS = {"h0", "h1", "ridge_rel", "cg_max_iter_l14",
 
 def _check_s_prior(spec):
     if "mode" not in spec:
-        raise KeyError('config_alg4.json "S_prior": missing "mode" '
+        raise KeyError('diversity arm: missing "mode" '
                        f"(one of {sorted(S_PRIOR_KEYS)})")
     mode = spec["mode"]
     if mode not in S_PRIOR_KEYS:
-        raise KeyError(f'config_alg4.json "S_prior".mode {mode!r} not in '
+        raise KeyError(f'diversity arm mode {mode!r} not in '
                        f"{sorted(S_PRIOR_KEYS)}")
     got, allowed = set(spec), S_PRIOR_KEYS[mode]
     if got != allowed:
-        raise KeyError(f'config_alg4.json "S_prior" (mode {mode!r}): '
+        raise KeyError(f'diversity arm (mode {mode!r}): '
                        f"missing={sorted(allowed - got)} unknown={sorted(got - allowed)}")
 
 
@@ -1362,7 +1479,6 @@ def _check_config_keys(cfg):
                     if dead else "")
             raise KeyError(f'config_alg4.json "{sect}": missing={sorted(allowed - got)} '
                            f"unknown={sorted(got - allowed)}{hint}")
-    _check_s_prior(cfg["S_prior"])
     required = {"sigma_n", "operator", "terminal_replace_weight",
                 "measurement_mode"}
     for task, spec in cfg["tasks_setup"].items():
@@ -1429,7 +1545,7 @@ def main():
         raise KeyError(f"mode {mode!r} not in {sorted(RUNNERS)}")
     _check_hash_seed(mode)
 
-    global PATHS, ALG, SAMPLER_KW, TASKS_SETUP, S_PRIOR, TRAJ_IMAGE
+    global PATHS, ALG, SAMPLER_KW, TASKS_SETUP, TRAJ_IMAGE
     TRAJ_IMAGE = cfg["traj_image"]
     subst = {"{IP_PACKAGE}": base.IP_PACKAGE, "{HERE}": HERE}
     PATHS = {k: v for k, v in cfg["paths"].items()}
@@ -1440,7 +1556,6 @@ def main():
     ALG = dict(cfg["algorithm"])
     SAMPLER_KW = dict(cfg["sampler_kw"])
     TASKS_SETUP = dict(cfg["tasks_setup"])
-    S_PRIOR = dict(cfg["S_prior"])
     measurement.configure(TASKS_SETUP, ALG["measurement_seed"])
 
     params = dict(cfg[mode])                       # strict: no code defaults
@@ -1449,7 +1564,7 @@ def main():
     if mode == "full_ip":
         params.setdefault("tasks", cfg["tasks"])
     print(f"[main4] mode={mode}  config={cfg_path}\n[main4] paths={PATHS}\n"
-          f"[main4] algorithm={ALG}\n[main4] S_prior={S_PRIOR}\n"
+          f"[main4] algorithm={ALG}\n[main4] S={S_DESC}\n"
           f"[main4] params={params}", flush=True)
     return RUNNERS[mode](argparse.Namespace(**params))
 

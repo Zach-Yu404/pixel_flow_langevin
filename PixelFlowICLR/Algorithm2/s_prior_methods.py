@@ -75,7 +75,6 @@ def _init_globals():
     main4.ALG.update(cfg["algorithm"])
     main4.SAMPLER_KW.update(cfg["sampler_kw"])
     main4.TASKS_SETUP.update(cfg["tasks_setup"])
-    main4.S_PRIOR.update(cfg["S_prior"])
     main4.measurement.configure(main4.TASKS_SETUP, main4.ALG["measurement_seed"])
     os.makedirs(OUT, exist_ok=True)
     os.makedirs(os.path.join(OUT, "configs"), exist_ok=True)
@@ -208,7 +207,7 @@ def cmd_onestep(_args):
     config, model, gamma2_tab, S = _load_sampling(device)
     stats = json.load(open(_stats_path()))
     K = int(config.scheduler.num_stages)
-    s2_fn_base = main4.make_s2_fn(main4.S_PRIOR, K)     # incumbent (capture run)
+    s2_fn_base = main4.default_s2_fn(K)     # the fixed per-class spectral S (capture run)
 
     cap = _Capture(ONESTEP_FRAMES)
     t0 = time.time()
