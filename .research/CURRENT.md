@@ -2,7 +2,13 @@
 
 更新时间：2026-09-03
 
-## 刚完成：S 固定为 spectral_class（tasks/default-spectral-class-s.md，2026-09-03）
+## 刚完成：block2-langevin-probe（tasks/block2-langevin-probe.md，2026-09-03）
+- Alg-2 的 l.11+l.15-17（score_solve x̂₀ → x₀ 重算 → x₀ − h/2(x₀+x̂₀) + √h ξ₀）代替 (23)：
+  junco box 3 seeds，h₀=0.5 hole 0.0749 vs exact draw 0.1369（+2.5 dB）；符号翻转 0.75–0.88。
+- 机制：x₀_cur 与 x̂₀ 是同一噪声的两个估计 ⟹ 该步 = 噪声坐标收缩 (1−h)x₀ + √h ξ + 样本/模型端点
+  平均，RTO 噪声减半。utils diag_block2_langevin（默认关）。待用户决定是否设默认/扩 task。
+
+## 已完成：S 固定为 spectral_class（tasks/default-spectral-class-s.md，2026-09-03）
 - main4 硬编码 s_stats per-class 谱 S（S_STATS/default_s2_fn/_bind_s2），config 删除 S_prior 段；
   与 S4 构造逐位一致（功率谱 torch.equal），完整采样差=GPU 运行噪声（~1e-3），CLI smoke 通过。
 - 后续跑的所有 main4 结果默认都是这个 S；旧 junco 表只剩 diversity 消融臂。
