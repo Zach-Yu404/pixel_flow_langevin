@@ -1170,8 +1170,6 @@ def run_posterior_sampling_alg4(
                                      #   x0 = x0 - h0/2 (x0 + x0_hat) + sqrt(h0) xi_0
                                      #   x_tau = H x1 + sigma_tau x0
                                      # None = the exact draw (23), bit-identical.
-    diag_block2_langevin_sign=+1.0,  # probe: sign of x0_hat in the drift
-                                     # (+1 = the spec / Alg-2 l.17; -1 = pull toward +x0_hat)
     **unused_kw,
 ):
     """Algorithm 4 (draft Sec. 7) with the SAME section layout as
@@ -1461,8 +1459,7 @@ def run_posterior_sampling_alg4(
                                              eff_si, cg_tol, L)
                         x0_cur = (x_tau - apply_H_tau(x1, tau, s_k, e_k, eff_si)) \
                             / float(sigma_tau)
-                        x0_new = x0_cur - (h0 / 2.0) * (
-                            x0_cur + float(diag_block2_langevin_sign) * x0_hat) \
+                        x0_new = x0_cur - (h0 / 2.0) * (x0_cur + x0_hat) \
                             + math.sqrt(h0) * xi_0
                         x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + \
                             float(sigma_tau) * x0_new

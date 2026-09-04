@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 87
+memory_version: 89
 updated_at: "2026-09-03"
 updated_by: "claude"          # claude | codex | user
 
@@ -29,9 +29,9 @@ execution_allowed: true
 active_tasks:
 - name: block2-langevin-probe
   type: experiment
-  state: done               # junco box seeds 42-44：h0=0.5 hole 0.0749 vs exact draw 0.1369
-                            # (+2.5 dB)；符号翻转 0.75-0.88 灾难。机制=噪声坐标收缩+样本/模型
-                            # 端点平均（RTO 噪声减半）。tasks/block2-langevin-probe.md
+  state: done               # junco box seeds 42-44：h0=0.5 hole 0.0749 vs exact draw 0.1369 (+2.5 dB)，
+                            # 单峰；h0→0 退化为 x_tau 冻结（1e-5: 0.179，比 baseline 差）。
+                            # 机制=噪声坐标收缩+样本/模型端点平均。tasks/block2-langevin-probe.md
   owner: claude
   branch: IP_branch
   depends_on: [default-spectral-class-s, xih-zero-probe]

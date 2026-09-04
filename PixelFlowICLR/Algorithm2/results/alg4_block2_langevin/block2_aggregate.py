@@ -4,23 +4,23 @@ import os, json, glob, csv, numpy as np
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 from PIL import Image
 OUT = "/CBIG-Standard-ECE/Zach/MSFlow/PixelFlowICLR/Algorithm2/results/alg4_block2_langevin"
-ARMS = ["baseline", "h0.1", "h0.5", "h1.0", "h0.1_flip", "h0.5_flip"]
+ARMS = ["baseline", "h1.0", "h0.5", "h0.1", "h5e-2", "h1e-2", "h5e-3", "h1e-5"]
 rows = [json.load(open(f)) for f in glob.glob(f"{OUT}/*/junco_s*/final.json")]
 by = {a: [r for r in rows if r["arm"] == a] for a in ARMS}
 with open(f"{OUT}/summary.csv", "w", newline="") as f:
-    w = csv.writer(f); w.writerow(["arm", "h0", "sign", "n_seeds", "mse_hole_mean", "mse_hole_std", "mse_full_mean", "mse_full_std", "psnr_range2_mean", "psnr_range2_std", "x0_rms_last_mean", "cg_bad_total", "secs_mean"])
+    w = csv.writer(f); w.writerow(["arm", "h0", "n_seeds", "mse_hole_mean", "mse_hole_std", "mse_full_mean", "mse_full_std", "psnr_range2_mean", "psnr_range2_std", "x0_rms_last_mean", "cg_bad_total", "secs_mean"])
     for a in ARMS:
         rs = by[a]
         if not rs: continue
         g = lambda k: np.array([r[k] for r in rs], float)
-        w.writerow([a, rs[0]["h0"], rs[0]["sign"], len(rs), f"{g('mse_hole').mean():.4f}", f"{g('mse_hole').std():.4f}", f"{g('mse_full').mean():.4f}", f"{g('mse_full').std():.4f}", f"{g('psnr_range2').mean():.2f}", f"{g('psnr_range2').std():.2f}", f"{g('x0_rms_last').mean():.3f}", int(g('cg_bad').sum()), f"{g('secs').mean():.0f}"])
+        w.writerow([a, rs[0]["h0"], len(rs), f"{g('mse_hole').mean():.4f}", f"{g('mse_hole').std():.4f}", f"{g('mse_full').mean():.4f}", f"{g('mse_full').std():.4f}", f"{g('psnr_range2').mean():.2f}", f"{g('psnr_range2').std():.2f}", f"{g('x0_rms_last').mean():.3f}", int(g('cg_bad').sum()), f"{g('secs').mean():.0f}"])
 md = ["# Block-2 Langevin probe — junco box, [2,2,1,1], default S (spectral_class), seeds 42-44\n",
-      "| arm | h0 | drift sign | seeds | hole MSE | full MSE | PSNR(range2) | x0 rms (last frame) | per-seed hole MSE |", "|---|---|---|---|---|---|---|---|---|"]
+      "| arm | h0 | seeds | hole MSE | full MSE | PSNR(range2) | x0 rms (last frame) | per-seed hole MSE |", "|---|---|---|---|---|---|---|---|"]
 for a in ARMS:
     rs = sorted(by[a], key=lambda r: r["seed"])
     if not rs: continue
     g = lambda k: np.array([r[k] for r in rs], float)
-    md.append(f"| {a} | {rs[0]['h0']} | {'+x0_hat (spec)' if rs[0]['sign'] > 0 else '-x0_hat (flipped)'} | {len(rs)} | {g('mse_hole').mean():.4f}±{g('mse_hole').std():.4f} | {g('mse_full').mean():.4f}±{g('mse_full').std():.4f} | {g('psnr_range2').mean():.2f}±{g('psnr_range2').std():.2f} | {g('x0_rms_last').mean():.3f} | {', '.join(f'{r['mse_hole']:.4f}' for r in rs)} |")
+    md.append(f"| {a} | {rs[0]['h0']} | {len(rs)} | {g('mse_hole').mean():.4f}±{g('mse_hole').std():.4f} | {g('mse_full').mean():.4f}±{g('mse_full').std():.4f} | {g('psnr_range2').mean():.2f}±{g('psnr_range2').std():.2f} | {g('x0_rms_last').mean():.3f} | {', '.join(f'{r['mse_hole']:.4f}' for r in rs)} |")
 open(f"{OUT}/summary.md", "w").write("\n".join(md) + "\n")
 # montage: rows = arms (seed 42), cols = GT, masked, frames 0,5,10,15,20,25,30,35,last
 FR = [0, 5, 10, 15, 20, 25, 30, 35, "last"]
