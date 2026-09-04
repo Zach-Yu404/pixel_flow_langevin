@@ -50,7 +50,43 @@ hole MSE 0.075 优于 3ξ=0 的 0.081）。我此前"固定 x̂₀ 的平稳律 
 「撤回flip的相关代码和内容，然后h_0 = 5e-2, 1e-2, 5e-3, 1e-5」：符号开关、对照臂及其结果目录/记录全部删除；
 追加 h₀ ∈ {5e-2, 1e-2, 5e-3, 1e-5}（同 junco box、seeds 42-44）。
 
+## 追加：噪声条件 × h₀（用户 2026-09-03）
+「no noise，和xi_0 = 0的设置，结合这几个h_0的选择测试一下」→ 条件 no_noise（ξ_y=ξ_h=ξ_s=0 全程）、
+xi0_zero（Block‑2 ξ₀=0 全程）、另加 all_zero（四个 ξ 全 0，对照）× 8 臂 × seeds 42-44 = 72 格；
+驱动 block2_langevin_cond.py，输出 results/alg4_block2_langevin/noise_conditions/<cond>/<arm>/junco_s<seed>/，
+聚合 block2_cond_aggregate.py → summary.{md,csv}、trajectory_<cond>.png、mse_hole_vs_frame_<cond>.png、hole_mse_vs_h0.png。
+注意 ξ₀=0 时 Langevin 步退化为纯收缩 x₀ ← x₀ − h/2(x₀+x̂₀)，无新鲜噪声。
+
+### 结果（noise_conditions/summary.md；hole MSE，seeds 42-44 mean±std）
+| 臂 | allnoise | no_noise (ξy=ξh=ξs=0) | ξ₀=0 | 四 ξ 全 0 |
+|---|---|---|---|---|
+| baseline (23) | 0.1369±0.0021 | 0.0816±0.0112 | 0.0750±0.0013 | 0.0666±0.0001 |
+| h₀=1.0 | 0.0870±0.0110 | 0.0709±0.0086 | 0.0714±0.0006 | 0.0689±0.0001 |
+| **h₀=0.5** | 0.0749±0.0050 | **0.0680±0.0044** | **0.0680±0.0006** | **0.0659±0.0005** |
+| h₀=0.1 | 0.0994±0.0172 | 0.0816±0.0058 | 0.0762±0.0046 | 0.0689±0.0088 |
+| h₀=5e-2 | 0.1241±0.0164 | 0.0976±0.0132 | 0.0939±0.0066 | 0.0818±0.0113 |
+| h₀=1e-2 | 0.1538±0.0117 | 0.1215±0.0136 | 0.1470±0.0185 | 0.1188±0.0096 |
+| h₀=5e-3 | 0.1621±0.0153 | 0.1281±0.0122 | 0.1595±0.0192 | 0.1264±0.0080 |
+| h₀=1e-5 | 0.1794±0.0198 | 0.1344±0.0018 | 0.1796±0.0202 | 0.1345±0.0016 |
+PSNR：baseline 20.43/22.79/22.98/23.68；h₀=0.5 22.98/23.56/23.41/23.72。
+
+### 解读
+1. **确定性地板 ≈ 0.066**（四 ξ 全 0 的 exact draw）：所有条件×h₀ 的最好值都贴着它
+   （all_zero h0.5 0.0659）；噪声在 exact draw 下总共多付 0.070，其中只关 ξ₀ 就省 0.062、
+   只关 Block‑1 三 ξ 省 0.055（两者重叠，非可加）。
+2. **h₀=0.5 在 allnoise 下（0.075）已拿回噪声代价的 ~90%**，与「ξ₀=0 的 exact draw」（0.075）相当；
+   再叠加 no_noise 或 ξ₀=0 只再降到 0.068。即 Langevin 步的收益本质是噪声阻尼，
+   在无噪极限下与 baseline 持平（0.0659 vs 0.0666）——它不改善确定性中心。
+3. **h₀→0 在所有条件下都退化到「x_τ 冻结」极限**：no_noise 与 all_zero 收敛到同一值 0.134
+   （√h ξ₀→0 后二者等价），带 Block‑1 噪声的 allnoise / ξ₀=0 收敛到 0.180。
+   即使完全无噪，冻结 x_τ 也比 exact draw 差一倍：Block 2 的作用不只是注噪，
+   还负责把 Block‑1 的新 x₁ 写回 x_τ（网络输入）；h₀ 小则 inner 迭代白做。
+4. ξ₀=0 时 Langevin 步退化为纯收缩 x₀ ← (1−h/2)x₀ − (h/2)x̂₀（x₀ rms：h1.0→0.50、h0.5→0.75），
+   h₀=0.5 仍最优（0.068），说明「样本/模型端点平均」这一半的机制独立于注噪存在。
+5. all_zero 下 h₀≤0.1 的 seed 间 std（0.0088–0.0113）来自 GPU 运行噪声被近冻结动力学放大，
+   baseline 的 std 仅 0.0001。
+
 ## 状态
-done（2026-09-03）。代码：utils.py diag_block2_langevin（默认关，位级不变）。产物：results/alg4_block2_langevin/
+done（2026-09-03，allnoise 24 格 + 噪声条件 72 格）。待用户决定：h₀=0.5 是否设默认 / 扩 task。代码：utils.py diag_block2_langevin（默认关，位级不变）。产物：results/alg4_block2_langevin/
 {summary.md, summary.csv, trajectory.png, mse_hole_vs_frame.png, <arm>/junco_s<seed>/…, block2_langevin.py,
 block2_aggregate.py}。待用户决定是否把 h₀=0.5 变体设为默认 / 扩到其他 task。

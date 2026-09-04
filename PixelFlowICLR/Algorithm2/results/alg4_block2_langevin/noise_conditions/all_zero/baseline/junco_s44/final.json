@@ -1,0 +1,15 @@
+{
+ "cond": "all_zero",
+ "arm": "baseline",
+ "h0": null,
+ "image": "junco",
+ "seed": 44,
+ "mse_full": 0.01716950722038746,
+ "mse_hole": 0.06671129912137985,
+ "mse_obs": 0.0006555774598382413,
+ "psnr_range2": 23.67302160613036,
+ "secs": 11.729815006256104,
+ "nfe": 0,
+ "cg_bad": 0,
+ "x0_rms_last": 0.0
+}
