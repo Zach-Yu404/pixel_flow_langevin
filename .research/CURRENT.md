@@ -1,8 +1,13 @@
 # 当前状态（人类可读，保持 ≤1 页）
 
-更新时间：2026-09-03
+更新时间：2026-09-05
 
-## 刚完成：S 固定为 spectral_class（tasks/default-spectral-class-s.md，2026-09-03）
+## 刚完成：compute-gamma2-valset（tasks/compute-gamma2-valset.md，2026-09-05）
+- γ²(k,τ) 全 ImageNet val 50k（4 卡 16.5 h；74 类 fp32 + 926 类 TF32）：gamma2_stats/gamma2_all.json（drop-in）
+  + gamma2_labelled.json（1000 类）。比 7 图旧表高 25–55%（stage 0–2、stage 3 早期），stage 3 晚期一致；
+  demo 7 图对网络"更容易"。待用户决定是否替换采样器的 γ² 表。
+
+## 已完成：S 固定为 spectral_class（tasks/default-spectral-class-s.md，2026-09-03）
 - main4 硬编码 s_stats per-class 谱 S（S_STATS/default_s2_fn/_bind_s2），config 删除 S_prior 段；
   与 S4 构造逐位一致（功率谱 torch.equal），完整采样差=GPU 运行噪声（~1e-3），CLI smoke 通过。
 - 后续跑的所有 main4 结果默认都是这个 S；旧 junco 表只剩 diversity 消融臂。
