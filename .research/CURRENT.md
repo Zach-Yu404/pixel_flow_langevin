@@ -5,7 +5,8 @@
 ## 刚完成：block2-langevin-probe（tasks/block2-langevin-probe.md，2026-09-03）
 - Alg-2 的 l.11+l.15-17（score_solve x̂₀ → x₀ 重算 → x₀ − h/2(x₀+x̂₀) + √h ξ₀）代替 (23)：
   junco box 3 seeds，h₀=0.5 hole 0.0749 vs exact draw 0.1369（+2.5 dB），单峰；h₀→0 退化为 x_τ 冻结。
-  噪声条件×h₀：确定性地板 0.066（四 ξ=0），h₀=0.5 在 allnoise 已拿回噪声代价 ~90%，无噪下与 baseline 持平。
+  噪声条件×h₀：四 ξ=0 baseline 0.066，h₀=0.5 在 allnoise 拿回噪声代价 88%，无噪下持平/略优；
+  精确恒等式 x_τⁿᵉʷ=(1−h)x_τ+h·H(x₁+x₁_hat)/2+√h σξ₀（复核通过）。
 - 机制：x₀_cur 与 x̂₀ 是同一噪声的两个估计 ⟹ 该步 = 噪声坐标收缩 (1−h)x₀ + √h ξ + 样本/模型端点
   平均，RTO 噪声减半。utils diag_block2_langevin（默认关）。待用户决定是否设默认/扩 task。
 

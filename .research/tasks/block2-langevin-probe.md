@@ -86,7 +86,28 @@ PSNR：baseline 20.43/22.79/22.98/23.68；h₀=0.5 22.98/23.56/23.41/23.72。
 5. all_zero 下 h₀≤0.1 的 seed 间 std（0.0088–0.0113）来自 GPU 运行噪声被近冻结动力学放大，
    baseline 的 std 仅 0.0001。
 
+### 对抗性复核（workflow wf_9809f626，3 个独立 refuter，均未推翻；采纳其修正）
+- **精确恒等式**（refuter C，由 score_solve 与 clean_endpoint_solve 共用算子 [N²+γ²H²] 及
+  (e−s)H+σB=N 推出）：x_τ − σx̂₀ = Hx₁_hat **恒等**，于是
+  **x_τⁿᵉʷ = (1−h)x_τ + h·H(x₁ⁿᵉʷ + x₁_hat)/2 + √h σξ₀**（对任意 τ、h 精确；h=1 即
+  H·(样本+端点估计)/2 + σξ₀）。「x₀ ← (1−h)x₀ + √h ξ」只是近似：丢掉的 (h/2)(x₀_cur − x̂₀)
+  = (h/2)H(x₁_hat − x₁)/σ 是 Block‑1 噪声映到 x₀ 坐标的项，小 σ 时是 O(1)
+  （ξ₀=0、h=1 时末帧 x₀ rms=0.50 而纯收缩预测 0；allnoise h=1 的 1.117=√(1+0.5²)），
+  正是 h=1 臂与 baseline 的全部差异。
+- 「拿回 ~90%」→ **88%**（逐 seed 79–97%，±1SE 83–93%）；h₀=0.5 allnoise 仍高于四ξ=0 baseline
+  0.0083（约 2.3 SE），不是完全闭合。
+- 「确定性地板 0.066」措辞不当：四ξ=0 并非完全确定性——**每个 stage 起点的 x₀=randn 抽样
+  不受 diag_noise_off 控制**（utils ~l.1331），且 all_zero h0.1 在两个 seed 上到 0.0625；
+  应称「四 ξ 置零的 exact‑draw baseline」。h₀=0.5 在其上「持平或略优」（−0.0007，三 seed 皆低，
+  n=3 时 p≈0.17）。
+- 「h₀→0 = x_τ 冻结」精确到 O(√h₀)：在一帧的 inner 内 x_τ 不变，跨帧仍按新 τ 重组、
+  且每个 stage 起点重抽 x₀；h₀=1e‑5 与 h₀=0 极限差 ≤0.001/seed，但 5e‑3、1e‑2 已不接近
+  （总收缩 0.74/0.55）。「worse in every condition」可加强为 12/12 seed 全部更差。
+- 表中 x0_rms_last 是末帧（σ_τ=4e‑4）伪影；轨迹中段 h₀=0.5 的 x₀ rms=0.82（≈√(1/(2−h))=0.816），
+  即振幅确实被压；但 h₀=1.0 无振幅压缩仍获益，说明 x̂₀ 修正项（端点平均）独立起作用。
+- summary 的 ± 为总体 std（ddof=0）；样本 std ×1.22。
+
 ## 状态
-done（2026-09-03，allnoise 24 格 + 噪声条件 72 格）。待用户决定：h₀=0.5 是否设默认 / 扩 task。代码：utils.py diag_block2_langevin（默认关，位级不变）。产物：results/alg4_block2_langevin/
+done（2026-09-03，allnoise 24 格 + 噪声条件 72 格 + 复核）。待用户决定：h₀=0.5 是否设默认 / 扩 task。代码：utils.py diag_block2_langevin（默认关，位级不变）。产物：results/alg4_block2_langevin/
 {summary.md, summary.csv, trajectory.png, mse_hole_vs_frame.png, <arm>/junco_s<seed>/…, block2_langevin.py,
 block2_aggregate.py}。待用户决定是否把 h₀=0.5 变体设为默认 / 扩到其他 task。

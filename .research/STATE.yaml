@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 91
+memory_version: 92
 updated_at: "2026-09-03"
 updated_by: "claude"          # claude | codex | user
 
@@ -29,8 +29,9 @@ execution_allowed: true
 active_tasks:
 - name: block2-langevin-probe
   type: experiment
-  state: done               # 噪声条件×h0：确定性地板 0.066（四ξ=0），h0=0.5 allnoise 0.075 已拿回
-                            # 噪声代价 ~90%，无噪下与 baseline 持平；h0→0 全部退化为 x_tau 冻结
+  state: done               # 噪声条件×h0：四ξ=0 baseline 0.066，h0=0.5 allnoise 0.075 拿回噪声代价
+                            # 88%，无噪下持平/略优；h0→0 退化为 x_tau 冻结(O(√h0))。精确恒等式：
+                            # x_tau_new=(1-h)x_tau+h·H(x1+x1_hat)/2+√h σξ0（复核 wf_9809f626）
                             # （0.134/0.180）。allnoise：h0=0.5 hole 0.0749 vs exact draw 0.1369，
                             # 单峰；h0→0 退化为 x_tau 冻结（1e-5: 0.179，比 baseline 差）。
                             # 机制=噪声坐标收缩+样本/模型端点平均。tasks/block2-langevin-probe.md
