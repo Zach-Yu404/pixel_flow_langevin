@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 92
+memory_version: 93
 updated_at: "2026-09-03"
 updated_by: "claude"          # claude | codex | user
 
@@ -27,21 +27,6 @@ authorized_scope: "implement-algorithm4：新增 PixelFlowICLR/Algorithm2/{main4
 execution_allowed: true
 
 active_tasks:
-- name: block2-langevin-probe
-  type: experiment
-  state: done               # 噪声条件×h0：四ξ=0 baseline 0.066，h0=0.5 allnoise 0.075 拿回噪声代价
-                            # 88%，无噪下持平/略优；h0→0 退化为 x_tau 冻结(O(√h0))。精确恒等式：
-                            # x_tau_new=(1-h)x_tau+h·H(x1+x1_hat)/2+√h σξ0（复核 wf_9809f626）
-                            # （0.134/0.180）。allnoise：h0=0.5 hole 0.0749 vs exact draw 0.1369，
-                            # 单峰；h0→0 退化为 x_tau 冻结（1e-5: 0.179，比 baseline 差）。
-                            # 机制=噪声坐标收缩+样本/模型端点平均。tasks/block2-langevin-probe.md
-  owner: claude
-  branch: IP_branch
-  depends_on: [default-spectral-class-s, xih-zero-probe]
-  execution_allowed: true   # 用户 2026-09-03 直接指令
-  issue: null
-  pr: null
-  pending_review_by: null
 - name: default-spectral-class-s
   type: implementation
   state: done               # S 固定为 s_stats per-class 谱（不再是 config 选项）；

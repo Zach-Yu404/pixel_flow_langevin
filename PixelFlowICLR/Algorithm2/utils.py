@@ -1162,14 +1162,6 @@ def run_posterior_sampling_alg4(
                                      # (x_tau = H x1) and zero Block-2 xi_0
                                      # (drawn first, RNG stays aligned). Breaks
                                      # the exact draw. None = bit-identical.
-    diag_block2_langevin=None,       # DIAGNOSTIC PROBE ONLY (user 2026-09-03): if a
-                                     # float h0 is given, Block 2 is replaced by
-                                     # Algorithm 2's l.11 + l.15-17 on x0:
-                                     #   x0_hat = [N^2 + g2 H^2]^-1 N (B x_tau - H v)   (CG)
-                                     #   x0 = (x_tau - H x1)/sigma_tau
-                                     #   x0 = x0 - h0/2 (x0 + x0_hat) + sqrt(h0) xi_0
-                                     #   x_tau = H x1 + sigma_tau x0
-                                     # None = the exact draw (23), bit-identical.
     **unused_kw,
 ):
     """Algorithm 4 (draft Sec. 7) with the SAME section layout as
@@ -1449,23 +1441,8 @@ def run_posterior_sampling_alg4(
                     if diag_xi0_off_from_frame is not None \
                             and frame >= int(diag_xi0_off_from_frame):
                         xi_0 = torch.zeros_like(xi_0)   # probe only
-                    if diag_block2_langevin is not None:
-                        # probe: Algorithm 2's Block 2 on x0 in place of (23).
-                        # x0_hat from the l.10 velocity at the CURRENT x_tau
-                        # (l.11); x0 recomputed with the Block-1 x1 (l.15);
-                        # Langevin step with the xi_0 drawn above (l.17).
-                        h0 = float(diag_block2_langevin)
-                        x0_hat = score_solve(x_tau, v, s_k, e_k, tau, gamma2,
-                                             eff_si, cg_tol, L)
-                        x0_cur = (x_tau - apply_H_tau(x1, tau, s_k, e_k, eff_si)) \
-                            / float(sigma_tau)
-                        x0_new = x0_cur - (h0 / 2.0) * (x0_cur + x0_hat) \
-                            + math.sqrt(h0) * xi_0
-                        x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + \
-                            float(sigma_tau) * x0_new
-                    else:
-                        x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + \
-                            float(sigma_tau) * xi_0                  # (23)
+                    x_tau = apply_H_tau(x1, tau, s_k, e_k, eff_si) + \
+                        float(sigma_tau) * xi_0                      # (23)
                     if diag is not None:
                         diag.on_inner(
                             frame=frame, stage=si, step=step_idx, inner=s,
