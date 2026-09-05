@@ -52,7 +52,9 @@ val 全表 vs 7 图旧表（γ²，val/ref 比）：
 per-class 离散：stage 3 τ=0.999 中位 0.1446、CV 0.04（5–95%：0.133–0.152，最高 n01924916 0.158，
 最低 n03924679 0.114）；τ=0 中位 0.0114、CV 0.36。早期 τ 的类间差异大（×2），晚期趋同。
 
-精度交叉核对：3 个 fp32 类（n01440764/n01443537/n01484850）用 TF32 重算 → xcheck_tf32/（结果见下）。
+精度交叉核对（xcheck_tf32/README.md）：3 个 fp32 类用 TF32 重算，同类同点对比 120 个 (stage,τ) 点：
+相对差均值 +6.6e-6、最大 7.2e-5 —— 与预期 (3e-3)²≈1e-5 一致，fp32/TF32 混表可视为同一口径。
+（附带修了 G2_SHARDS 相对路径 bug：utils import 会 chdir 到 IP_package，现改为 abspath。）
 
 ## 状态
 done（2026-09-05）。gamma2_all.json 可直接替换 gamma2_meas_alg4.json（同 table 格式）；是否切换由用户决定

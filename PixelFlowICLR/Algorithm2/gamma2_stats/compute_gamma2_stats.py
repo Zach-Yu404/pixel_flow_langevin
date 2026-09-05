@@ -27,7 +27,7 @@ BASE = "/CBIG-Standard-ECE/Zach_dataset/Zach_dataset/imageNet256"
 VAL_ROOT = BASE + "/ILSVRC/Data/CLS-LOC/val"; SYNSET_MAP = BASE + "/LOC_synset_mapping.txt"; VAL_SOLUTION = BASE + "/LOC_val_solution.csv"
 PER_CLASS = int(os.environ.get("G2_PER_CLASS", "50"))   # 50 = every val image (user 2026-09-04: 全量 5w)
 LIMIT = int(os.environ.get("G2_LIMIT_CLASSES", "0"))
-SHARDS = os.environ.get("G2_SHARDS", os.path.join(HERE, "shards")); CLAIMS = SHARDS + "_claims"
+SHARDS = os.path.abspath(os.environ.get("G2_SHARDS", os.path.join(HERE, "shards"))); CLAIMS = SHARDS + "_claims"   # abspath: utils import chdir()s to IP_package
 ONLY = [x for x in os.environ.get("G2_ONLY", "").split(",") if x]   # restrict to these synsets (precision cross-check)
 RES = 256
 TF32 = os.environ.get("G2_TF32", "1") == "1"    # 1 = TF32 matmul (default since 2026-09-04), 0 = strict fp32
