@@ -77,7 +77,7 @@ Metrics conventions used in the tests (`rerun_imageNet/metrics.py`): PSNR/SSIM o
 | motion_blur | 0.0358 | 20.69 | – | 0.9985 | 0.0258 / 21.91 / – |
 | superresolution | 0.0324 | 21.17 | – | 0.8986 | 0.0215 / 22.69 / – |
 
-Per-image values: `results/alg4/full_ip_final.csv`; per-frame curves: `results/alg4/full_ip_metrics.csv`, `loss_curves.png`, `report.md`.
+Per-image values: `results/alg4/full_ip_final.csv`; per-frame curves: `results/alg4/full_ip_metrics.csv`, `loss_curves.png` (png not tracked).
 Multi-seed / MMSE / no-noise numbers for the same configuration (gamma2_all arm): `gamma2_stats/test/summary_est.md`.
 
 ## 6. Multi-seed evidence already measured with S = spectral_class (γ² = 7-image table; γ² = gamma2_all differs by ≤ 0.03 dB)
