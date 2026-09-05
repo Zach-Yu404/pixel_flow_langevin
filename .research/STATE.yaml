@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 101
+memory_version: 103
 updated_at: "2026-09-05"
 updated_by: "claude"          # claude | codex | user
 
@@ -27,6 +27,17 @@ authorized_scope: "implement-algorithm4：新增 PixelFlowICLR/Algorithm2/{main4
 execution_allowed: true
 
 active_tasks:
+- name: clean-alg4-project
+  type: implementation
+  state: done               # PixelFlowICLR/Algorithm4 自包含干净版：35/35 格验收 |Δ|≤8e-6，两视角逐行
+                            # 审查无偏差。README 含 S_stats 必做步骤。tasks/clean-alg4-project.md
+  owner: claude
+  branch: IP_branch
+  depends_on: [finalize-alg4-config]
+  execution_allowed: true   # 用户 2026-09-05 直接指令
+  issue: null
+  pr: null
+  pending_review_by: null
 - name: finalize-alg4-config
   type: implementation
   state: done               # γ² → gamma2_all；删 random_inpainting num_langevin=15 覆盖；results/alg4 重跑

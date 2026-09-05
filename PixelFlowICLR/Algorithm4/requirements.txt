@@ -1,0 +1,10 @@
+# tested with the `pixelflow` conda env (python 3.12, torch 2.x + CUDA, A100)
+torch
+torchvision
+numpy
+scipy
+Pillow
+omegaconf
+diffusers==0.32.2
+piq
+lpips

@@ -1,0 +1,7 @@
+results/
+data/s_stats/*.npz
+data/gamma2_shards/
+data/gamma2_shards_claims/
+__pycache__/
+*.pyc
+*.log

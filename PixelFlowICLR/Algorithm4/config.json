@@ -1,0 +1,22 @@
+{
+ "paths": {
+  "model_dir": "../../PixelFlow/IP_package/pretrained_models/c2img",
+  "demo_dir": "data/demo",
+  "gamma2_table": "data/gamma2_all.json",
+  "s_stats_npz": "data/s_stats/spectral_power_labelled.npz",
+  "synset_map": "data/synsets.txt"
+ },
+ "algorithm": {"sigma_min": 1e-08, "seed": 42, "measurement_seed": 42, "cg_max_iter_endpoint": 200},
+ "sampler_kw": {"num_langevin": [2, 2, 1, 1], "ode_steps_per_stage": 10, "shift": 1.0,
+                "guidance_scale": 2.0, "cg_tol": 1e-05, "cg_max_iter": 300},
+ "tasks_setup": {
+  "box_inpainting":    {"sigma_n": 0.05, "operator": {"mask_len_range": [128, 129], "center": true}, "terminal_replace_weight": 0.0, "measurement_mode": "measure"},
+  "random_inpainting": {"sigma_n": 0.05, "operator": {"mask_prob": 0.7}, "terminal_replace_weight": 0.0, "measurement_mode": "measure"},
+  "gaussian_blur":     {"sigma_n": 0.05, "operator": {"kernel_size": 61, "kernel_std": 3.0}, "terminal_replace_weight": 0.0},
+  "motion_blur":       {"sigma_n": 0.05, "operator": {"kernel_size": 61, "kernel_intensity": 0.5, "kernel_seed": 42}, "terminal_replace_weight": 0.0},
+  "superresolution":   {"sigma_n": 0.05, "operator": {"scale_factor": 4, "antialias": true}, "terminal_replace_weight": 0.0}
+ },
+ "tasks": ["box_inpainting", "random_inpainting", "gaussian_blur", "motion_blur", "superresolution"],
+ "images": ["breastplate_armor", "crane_structure", "ibex_horns", "junco", "lakeside_beach", "sea_anemone", "shetland_sheepdog"],
+ "out": "results/run"
+}
