@@ -39,6 +39,8 @@
   g_bypass_stage3 开关成为无效 no-op,gamma2 表按新口径重测(junco 单图)
 - (2026-08-24 用户决定)gamma2 表分表:gamma2_meas.json = junco 单图/eps_for(Alg2/config.json 专用);
   gamma2_meas_alg4.json = Alg4 专用(config_alg4.json 指向它,stage-3 为 7 图/随机噪声口径)。
+  【2026-09-05 更新】config_alg4.json 现指向 gamma2_stats/gamma2_all.json（ImageNet-val 50k 表，已入库）；
+  gamma2_meas_alg4.json 仅作论文可比参照。handbook 须写明：gamma2_all.json 已入库无需重建，重测用 gamma2_stats/compute_gamma2_stats.py（+ --merge），重测时保留原 gamma2_all.json 在位。
   两个会话不得写对方的表——此前 stage-3 行曾被两会话互相覆写
 - config 不跨任务迁移(ns/tr/fd/srs 全是任务相关;motion 伴随必须 flip(K))
 - inpainting tr=1;blur/SR tr=0(SR@tr=1 = bicubic,不是算法结果)

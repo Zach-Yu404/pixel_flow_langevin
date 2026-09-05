@@ -28,7 +28,7 @@ ONE config file (config_alg4.json) is the ONLY source of configuration, with
 the same strict key contract main.py enforces. Two values are derived rather
 than tuned and their derivations live in the diagnosis report (Sec. 11-12):
 ``cg_max_iter = 300`` covers the measured worst case of the line-13 solve
-(motion_blur stage 0 needs 174 plain-CG iterations), and ``sigma_min = 0.39``
+(motion_blur stage 0 needs 174 plain-CG iterations), and ``sigma_min`` (config: 1e-8 -- every frame runs; the 0.39 rule below is historical)
 stops each stage where the velocity weight of (19), b = N sigma/(N^2+g2 h^2),
 falls below 1 -- sigma_tau >= N_k ~= 0.4, minus float32 tolerance so the
 sigma_tau = 0.4 boundary frame still runs. Past that point the clean-endpoint
@@ -574,6 +574,7 @@ def run_full_ip(args):
             has_hole = float(hole_full.sum()) > 0
             hole_mask = hole_full if has_hole else None
 
+            print(f"[cell] {task}/{name}: {_describe_s2(_bind_s2(s2_fn, d['class_idx']), num_stages)}", flush=True)
             NFE["n"] = 0
             ts = time.time()
             x1_final, rows, traj = _with_retries(

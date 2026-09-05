@@ -1313,7 +1313,8 @@ def run_posterior_sampling_alg4(
         # stage_idx is a no-op and this value is inert; None states the intent.
         # Prop. 4(a) keeps M_tau^den positive definite where H_tau = s_k G is
         # rank deficient. The stage-3 gamma^2 entries were measured under this
-        # convention (gamma2_meas_alg4.json).
+        # convention (gamma2_stats/gamma2_all.json since 2026-09-05; the old
+        # 7-image gamma2_meas_alg4.json used the same REAL-G convention).
         eff_si = None
 
         if si > 0:                                                   # l.18: U^(1)

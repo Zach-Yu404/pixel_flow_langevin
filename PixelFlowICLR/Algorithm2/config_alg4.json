@@ -3,7 +3,7 @@
  "paths": {
   "model_dir": "{IP_PACKAGE}/pretrained_models/c2img",
   "demo_dir": "{IP_PACKAGE}/demo",
-  "gamma2_table": "{HERE}/gamma2_meas_alg4.json"
+  "gamma2_table": "{HERE}/gamma2_stats/gamma2_all.json"
  },
  "algorithm": {
   "sigma_min": 1e-08,
@@ -36,9 +36,6 @@
    "sigma_n": 0.05,
    "operator": {
     "mask_prob": 0.7
-   },
-   "kw": {
-    "num_langevin": 15
    },
    "terminal_replace_weight": 0.0,
    "measurement_mode": "measure"

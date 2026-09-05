@@ -1,15 +1,19 @@
 # 当前状态（人类可读，保持 ≤1 页）
 
-更新时间：2026-09-05
+更新时间：2026-09-05（finalize）
 
-## 刚完成：gamma2-tables-test（tasks/gamma2-tables-test.md，2026-09-05）
+## 进行中：finalize-alg4-config（tasks/finalize-alg4-config.md，2026-09-05）
+- 用户决定 γ² 用 gamma2_all（config 一行）。审计后删掉 random_inpainting 的 num_langevin=15 覆盖、
+  归档旧 results/alg4 → alg4_pre_final_0824，最终参考跑 `python main4.py` 写 results/alg4；FINAL.md 供用户 check。
+
+## 已完成：gamma2-tables-test（tasks/gamma2-tables-test.md，2026-09-05）
 - spectral_class 下 γ² 表三臂 × 5 task × 7 图：val 表全噪声 −0.03 dB（105 格 0 胜）、MMSE10 −0.01、无噪持平/略优；
   per-class 表更差且方差大；GPU 噪声地板 0。结论：γ² 表不敏感，保留 baseline 或切 gamma2_all，不用 per-class。
 
 ## 已完成：compute-gamma2-valset（tasks/compute-gamma2-valset.md，2026-09-05）
 - γ²(k,τ) 全 ImageNet val 50k（4 卡 16.5 h；74 类 fp32 + 926 类 TF32）：gamma2_stats/gamma2_all.json（drop-in）
   + gamma2_labelled.json（1000 类）。比 7 图旧表高 25–55%（stage 0–2、stage 3 早期），stage 3 晚期一致；
-  demo 7 图对网络"更容易"。待用户决定是否替换采样器的 γ² 表。
+  demo 7 图对网络"更容易"。用户已决定：切 gamma2_all（2026-09-05）。
 
 ## 已完成：S 固定为 spectral_class（tasks/default-spectral-class-s.md，2026-09-03）
 - main4 硬编码 s_stats per-class 谱 S（S_STATS/default_s2_fn/_bind_s2），config 删除 S_prior 段；
