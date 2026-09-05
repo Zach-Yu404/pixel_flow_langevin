@@ -1,5 +1,5 @@
 # 机器可读 canonical state。改动本文件必须 memory_version +1。
-memory_version: 97
+memory_version: 98
 updated_at: "2026-09-05"
 updated_by: "claude"          # claude | codex | user
 
@@ -27,6 +27,17 @@ authorized_scope: "implement-algorithm4：新增 PixelFlowICLR/Algorithm2/{main4
 execution_allowed: true
 
 active_tasks:
+- name: gamma2-tables-test
+  type: experiment
+  state: running            # spectral_class 下 γ² 表三臂（7 图 baseline / val all / val per-class）×
+                            # 5 task × 7 图 × 3 seeds，PSNR/SSIM/LPIPS。tasks/gamma2-tables-test.md
+  owner: claude
+  branch: IP_branch
+  depends_on: [compute-gamma2-valset, default-spectral-class-s]
+  execution_allowed: true   # 用户 2026-09-05 直接指令
+  issue: null
+  pr: null
+  pending_review_by: null
 - name: compute-gamma2-valset
   type: experiment
   state: done               # γ²(k,τ) 全 val 50k（74 类 fp32 + 926 TF32，16.5 h）：比 7 图旧表高 25–55%
