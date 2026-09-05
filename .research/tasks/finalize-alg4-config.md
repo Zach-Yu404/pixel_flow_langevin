@@ -1,4 +1,4 @@
-# finalize-alg4-config（2026-09-05，running）
+# finalize-alg4-config（2026-09-05，done）
 
 ## 用户原始要求（逐字）
 「现在gamma2我用gamma2_all的，现在给我一个finalize的版本和我check一下」
@@ -18,5 +18,8 @@
      ImageNet val + LOC 文件（main4.S_STATS 绝对路径）、s_stats npz（须重建）、conda env pixelflow、PYTHONHASHSEED=0。
 3. PixelFlowICLR/Algorithm2/FINAL.md：固定选择、config、统计量重建、运行命令、参考结果表（待跑完填入）。
 
+## 参考跑结果（results/alg4，seed 42，35/35 格；已填入 FINAL.md §5）
+box/junco hole 0.1401 与 gamma2_stats/test 的 gamma2_all/seed42 行逐位一致（同配置的可复现 receipt）。
+
 ## 状态
-running：最终参考跑 `PYTHONHASHSEED=0 python main4.py`（默认 config，out=results/alg4）GPU 0 进行中（~15 min + EIO）。
+done（2026-09-05）。FINAL.md 交用户 check；后续如改 config/代码需同步 FINAL.md §1–2。

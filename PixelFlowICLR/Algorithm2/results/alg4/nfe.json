@@ -1,0 +1,16 @@
+{
+ "motion_blur/breastplate_armor": 60,
+ "motion_blur/crane_structure": 60,
+ "motion_blur/ibex_horns": 60,
+ "motion_blur/junco": 60,
+ "motion_blur/lakeside_beach": 60,
+ "motion_blur/sea_anemone": 60,
+ "motion_blur/shetland_sheepdog": 60,
+ "superresolution/breastplate_armor": 60,
+ "superresolution/crane_structure": 60,
+ "superresolution/ibex_horns": 60,
+ "superresolution/junco": 60,
+ "superresolution/lakeside_beach": 60,
+ "superresolution/sea_anemone": 60,
+ "superresolution/shetland_sheepdog": 60
+}

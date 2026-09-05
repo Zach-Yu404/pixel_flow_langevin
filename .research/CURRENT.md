@@ -2,9 +2,9 @@
 
 更新时间：2026-09-05（finalize）
 
-## 进行中：finalize-alg4-config（tasks/finalize-alg4-config.md，2026-09-05）
+## 刚完成：finalize-alg4-config（tasks/finalize-alg4-config.md，2026-09-05）
 - 用户决定 γ² 用 gamma2_all（config 一行）。审计后删掉 random_inpainting 的 num_langevin=15 覆盖、
-  归档旧 results/alg4 → alg4_pre_final_0824，最终参考跑 `python main4.py` 写 results/alg4；FINAL.md 供用户 check。
+  归档旧 results/alg4 → alg4_pre_final_0824，最终参考跑 `python main4.py` 已写 results/alg4（35 格）；FINAL.md（含参考表）交用户 check。
 
 ## 已完成：gamma2-tables-test（tasks/gamma2-tables-test.md，2026-09-05）
 - spectral_class 下 γ² 表三臂 × 5 task × 7 图：val 表全噪声 −0.03 dB（105 格 0 胜）、MMSE10 −0.01、无噪持平/略优；

@@ -67,7 +67,18 @@ Metrics conventions used in the tests (`rerun_imageNet/metrics.py`): PSNR/SSIM o
 
 (filled from `results/alg4_final/full_ip_final.csv`, seed 42, single sample per cell — see section 6 for the multi-seed tables)
 
-REFERENCE_TABLE_PLACEHOLDER
+35/35 cells (`results/alg4/full_ip_final.csv`; full MSE and hole MSE in [−1,1] units; PSNR = 10·log10(4/MSE_full)).
+
+| task | full MSE (7-img mean) | PSNR (dB) | hole MSE (inpainting) | meas. residual | junco: full MSE / PSNR / hole |
+|---|---|---|---|---|---|
+| box_inpainting | 0.0458 | 19.85 | 0.1744 | 0.9283 | 0.0370 / 20.34 / 0.1401 |
+| random_inpainting | 0.0174 | 23.97 | 0.0232 | 0.9832 | 0.0106 / 25.78 / 0.0136 |
+| gaussian_blur | 0.0339 | 21.01 | – | 0.9932 | 0.0223 / 22.55 / – |
+| motion_blur | 0.0358 | 20.69 | – | 0.9985 | 0.0258 / 21.91 / – |
+| superresolution | 0.0324 | 21.17 | – | 0.8986 | 0.0215 / 22.69 / – |
+
+Per-image values: `results/alg4/full_ip_final.csv`; per-frame curves: `results/alg4/full_ip_metrics.csv`, `loss_curves.png`, `report.md`.
+Multi-seed / MMSE / no-noise numbers for the same configuration (gamma2_all arm): `gamma2_stats/test/summary_est.md`.
 
 ## 6. Multi-seed evidence already measured with S = spectral_class (γ² = 7-image table; γ² = gamma2_all differs by ≤ 0.03 dB)
 
