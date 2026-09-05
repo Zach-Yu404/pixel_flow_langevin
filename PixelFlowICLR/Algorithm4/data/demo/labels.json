@@ -1,0 +1,77 @@
+{
+ "_comment": "ImageNet val demo set for inverse problem experiments. class_idx is the standard ImageNet 0-999 index (matches torchvision ImageNet ordering / synset mapping line number - 1). Curated for top-conference paper figures: no watermarks, no text overlays, no human faces; clean composition, recognizable subjects, texture-rich for SR/deblur showcases.",
+ "_source": "/data/Zach_dataset/imageNet256/ILSVRC/Data/CLS-LOC/val (original ILSVRC2012, NOT pre-resized to 256 \u2014 apply center crop + resize before use)",
+ "num_samples": 7,
+ "samples": [
+  {
+   "file": "013_junco_val00000247.JPEG",
+   "class_idx": 13,
+   "synset": "n01534433",
+   "label": "junco, snowbird",
+   "short_name": "junco",
+   "orig_id": "ILSVRC2012_val_00000247",
+   "category": "bird",
+   "recommended_use": "fine feather detail, near-square crop friendly for 256x256 SR/deblur"
+  },
+  {
+   "file": "108_sea_anemone_val00000017.JPEG",
+   "class_idx": 108,
+   "synset": "n01914609",
+   "label": "sea anemone, anemone",
+   "short_name": "sea_anemone",
+   "orig_id": "ILSVRC2012_val_00000017",
+   "category": "marine",
+   "recommended_use": "high-frequency thin-tentacle stress test for SR / wavelet methods"
+  },
+  {
+   "file": "230_shetland_sheepdog_val00000003.JPEG",
+   "class_idx": 230,
+   "synset": "n02105855",
+   "label": "Shetland sheepdog, Shetland sheep dog, Shetland",
+   "short_name": "shetland_sheepdog",
+   "orig_id": "ILSVRC2012_val_00000003",
+   "category": "dog",
+   "recommended_use": "primary hero \u2014 long fur for SR/deblur, clean background, no watermark"
+  },
+  {
+   "file": "350_ibex_horns_val00000444.JPEG",
+   "class_idx": 350,
+   "synset": "n02417914",
+   "label": "ibex, Capra ibex",
+   "short_name": "ibex_horns",
+   "orig_id": "ILSVRC2012_val_00000444",
+   "category": "mammal",
+   "recommended_use": "ribbed-horn structure + rocky background \u2014 geometric + texture combo"
+  },
+  {
+   "file": "461_breastplate_armor_val00000080.JPEG",
+   "class_idx": 461,
+   "synset": "n02895154",
+   "label": "breastplate, aegis, egis",
+   "short_name": "breastplate_armor",
+   "orig_id": "ILSVRC2012_val_00000080",
+   "category": "object",
+   "recommended_use": "engraved metal surface \u2014 high-frequency etched-line detail for SR"
+  },
+  {
+   "file": "517_crane_structure_val00000020.JPEG",
+   "class_idx": 517,
+   "synset": "n03126707",
+   "label": "crane",
+   "short_name": "crane_structure",
+   "orig_id": "ILSVRC2012_val_00000020",
+   "category": "structure",
+   "recommended_use": "lattice steel against sky \u2014 sharp edges for inpainting / structural recovery"
+  },
+  {
+   "file": "975_lakeside_beach_val00000150.JPEG",
+   "class_idx": 975,
+   "synset": "n09332890",
+   "label": "lakeside, lakeshore",
+   "short_name": "lakeside_beach",
+   "orig_id": "ILSVRC2012_val_00000150",
+   "category": "scene",
+   "recommended_use": "natural scene \u2014 wave foam stochastic texture, scene-level evaluation"
+  }
+ ]
+}
